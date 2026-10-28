@@ -1,0 +1,30 @@
+# Paper-aligned MusicFM configuration for HT-Demucs mixtures and stems.
+extractor:
+  name: musicfm
+  architecture: MusicFM25Hz
+  checkpoint: pretrained_msd.pt
+  statistics: msd_stats.json
+  frozen: true
+
+audio:
+  sample_rate_hz: 24000
+  channels: mono
+  max_seconds: null
+
+features:
+  conformer_layer_index: 7
+  temporal_pooling: mean
+  dimension: 1024
+  dtype: float32
+
+runtime:
+  device: cuda
+  flash_attention: false
+
+output:
+  format: pickle
+  key: zero_padded_fma_track_id
+  files_per_source:
+    - train
+    - validation
+    - test

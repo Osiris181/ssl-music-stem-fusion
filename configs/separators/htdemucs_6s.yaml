@@ -1,0 +1,39 @@
+# Effective settings used by the paper's legacy HT-Demucs scripts.
+separator:
+  name: htdemucs
+  package: demucs
+  package_version: 4.0.1
+  model_name: htdemucs_6s
+  expected_stems:
+    - bass
+    - drums
+    - guitar
+    - other
+    - piano
+    - vocals
+
+inference:
+  device: cuda
+  shifts: 1
+  overlap: 0.25
+  split: true
+  clip_mode: rescale
+  jobs: 0
+
+output:
+  format: mp3
+  bitrate_kbps: 320
+  mp3_preset: 2
+  filename_template: "{track}/{stem}.{ext}"
+
+batching:
+  default_tracks_per_process: 128
+  ismir04_tracks_per_process: 32
+
+inputs:
+  default_extensions:
+    - .mp3
+  ismir04_extensions:
+    - .mp3
+    - .wav
+    - .au

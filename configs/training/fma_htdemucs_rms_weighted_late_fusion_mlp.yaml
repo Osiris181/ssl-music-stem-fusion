@@ -1,0 +1,55 @@
+# Table 4: FMA-Medium genre classification with HT-Demucs RMS-weighted late fusion.
+task:
+  name: genre_classification
+  label_type: multiclass
+  number_of_classes: 16
+
+features:
+  musicfm:
+    name: musicfm_msd_layer7
+    dimension_per_source: 1024
+  rms:
+    dimension_per_source: 1
+    cache: separate
+  fusion: independent_logits_then_rms_weighted_sum
+  source_order:
+    - mixture
+    - guitar
+    - drums
+    - piano
+    - bass
+    - vocals
+    - other
+
+model:
+  name: per_source_deep_mlp_with_rms_gates
+  hidden_dimensions: [1024, 512]
+  energy_gate_hidden_dimension: 16
+  activation: relu
+  gate_output: sigmoid
+  dropout: 0.2
+
+optimization:
+  loss: cross_entropy
+  optimizer: adam
+  learning_rate: 0.0001
+  batch_size: 128
+  epochs: 20
+
+checkpoint:
+  split: validation
+  maximize: [accuracy_micro, roc_auc_macro, pr_auc_macro]
+  aggregation: sum
+
+evaluation:
+  accuracy: micro
+  precision: macro
+  recall: macro
+  f1: macro
+  roc_auc: macro_one_vs_rest
+  pr_auc: macro_one_vs_rest
+
+reproducibility:
+  seed: 42
+  cudnn_deterministic: true
+  cudnn_benchmark: false
