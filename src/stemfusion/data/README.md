@@ -30,7 +30,7 @@ Inspect all arguments with:
 
     stemfusion data fma-manifest --help
 
-Multi-disk HT-Demucs examples are in `docs/fma_htdemucs_features.md`.
+Multi-disk HT-Demucs examples are in `docs/fma_medium_extraction.md`.
 The builder inventories all six separator outputs; revised training selects
 the five named stems and excludes `other`.
 

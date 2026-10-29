@@ -9,13 +9,15 @@ datasets or model checkpoints.
 
 | File | Coverage |
 | --- | --- |
+| `test_direct_extraction_script.py` | Direct Python-file execution without PYTHONPATH, YAML source selection, and non-writing dry runs. |
+| `test_yaml_configuration.py` | YAML precedence, relative paths, run selection, strict validation, safe loading, and saved resolved settings. |
+| `test_multi_source_extraction.py` | YAML source lists, CLI subsets, one-time encoder loading, cache skipping, partial failures, and aggregate reports. |
 | `test_htdemucs.py` | Multi-root discovery, six-stem completion, commands, storage resume, and rescue behavior. |
 | `test_fma_manifest.py` | FMA splits, distributed HT-Demucs roots, and aligned missing-file handling. |
 | `test_musicfm_features.py` | HT-Demucs MusicFM cache keys, reports, dry runs, and partial failures. |
-| `test_htdemucs_features.py` | HT-Demucs RMS one-value caches, settings reports, dry runs, and partial failures. |
-| `test_feature_entry_points.py` | HT-Demucs CLI routing, mixture/source scopes, and MusicFM/RMS modes. |
-| `test_htdemucs_late_fusion.py` | Unweighted and RMS-weighted training, separate and legacy appended RMS caches, and logit aggregation. |
-| `test_htdemucs_training_entrypoints.py` | Table 3/4 command routing and HT-Demucs-specific defaults. |
+| `test_feature_entry_points.py` | MusicFM routing and rejection of archived RMS commands. |
+| `test_fma_late_fusion.py` | Unweighted cache planning, source-logit aggregation, and synthetic training artifacts. |
+| `test_fma_experiment_entry_points.py` | Dataset-specific routing, matching training defaults, and rejection of superseded commands. |
 | `test_genre_training.py` | Source ordering, clean and legacy cache resolution, dry-run planning, and a dependency-gated synthetic mid-fusion run. |
 
 ## How to run them

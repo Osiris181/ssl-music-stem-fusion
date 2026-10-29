@@ -1,19 +1,15 @@
 """Frozen feature-extraction backends."""
 
-from stemfusion.features.htdemucs import (
+from stemfusion.features._musicfm import (
     MusicFMExtractionConfig,
     MusicFMExtractionSummary,
     extract_musicfm,
-    RMSExtractionConfig,
-    RMSExtractionSummary,
-    extract_rms,
+    extract_musicfm_sources,
 )
 
 __all__ = [
     "MusicFMExtractionConfig",
     "MusicFMExtractionSummary",
-    "RMSExtractionConfig",
-    "RMSExtractionSummary",
     "extract_musicfm",
-    "extract_rms",
+    "extract_musicfm_sources",
 ]

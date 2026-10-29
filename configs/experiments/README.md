@@ -1,9 +1,12 @@
-# Experiment configurations
+# Dataset experiment configurations
 
-## Purpose
+Only [FMA-Medium](fma_medium/README.md) is currently active. Its task files
+reference shared feature and training presets.
 
-Experiment manifests enumerate the feature combinations reported in the
-paper. Reusable separator, feature, and training settings remain in their own
-configuration groups.
+Pass an experiment file with `--config`. For training, `--run` selects
+one named source condition. Experiment values override their referenced
+preset, and explicit CLI arguments override YAML.
 
-The `paper/` directory is organized by paper table.
+The configuration loader never launches every listed run automatically.
+Matched controls, independent branch training, and five-seed evaluation remain
+pending. See [configuration usage](../../docs/configuration.md).

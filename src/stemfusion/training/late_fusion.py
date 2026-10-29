@@ -1,4 +1,4 @@
-"""Private shared implementation for the HT-Demucs Table 4 workflows."""
+"""Shared unweighted late-fusion runner retained for FMA-Medium migration."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ import platform
 import sys
 from collections import Counter
 from collections.abc import Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -49,20 +49,15 @@ LOGGER = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class LateFusionTrainingConfig:
-    """Settings shared by the two paper-aligned HT-Demucs late-fusion MLPs."""
+    """Settings for the retained unweighted source-MLP runner."""
 
     manifest_path: Path
     feature_directory: Path
     output_directory: Path
     sources: tuple[str, ...]
-    weighted: bool
     source_feature_directories: tuple[SourceFeatureDirectory, ...] = ()
-    energy_feature_directory: Path | None = None
-    energy_source_feature_directories: tuple[SourceFeatureDirectory, ...] = ()
-    legacy_appended_energy: bool = False
     expected_feature_dimension: int = 1024
     hidden_dimensions: tuple[int, int] = (1024, 512)
-    energy_hidden_dimension: int = 16
     dropout: float = 0.2
     batch_size: int = 128
     learning_rate: float = 1e-4
@@ -73,12 +68,12 @@ class LateFusionTrainingConfig:
     allow_missing_features: bool = False
     overwrite: bool = False
     dry_run: bool = False
+    config_provenance: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class _PreparedSplit:
     features: Any
-    energies: Any | None
     labels: Any
     track_ids: tuple[str, ...]
     dropped: int
@@ -103,26 +98,8 @@ def _base_config(config: LateFusionTrainingConfig) -> GenreTrainingConfig:
         allow_missing_features=config.allow_missing_features,
         overwrite=config.overwrite,
         dry_run=config.dry_run,
+        config_provenance=config.config_provenance,
     )
-
-
-def _energy_directory_map(config: LateFusionTrainingConfig) -> dict[str, Path]:
-    directories: dict[str, Path] = {}
-    for override in config.energy_source_feature_directories:
-        source = normalize_source(override.source)
-        if source in directories:
-            raise GenreTrainingError(
-                f"Energy feature directory was configured twice for {source}."
-            )
-        directories[source] = override.directory
-    unused = set(directories) - set(config.sources)
-    if unused:
-        names = ", ".join(sorted(unused))
-        raise GenreTrainingError(
-            "Energy feature-directory overrides were provided for unselected "
-            f"sources: {names}."
-        )
-    return directories
 
 
 def _validate_config_late(
@@ -132,110 +109,7 @@ def _validate_config_late(
     if sources != config.sources:
         config = replace(config, sources=sources)
     _validate_config(_base_config(config))
-    if config.energy_hidden_dimension <= 0:
-        raise GenreTrainingError("Energy hidden dimension must be positive.")
-    if not config.weighted:
-        if config.energy_feature_directory is not None:
-            raise GenreTrainingError(
-                "An energy feature directory is only valid for RMS-weighted "
-                "late fusion."
-            )
-        if config.energy_source_feature_directories:
-            raise GenreTrainingError(
-                "Energy feature-directory overrides are only valid for "
-                "RMS-weighted late fusion."
-            )
-        if config.legacy_appended_energy:
-            raise GenreTrainingError(
-                "Legacy appended energy is only valid for RMS-weighted late "
-                "fusion."
-            )
-        return config
-    if config.energy_feature_directory is None:
-        raise GenreTrainingError(
-            "RMS-weighted late fusion requires --energy-feature-dir."
-        )
-    if not config.energy_feature_directory.is_dir():
-        raise GenreTrainingError(
-            "Energy feature directory does not exist: "
-            f"{config.energy_feature_directory}"
-        )
-    for source, directory in _energy_directory_map(config).items():
-        if not directory.is_dir():
-            raise GenreTrainingError(
-                f"Energy feature directory for {source} does not exist: "
-                f"{directory}"
-            )
     return config
-
-
-def _legacy_source_name(source: str) -> str:
-    return "mix" if source == "mixture" else source
-
-
-def resolve_energy_cache_path(
-    config: LateFusionTrainingConfig,
-    source: str,
-    split: str,
-) -> Path:
-    """Resolve modern RMS caches or explicitly requested legacy appended caches."""
-
-    if not config.weighted or config.energy_feature_directory is None:
-        raise GenreTrainingError("This workflow does not use energy caches.")
-    directories = _energy_directory_map(config)
-    root = directories.get(source, config.energy_feature_directory)
-    legacy_source = _legacy_source_name(source)
-    if config.legacy_appended_energy:
-        candidates = [
-            root / f"fma_musicfm_{legacy_source}_{split}_with_energy.pkl",
-        ]
-        if source != legacy_source:
-            candidates.append(
-                root / f"fma_musicfm_{source}_{split}_with_energy.pkl"
-            )
-    else:
-        candidates = [root / f"fma_rms_{source}_{split}.pkl"]
-        if source != legacy_source:
-            candidates.append(root / f"fma_rms_{legacy_source}_{split}.pkl")
-    for candidate in candidates:
-        if candidate.is_file() and candidate.stat().st_size > 0:
-            return candidate
-    listed = ", ".join(str(path) for path in candidates)
-    raise GenreTrainingError(
-        f"No non-empty RMS cache was found for {source} {split}. "
-        f"Checked: {listed}."
-    )
-
-
-def _energy_vector(
-    feature: Any,
-    source: str,
-    track_id: str,
-    config: LateFusionTrainingConfig,
-    numpy: Any,
-) -> Any:
-    if hasattr(feature, "detach"):
-        feature = feature.detach().cpu().numpy()
-    try:
-        vector = numpy.asarray(feature, dtype=numpy.float32)
-    except Exception as error:
-        raise GenreTrainingError(
-            f"Could not convert RMS feature for {source} {track_id}: {error}"
-        ) from error
-    if vector.ndim == 2:
-        vector = vector.mean(axis=0, dtype=numpy.float32)
-    expected_dimension = 1025 if config.legacy_appended_energy else 1
-    if vector.shape != (expected_dimension,):
-        raise GenreTrainingError(
-            f"Expected RMS feature for {source} track {track_id} to have "
-            f"shape ({expected_dimension},), received {tuple(vector.shape)}."
-        )
-    if not numpy.isfinite(vector).all():
-        raise GenreTrainingError(
-            f"RMS feature for {source} track {track_id} contains non-finite "
-            "values."
-        )
-    return vector[-1:].astype(numpy.float32, copy=False)
 
 
 def _prepare_split(
@@ -252,18 +126,7 @@ def _prepare_split(
         )
         for source in config.sources
     }
-    energy_caches = (
-        {
-            source: _load_feature_cache(
-                resolve_energy_cache_path(config, source, split)
-            )
-            for source in config.sources
-        }
-        if config.weighted
-        else None
-    )
     feature_rows: list[Any] = []
-    energy_rows: list[Any] = []
     labels: list[int] = []
     track_ids: list[str] = []
     missing_counts: Counter[str] = Counter()
@@ -275,12 +138,6 @@ def _prepare_split(
             for source in config.sources
             if record.track_id not in feature_caches[source]
         ]
-        if energy_caches is not None:
-            missing.extend(
-                f"{source}:rms"
-                for source in config.sources
-                if record.track_id not in energy_caches[source]
-            )
         if missing:
             missing_counts.update(missing)
             if len(missing_examples) < 10:
@@ -299,21 +156,6 @@ def _prepare_split(
             for source in config.sources
         ]
         feature_rows.append(dependencies.numpy.stack(vectors))
-        if energy_caches is not None:
-            energy_rows.append(
-                dependencies.numpy.stack(
-                    [
-                        _energy_vector(
-                            energy_caches[source][record.track_id],
-                            source,
-                            record.track_id,
-                            config,
-                            dependencies.numpy,
-                        )
-                        for source in config.sources
-                    ]
-                )
-            )
         labels.append(record.label)
         track_ids.append(record.track_id)
 
@@ -336,14 +178,6 @@ def _prepare_split(
         dependencies.numpy.float32,
         copy=False,
     )
-    energies = (
-        dependencies.numpy.stack(energy_rows).astype(
-            dependencies.numpy.float32,
-            copy=False,
-        )
-        if energy_caches is not None
-        else None
-    )
     expected_features = (
         len(config.sources),
         config.expected_feature_dimension,
@@ -353,13 +187,8 @@ def _prepare_split(
             f"Expected per-track feature shape {expected_features}, received "
             f"{tuple(features.shape[1:])}."
         )
-    if energies is not None and energies.shape[1:] != (len(config.sources), 1):
-        raise GenreTrainingError(
-            "Expected one RMS value per selected source for every track."
-        )
     return _PreparedSplit(
         features=features,
-        energies=energies,
         labels=dependencies.numpy.asarray(labels, dtype=dependencies.numpy.int64),
         track_ids=tuple(track_ids),
         dropped=len(split_records) - len(track_ids),
@@ -368,28 +197,18 @@ def _prepare_split(
 
 def _config_dict(config: LateFusionTrainingConfig) -> dict[str, Any]:
     return {
+        "config_provenance": config.config_provenance,
         "manifest_path": str(config.manifest_path),
         "feature_directory": str(config.feature_directory),
         "output_directory": str(config.output_directory),
         "sources": list(config.sources),
-        "fusion": "rms_weighted_late" if config.weighted else "unweighted_late",
+        "fusion": "unweighted_late",
         "source_feature_directories": {
             item.source: str(item.directory)
             for item in config.source_feature_directories
         },
-        "energy_feature_directory": (
-            str(config.energy_feature_directory)
-            if config.energy_feature_directory is not None
-            else None
-        ),
-        "energy_source_feature_directories": {
-            item.source: str(item.directory)
-            for item in config.energy_source_feature_directories
-        },
-        "legacy_appended_energy": config.legacy_appended_energy,
         "expected_feature_dimension": config.expected_feature_dimension,
         "hidden_dimensions": list(config.hidden_dimensions),
-        "energy_hidden_dimension": config.energy_hidden_dimension,
         "dropout": config.dropout,
         "batch_size": config.batch_size,
         "learning_rate": config.learning_rate,
@@ -415,28 +234,16 @@ def plan_late_fusion_training(config: LateFusionTrainingConfig) -> dict[str, Any
         }
         for source in config.sources
     }
-    energy_paths = (
-        {
-            source: {
-                split: str(resolve_energy_cache_path(config, source, split))
-                for split in SPLITS
-            }
-            for source in config.sources
-        }
-        if config.weighted
-        else None
-    )
     counts = Counter(record.split for record in records)
     return {
         "dry_run": True,
-        "fusion": "rms_weighted_late" if config.weighted else "unweighted_late",
+        "fusion": "unweighted_late",
         "sources": list(config.sources),
         "source_order": list(config.sources),
         "per_source_feature_dimension": config.expected_feature_dimension,
         "number_of_classes": len(_label_mapping(records)),
         "manifest_split_counts": {split: counts[split] for split in SPLITS},
         "feature_caches": cache_paths,
-        "energy_caches": energy_paths,
         "output_directory": str(config.output_directory),
         "training": _config_dict(config),
     }
@@ -457,31 +264,21 @@ def _check_output_targets(config: LateFusionTrainingConfig) -> None:
 
 def _build_model(config: LateFusionTrainingConfig, number_of_classes: int) -> Any:
     try:
-        from stemfusion.models.late_fusion import (
-            RMSWeightedLateFusionMLP,
-            UnweightedLateFusionMLP,
-        )
+        from stemfusion.models.late_fusion import UnweightedLateFusionMLP
     except Exception as error:
         raise GenreTrainingError(
-            f"Could not load the late-fusion models: {error}"
+            f"Could not load the late-fusion model: {error}"
         ) from error
-    model_type = RMSWeightedLateFusionMLP if config.weighted else UnweightedLateFusionMLP
-    arguments: dict[str, Any] = {
-        "number_of_sources": len(config.sources),
-        "feature_dimension": config.expected_feature_dimension,
-        "number_of_classes": number_of_classes,
-        "hidden_dimensions": config.hidden_dimensions,
-        "dropout": config.dropout,
-    }
-    if config.weighted:
-        arguments["energy_hidden_dimension"] = config.energy_hidden_dimension
-    return model_type(**arguments)
+    return UnweightedLateFusionMLP(
+        number_of_sources=len(config.sources),
+        feature_dimension=config.expected_feature_dimension,
+        number_of_classes=number_of_classes,
+        hidden_dimensions=config.hidden_dimensions,
+        dropout=config.dropout,
+    )
 
 
-def _run_model(model: Any, batch: Sequence[Any], weighted: bool) -> tuple[Any, Any]:
-    if weighted:
-        features, energies, labels = batch
-        return model(features, energies), labels
+def _run_model(model: Any, batch: Sequence[Any]) -> tuple[Any, Any]:
     features, labels = batch
     return model(features), labels
 
@@ -489,7 +286,11 @@ def _run_model(model: Any, batch: Sequence[Any], weighted: bool) -> tuple[Any, A
 def train_late_fusion_classifier(
     config: LateFusionTrainingConfig,
 ) -> dict[str, Any]:
-    """Train and evaluate one of the paper-aligned HT-Demucs late-fusion MLPs."""
+    """Train the retained model jointly through summed source logits.
+
+    This historical runner does not yet implement the revised protocol's
+    independently trained and individually selected branch checkpoints.
+    """
 
     config = _validate_config_late(config)
     if config.dry_run:
@@ -517,10 +318,6 @@ def train_late_fusion_classifier(
     datasets = {}
     for split, data in prepared.items():
         tensors = [dependencies.torch.from_numpy(data.features)]
-        if config.weighted:
-            if data.energies is None:
-                raise GenreTrainingError("Weighted late fusion is missing RMS data.")
-            tensors.append(dependencies.torch.from_numpy(data.energies))
         tensors.append(dependencies.torch.from_numpy(data.labels))
         datasets[split] = dependencies.tensor_dataset(*tensors)
     loaders = {
@@ -577,7 +374,7 @@ def train_late_fusion_classifier(
                 value.to(device, non_blocking=pin_memory) for value in batch
             )
             optimizer.zero_grad()
-            logits, labels = _run_model(model, batch, config.weighted)
+            logits, labels = _run_model(model, batch)
             loss = criterion(logits, labels)
             loss.backward()
             optimizer.step()
@@ -590,7 +387,7 @@ def train_late_fusion_classifier(
                 batch = tuple(
                     value.to(device, non_blocking=pin_memory) for value in batch
                 )
-                logits, labels = _run_model(model, batch, config.weighted)
+                logits, labels = _run_model(model, batch)
                 for metric in validation_metrics.values():
                     metric.update(logits, labels)
         validation = {
@@ -632,11 +429,7 @@ def train_late_fusion_classifier(
                 config.output_directory / "checkpoint.pt",
                 {
                     "model_state_dict": best_state,
-                    "fusion": (
-                        "rms_weighted_late"
-                        if config.weighted
-                        else "unweighted_late"
-                    ),
+                    "fusion": "unweighted_late",
                     "number_of_sources": len(config.sources),
                     "feature_dimension": config.expected_feature_dimension,
                     "number_of_classes": number_of_classes,
@@ -660,7 +453,7 @@ def train_late_fusion_classifier(
             batch = tuple(
                 value.to(device, non_blocking=pin_memory) for value in batch
             )
-            logits, labels = _run_model(model, batch, config.weighted)
+            logits, labels = _run_model(model, batch)
             logits_batches.append(logits.detach().cpu())
             for metric in metrics.values():
                 metric.update(logits, labels)
@@ -695,7 +488,7 @@ def train_late_fusion_classifier(
     }
     result = {
         "dry_run": False,
-        "fusion": "rms_weighted_late" if config.weighted else "unweighted_late",
+        "fusion": "unweighted_late",
         "sources": list(config.sources),
         "source_order": list(config.sources),
         "per_source_feature_dimension": config.expected_feature_dimension,
@@ -733,10 +526,9 @@ def train_late_fusion_classifier(
 def configure_parser(
     parser: argparse.ArgumentParser,
     *,
-    weighted: bool,
     command_handler: Any,
 ) -> None:
-    """Configure one public HT-Demucs Table 4 late-fusion command."""
+    """Configure an unweighted late-fusion command."""
 
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--feature-dir", type=Path, required=True)
@@ -757,23 +549,6 @@ def configure_parser(
         metavar="SOURCE=PATH",
         help="Override one MusicFM source cache directory.",
     )
-    if weighted:
-        parser.add_argument("--energy-feature-dir", type=Path, required=True)
-        parser.add_argument(
-            "--energy-source-feature-dir",
-            action="append",
-            default=[],
-            metavar="SOURCE=PATH",
-            help="Override one RMS source cache directory.",
-        )
-        parser.add_argument(
-            "--legacy-appended-energy",
-            action="store_true",
-            help=(
-                "Read legacy fma_musicfm_SOURCE_SPLIT_with_energy.pkl "
-                "caches instead of separate fma_rms_SOURCE_SPLIT.pkl caches."
-            ),
-        )
     parser.add_argument("--expected-feature-dimension", type=int, default=1024)
     parser.add_argument(
         "--hidden-dimensions",
@@ -782,8 +557,6 @@ def configure_parser(
         default=(1024, 512),
         metavar=("FIRST", "SECOND"),
     )
-    if weighted:
-        parser.add_argument("--energy-hidden-dimension", type=int, default=16)
     parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--learning-rate", type=float, default=1e-4)
@@ -797,11 +570,7 @@ def configure_parser(
     parser.set_defaults(command_handler=command_handler)
 
 
-def config_from_args(
-    args: argparse.Namespace,
-    *,
-    weighted: bool,
-) -> LateFusionTrainingConfig:
+def config_from_args(args: argparse.Namespace) -> LateFusionTrainingConfig:
     source_directories = tuple(
         SourceFeatureDirectory(
             source=normalize_source(_parse_assignment(value, "--source-feature-dir")[0]),
@@ -811,36 +580,14 @@ def config_from_args(
         )
         for value in args.source_feature_dir
     )
-    energy_directories = ()
-    if weighted:
-        energy_directories = tuple(
-            SourceFeatureDirectory(
-                source=normalize_source(
-                    _parse_assignment(value, "--energy-source-feature-dir")[0]
-                ),
-                directory=Path(
-                    _parse_assignment(value, "--energy-source-feature-dir")[1]
-                )
-                .expanduser()
-                .resolve(),
-            )
-            for value in args.energy_source_feature_dir
-        )
     return LateFusionTrainingConfig(
         manifest_path=args.manifest.expanduser().resolve(),
         feature_directory=args.feature_dir.expanduser().resolve(),
         output_directory=args.output_dir.expanduser().resolve(),
         sources=canonicalize_sources(args.source),
-        weighted=weighted,
         source_feature_directories=source_directories,
-        energy_feature_directory=(
-            args.energy_feature_dir.expanduser().resolve() if weighted else None
-        ),
-        energy_source_feature_directories=energy_directories,
-        legacy_appended_energy=(args.legacy_appended_energy if weighted else False),
         expected_feature_dimension=args.expected_feature_dimension,
         hidden_dimensions=tuple(args.hidden_dimensions),
-        energy_hidden_dimension=(args.energy_hidden_dimension if weighted else 16),
         dropout=args.dropout,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
@@ -851,13 +598,14 @@ def config_from_args(
         allow_missing_features=args.allow_missing_features,
         overwrite=args.overwrite,
         dry_run=args.dry_run,
+        config_provenance=getattr(args, "yaml_provenance", {}),
     )
 
 
-def run_from_args(args: argparse.Namespace, *, weighted: bool) -> int:
+def run_from_args(args: argparse.Namespace) -> int:
     try:
         result = train_late_fusion_classifier(
-            config_from_args(args, weighted=weighted)
+            config_from_args(args)
         )
     except GenreTrainingError as error:
         LOGGER.error("%s", error)

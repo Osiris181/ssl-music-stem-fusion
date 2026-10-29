@@ -1,18 +1,23 @@
 # Training configurations
 
-## Purpose
-
-This directory records training settings shared by directly comparable
-experiments.
-
-## Contents
+These presets document the retained FMA-Medium classifier settings.
 
 | File | Purpose |
 | --- | --- |
-| `fma_genre_mlp.yaml` | Shared MLP, optimizer, checkpoint, metric, and seed settings for FMA-Medium genre classification. |
-| `fma_htdemucs_mid_fusion_mlp.yaml` | Table 3 HT-Demucs MusicFM mid-fusion settings. |
-| `fma_htdemucs_late_fusion_mlp.yaml` | Table 4 HT-Demucs unweighted late-fusion settings. |
-| `fma_htdemucs_rms_weighted_late_fusion_mlp.yaml` | Table 4 HT-Demucs RMS-weighted late-fusion settings. |
+| `fma_medium_mid_fusion.yaml` | Single-source and concatenation MLP training. |
+| `fma_medium_late_fusion.yaml` | Retained unweighted summed-logit model training. |
 
-The command-line defaults shown by the corresponding `stemfusion train` command
-must remain consistent with these files.
+`stemfusion train fma-medium mid-fusion` and
+`stemfusion train fma-medium late-fusion` automatically load their
+corresponding presets. Use
+`--config` for experiment files and `--run` for named conditions. See
+[configuration usage](../../docs/configuration.md).
+
+Learning rate, optimizer, batch size, epoch budget, hidden widths, dropout,
+validation selection, and
+seed defaults are unchanged by reorganization.
+
+Source conditions are recorded in `../experiments/fma_medium/`.
+Matched controls, independent late-fusion branch selection, and five-seed
+reporting still require implementation. Old RMS and duplicate presets are
+archived outside the project.

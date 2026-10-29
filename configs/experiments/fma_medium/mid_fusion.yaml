@@ -1,0 +1,15 @@
+# Supported input conditions; matched controls and five-seed evaluation pending.
+dataset: fma_medium
+task: genre_classification
+number_of_classes: 16
+separator: htdemucs_6s
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+training_profile: ../../training/fma_medium_mid_fusion.yaml
+command: train fma-medium mid-fusion
+implementation_status: retained_runner_not_revision_complete
+
+runs:
+  mixture_only: {sources: [mixture]}
+  mixture_guitar_drums_piano: {sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {sources: [mixture, guitar, drums, piano, bass, vocals]}

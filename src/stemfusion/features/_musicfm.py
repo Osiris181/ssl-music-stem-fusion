@@ -1,17 +1,21 @@
-"""Private MusicFM implementation for the HT-Demucs feature workflow."""
+"""Shared MusicFM implementation used by dataset-specific extraction tasks."""
 
 from __future__ import annotations
 
-import argparse
 import importlib
 import json
 import logging
 import pickle
 import sys
-from collections.abc import Callable, Collection
-from dataclasses import asdict, dataclass, field
+from collections.abc import Callable, Sequence
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any
+
+from tqdm.auto import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
+from stemfusion.configuration import configuration_dict
 
 from stemfusion.data.fma import (
     HTDEMUCS_SOURCES,
@@ -52,6 +56,7 @@ class MusicFMExtractionConfig:
     continue_on_error: bool = True
     dry_run: bool = False
     report_path: Path | None = None
+    config_provenance: dict[str, Any] = field(default_factory=dict)
 
     @property
     def effective_stats_path(self) -> Path:
@@ -103,6 +108,7 @@ class MusicFMExtractionSummary:
     split_summaries: list[MusicFMSplitSummary] = field(default_factory=list)
     failures: list[MusicFMExtractionFailure] = field(default_factory=list)
     dry_run: bool = False
+    resolved_config: dict[str, Any] = field(default_factory=dict)
 
     @property
     def exit_code(self) -> int:
@@ -363,6 +369,7 @@ def extract_musicfm(
         expected_dimension=config.expected_dimension,
         max_seconds=config.max_seconds,
         dry_run=config.dry_run,
+        resolved_config=configuration_dict(config),
     )
     pending: list[tuple[str, list[FMAManifestRecord], Path]] = []
     for split in config.splits:
@@ -391,59 +398,60 @@ def extract_musicfm(
         )
         features: dict[str, Any] = {}
         split_failures: list[MusicFMExtractionFailure] = []
-        for index, record in enumerate(split_records, start=1):
-            source_path = record.paths.get(config.source)
-            if source_path is None:
-                reason = (
-                    f"Manifest does not contain source {config.source!r}."
-                )
-                audio_path = ""
-            else:
-                audio_path = source_path
-                path = Path(source_path)
-                if not path.is_file() or path.stat().st_size == 0:
-                    reason = "Audio file is missing or empty."
+        with logging_redirect_tqdm(loggers=[LOGGER]), tqdm(
+            total=len(split_records),
+            desc=f"{config.source} / {split}",
+            unit="track",
+            dynamic_ncols=True,
+        ) as progress:
+            for record in split_records:
+                source_path = record.paths.get(config.source)
+                if source_path is None:
+                    reason = (
+                        f"Manifest does not contain source {config.source!r}."
+                    )
+                    audio_path = ""
                 else:
-                    try:
-                        feature = extractor(path)
-                        dimension = _feature_dimension(feature)
-                        if dimension != config.expected_dimension:
-                            raise MusicFMExtractionError(
-                                f"Expected {config.expected_dimension} values, "
-                                f"received {dimension}."
-                            )
-                    except Exception as error:
-                        reason = str(error)
+                    audio_path = source_path
+                    path = Path(source_path)
+                    if not path.is_file() or path.stat().st_size == 0:
+                        reason = "Audio file is missing or empty."
                     else:
-                        features[record.track_id] = feature
-                        split_summary.succeeded += 1
-                        summary.succeeded += 1
-                        if index % 100 == 0:
-                            LOGGER.info(
-                                "Extracted %d/%d %s features.",
-                                index,
-                                len(split_records),
-                                split,
-                            )
-                        continue
+                        try:
+                            feature = extractor(path)
+                            dimension = _feature_dimension(feature)
+                            if dimension != config.expected_dimension:
+                                raise MusicFMExtractionError(
+                                    f"Expected {config.expected_dimension} values, "
+                                    f"received {dimension}."
+                                )
+                        except Exception as error:
+                            reason = str(error)
+                        else:
+                            features[record.track_id] = feature
+                            split_summary.succeeded += 1
+                            summary.succeeded += 1
+                            progress.update(1)
+                            continue
 
-            failure = MusicFMExtractionFailure(
-                track_id=record.track_id,
-                split=split,
-                audio_path=audio_path,
-                reason=reason,
-            )
-            split_failures.append(failure)
-            summary.failures.append(failure)
-            split_summary.failed += 1
-            summary.failed += 1
-            LOGGER.error(
-                "MusicFM extraction failed for %s: %s",
-                record.track_id,
-                reason,
-            )
-            if not config.continue_on_error:
-                break
+                failure = MusicFMExtractionFailure(
+                    track_id=record.track_id,
+                    split=split,
+                    audio_path=audio_path,
+                    reason=reason,
+                )
+                split_failures.append(failure)
+                summary.failures.append(failure)
+                split_summary.failed += 1
+                summary.failed += 1
+                LOGGER.error(
+                    "MusicFM extraction failed for %s: %s",
+                    record.track_id,
+                    reason,
+                )
+                progress.update(1)
+                if not config.continue_on_error:
+                    break
 
         if split_failures:
             if features:
@@ -465,83 +473,52 @@ def extract_musicfm(
     return summary
 
 
-def configure_parser(
-    parser: argparse.ArgumentParser,
-    *,
-    allowed_sources: Collection[str] = MUSICFM_SOURCES,
-) -> None:
-    parser.description = (
-        "Extract layer-7, mean-pooled MusicFM-MSD features from a manifest."
-    )
-    parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument(
-        "--source",
-        choices=tuple(sorted(allowed_sources)),
-        required=True,
-    )
-    parser.add_argument("--musicfm-root", type=Path, required=True)
-    parser.add_argument("--stats-path", type=Path)
-    parser.add_argument("--checkpoint-path", type=Path)
-    parser.add_argument("--device", default="cuda")
-    parser.add_argument("--sample-rate", type=int, default=24_000)
-    parser.add_argument("--layer-index", type=int, default=7)
-    parser.add_argument("--is-flash", action="store_true")
-    parser.add_argument("--max-seconds", type=float)
-    parser.add_argument(
-        "--split",
-        action="append",
-        choices=DEFAULT_SPLITS,
-        dest="splits",
-    )
-    parser.add_argument("--limit-per-split", type=int)
-    parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--fail-fast", action="store_true")
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--report", type=Path)
-    parser.set_defaults(command_handler=run_from_args)
+def extract_musicfm_sources(
+    configs: Sequence[MusicFMExtractionConfig],
+    feature_extractor: Callable[[Path], Any] | None = None,
+) -> list[MusicFMExtractionSummary]:
+    """Extract sources sequentially with one shared encoder and audio policy.
 
+    Dry runs and already-complete caches never initialize the model. Stop
+    after a failed source, retaining its partial cache and individual report.
+    """
 
-def config_from_args(args: argparse.Namespace) -> MusicFMExtractionConfig:
-    return MusicFMExtractionConfig(
-        manifest_path=args.manifest.expanduser().resolve(),
-        output_dir=args.output_dir.expanduser().resolve(),
-        source=args.source,
-        musicfm_root=args.musicfm_root.expanduser().resolve(),
-        stats_path=(
-            args.stats_path.expanduser().resolve()
-            if args.stats_path is not None
-            else None
-        ),
-        checkpoint_path=(
-            args.checkpoint_path.expanduser().resolve()
-            if args.checkpoint_path is not None
-            else None
-        ),
-        device=args.device,
-        sample_rate=args.sample_rate,
-        layer_index=args.layer_index,
-        is_flash=args.is_flash,
-        max_seconds=args.max_seconds,
-        splits=tuple(args.splits or DEFAULT_SPLITS),
-        limit_per_split=args.limit_per_split,
-        overwrite=args.overwrite,
-        continue_on_error=not args.fail_fast,
-        dry_run=args.dry_run,
-        report_path=(
-            args.report.expanduser().resolve()
-            if args.report is not None
-            else None
-        ),
-    )
+    if not configs:
+        raise MusicFMExtractionError("At least one extraction source is required.")
+    if len({config.source for config in configs}) != len(configs):
+        raise MusicFMExtractionError("Each extraction source must be selected only once.")
 
+    def shared_settings(config: MusicFMExtractionConfig) -> tuple[Any, ...]:
+        return (
+            config.manifest_path, config.musicfm_root,
+            config.effective_checkpoint_path, config.effective_stats_path,
+            config.device, config.sample_rate, config.layer_index,
+            config.expected_dimension, config.temporal_pooling, config.is_flash,
+            config.max_seconds, config.splits, config.limit_per_split,
+            config.output_dir, config.dry_run,
+        )
 
-def run_from_args(args: argparse.Namespace) -> int:
-    try:
-        config = config_from_args(args)
-        summary = extract_musicfm(config)
-    except MusicFMExtractionError as error:
-        LOGGER.error("%s", error)
-        return 2
-    print(json.dumps(summary.to_dict(), indent=2, sort_keys=True))
-    return summary.exit_code
+    expected = shared_settings(configs[0])
+    for config in configs:
+        _validate_config(config)
+        if shared_settings(config) != expected:
+            raise MusicFMExtractionError(
+                "All sources in one job must share the manifest, encoder, "
+                "audio settings, splits, and output directory."
+            )
+
+    extractor = feature_extractor
+    summaries = []
+    for index, config in enumerate(configs, start=1):
+        LOGGER.info("Source %d/%d: %s", index, len(configs), config.source)
+        if extractor is None and not config.dry_run:
+            plan = extract_musicfm(replace(config, dry_run=True))
+            if plan.planned:
+                # Initialize outside the per-track failure handler so a model
+                # initialization error is not retried for every audio file.
+                extractor = _MusicFMRuntime(config)
+        summary = extract_musicfm(config, feature_extractor=extractor)
+        summaries.append(summary)
+        if summary.exit_code:
+            break
+    return summaries

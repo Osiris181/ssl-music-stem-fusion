@@ -14,7 +14,7 @@ import random
 import sys
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -84,6 +84,7 @@ class GenreTrainingConfig:
     drop_silent_features: bool = False
     overwrite: bool = False
     dry_run: bool = False
+    config_provenance: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -315,6 +316,7 @@ def _label_mapping(records: Sequence[FMAManifestRecord]) -> dict[str, int]:
 
 def _config_dict(config: GenreTrainingConfig) -> dict[str, Any]:
     return {
+        "config_provenance": config.config_provenance,
         "manifest_path": str(config.manifest_path),
         "feature_directory": str(config.feature_directory),
         "output_directory": str(config.output_directory),
@@ -1010,7 +1012,9 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--device", default="auto")
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--allow-missing-features", action="store_true")
-    parser.add_argument("--drop-silent-features", action="store_true")
+    parser.add_argument(
+        "--drop-silent-features", action=argparse.BooleanOptionalAction, default=False,
+    )
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.set_defaults(command_handler=run_from_args)
@@ -1046,6 +1050,7 @@ def config_from_args(args: argparse.Namespace) -> GenreTrainingConfig:
         drop_silent_features=args.drop_silent_features,
         overwrite=args.overwrite,
         dry_run=args.dry_run,
+        config_provenance=getattr(args, "yaml_provenance", {}),
     )
 
 

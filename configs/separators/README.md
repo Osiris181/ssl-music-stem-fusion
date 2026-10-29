@@ -13,7 +13,9 @@ wrappers.
 
 ## How to use these settings
 
-Review these files before running the matching commands:
+The matching command automatically loads `htdemucs_6s.yaml`. Use `--config`
+for a custom YAML; explicit CLI arguments override configured values.
+Review the interface before running:
 
     stemfusion separate htdemucs --help
 

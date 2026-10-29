@@ -7,8 +7,10 @@ from stemfusion.training.genre import (
     train_genre_classifier,
 )
 
-from stemfusion.training._htdemucs_late_fusion import LateFusionTrainingConfig
-from stemfusion.training.htdemucs_late_fusion import train_late_fusion_classifier
+from stemfusion.training.late_fusion import (
+    LateFusionTrainingConfig,
+    train_late_fusion_classifier,
+)
 
 __all__ = [
     "GenreTrainingConfig",

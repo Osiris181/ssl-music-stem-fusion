@@ -1,15 +1,20 @@
 # Legacy migration map
 
-Original research files remain unchanged until their replacements have been
-validated against the paper experiments.
+Original scripts and cached inputs outside the project remain unchanged.
+Only FMA-Medium genre-classification entry points are currently active.
 
-| Pipeline component | Authoritative legacy source | Clean replacement | Status |
+| Component | Legacy source | Active implementation | Status |
 | --- | --- | --- | --- |
-| HT-Demucs batch separation | /home/osiris181/htdemucs_separation.py; SSD and new-HDD files are storage continuations; ISMIR04 changes only inputs and scheduling | src/stemfusion/separation/htdemucs.py | Migrated as one method; lightweight tests added; output equivalence still pending |
-| FMA-Medium HT-Demucs MusicFM and RMS extraction | /home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/fixed_get_musicfm_htdemucs.py; /home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/get_musicfm_htdemucs_add_rms_features.py | src/stemfusion/data/fma.py; src/stemfusion/features/htdemucs.py | Migrated to the paper-aligned MSD/layer-7 profile; real-cache equivalence still pending |
-| FMA-Medium HT-Demucs Table 3 and Table 4 genre training | `/home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/classifier.py`; `late_fusion.py`; `late_fusion_with_energy_classifier.py` | `src/stemfusion/training/htdemucs_mid_fusion.py`; `htdemucs_late_fusion.py`; `htdemucs_rms_weighted_late_fusion.py` | Migrated with modern separate RMS caches and a legacy appended-energy adapter; metric equivalence pending |
+| HT-Demucs separation | `/home/osiris181/htdemucs_separation.py`; storage continuations | `src/stemfusion/separation/htdemucs.py` | Shared wrapper; real output-equivalence check pending. |
+| FMA HT-Demucs MusicFM | `/home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/fixed_get_musicfm_htdemucs.py` | `src/stemfusion/data/fma.py`; `experiments/fma_medium/extraction.py` | MSD/layer-7 configured; full feature-provenance audit pending. |
+| FMA mid-fusion | `/home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/classifier.py` | `experiments/fma_medium/train_mid.py` over `training/genre.py` | Historical runner retained; revised matched controls pending. |
+| FMA unweighted late-fusion | `/home/osiris181/htdemucs_experiment(FMA_HTDEMUCS)/late_fusion.py` | `experiments/fma_medium/train_late.py` over `training/late_fusion.py` | Historical joint runner retained; independent branch training pending. |
 
-`src/stemfusion/training/genre.py` and `src/stemfusion/models/mlp.py` remain
-shared HT-Demucs dependencies. The retired separator's migration history and
-Table 2 reproduction artifacts are recoverable as recorded in
-[cleanup_20261028.md](cleanup_20261028.md).
+Module paths in the last two columns are relative to `src/stemfusion/`
+unless written in full. Dataset entry points contain routing/configuration;
+shared models and engines contain the implementation.
+
+Old RMS/weighted modules, duplicate wrappers, and paper-table configs are
+recoverable through [the FMA organization archive](fma_medium_organization.md).
+Earlier Banquet/Table 2 assets are covered by
+[the previous cleanup record](cleanup_20261028.md).

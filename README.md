@@ -1,325 +1,319 @@
 # Stem Fusion for Music Classification
 
-This repository is the staging area for cleaning and consolidating the research
-code associated with the paper **"Enhancing Music Classification via Source
-Separation and Feature Fusion."**
+Research code for studying whether source-separated instrument representations
+add predictive value beyond strong pretrained representations of the original
+music mixture. This repository supports the revision of *Enhancing Music
+Classification via Source Separation and Feature Fusion*. The Python package
+and command-line interface are named `stemfusion`.
 
-The intended repository name is:
+## Current status
 
-```text
-stem-fusion-music-classification
-```
+As of 2026-10-28, repository cleanup is in progress. The active package contains
+HT-Demucs separation, FMA-Medium manifest construction, MusicFM extraction,
+and historical genre-classification workflows.
 
-The intended Python package and command-line name is `stemfusion`.
+Banquet code, configurations, dedicated documentation, and Table 2 experiment
+outputs have been removed from the active project with a recovery archive
+outside it. See [the cleanup record](docs/cleanup_20261028.md).
+RMS extraction, weighted fusion, old table-based configurations, and
+superseded entry points are now archived outside the active project as well;
+see [the FMA organization record](docs/fma_medium_organization.md).
 
-> Status (2026-10-28): the active project now contains HT-Demucs separation,
-> FMA-Medium feature extraction, and classifier workflows. Banquet-specific
-> code, configurations, documentation, and Table 2 outputs have been removed
-> from this folder with a recovery archive outside the project. See
-> [the cleanup record](docs/cleanup_20261028.md). Original research directories
-> outside this project remain unchanged.
->
-> The current revision protocol is in
-> [PHASE2_EXPERIMENTAL_DESIGN.md](PHASE2_EXPERIMENTAL_DESIGN.md). Its matched
-> controls and five-seed evaluation have not yet been implemented. Existing
-> RMS extraction and weighted-fusion code remain historical functionality,
-> outside the revised primary matrix.
+FMA-Medium genre classification is the only active dataset experiment.
+Start with [its dataset guide](src/stemfusion/experiments/fma_medium/README.md).
+Shared separation, MusicFM, model, and training code remains available to
+support that experiment.
 
-## Migration progress
+No previous run artifacts remain in the active project. The obsolete
+`reference_results/` directory has been removed from this project; `outputs/`
+is currently empty and reserved for future runs. Reusable feature caches and
+split manifests are inputs, rather than previous experimental results.
 
-- [x] Select the repository and package names.
-- [x] Record the target repository structure and reproduction requirements.
-- [x] Consolidate the HT-Demucs batch scripts into one configurable wrapper.
-- [ ] Validate cleaned HT-Demucs outputs against legacy outputs.
-- [x] Migrate the FMA-Medium HT-Demucs manifest, vanilla MusicFM extraction,
-  and separate RMS extraction stage.
-- [ ] Validate cleaned MusicFM embeddings against legacy feature caches.
-- [x] Consolidate the FMA-Medium single-source genre classifier into one
-  configurable MLP trainer with legacy cache adapters.
-- [x] Remove the retired separator's workflows and archive its experiment outputs.
-- [x] Migrate distinct HT-Demucs Table 3 mid-fusion and Table 4 late-fusion
-  training workflows with separate RMS-cache support.
-- [ ] Migrate feature extraction for the remaining datasets and backends.
-- [ ] Migrate classifiers, training, and evaluation table by table.
+The matched mixture-only controls, five-seed evaluation, and revised results
+are **not yet implemented or completed**. Existing code and historical results
+must not be presented as evidence from the revised protocol.
 
-See [docs/legacy_map.md](docs/legacy_map.md) for the source-to-replacement
-mapping, [docs/fma_htdemucs_features.md](docs/fma_htdemucs_features.md) for
-the FMA-Medium feature workflow, and
-[docs/fma_htdemucs_training.md](docs/fma_htdemucs_training.md) for classifier usage.
+The project context is recorded in:
 
-## Research objective
+- [Research direction](RESEARCH_DIRECTION.md): scientific question, prior-work
+  positioning, historical setup, and interpretation limits.
+- [Phase 1: novelty revision](PHASE1_NOVELTY_REVISION.md): revised motivation,
+  empirical objectives, and manuscript drafting notes.
+- [Phase 2: experimental design](PHASE2_EXPERIMENTAL_DESIGN.md): the current,
+  provisionally agreed comparison matrix and implementation checks.
 
-The project evaluates whether features extracted from source-separated music
-stems improve downstream music classification. The common pipeline is:
+Phase 2 takes precedence over earlier experimental proposals. The cleanup
+record documents repository changes made after those design notes.
 
-```text
-mixture audio
-    -> music source separation
-    -> frozen feature extraction for the mixture and stems
-    -> feature fusion
-    -> trainable classifier
-    -> task-specific evaluation
-```
+## Research question
 
-Only the downstream classifier is trained. The source-separation models and
-pretrained feature extractors remain frozen.
+When pretrained music models already provide informative representations of
+the original mixture, does explicitly adding representations of separated
+instrument stems improve downstream classification? Under which evaluated
+conditions does it help, make little difference, or hurt?
 
-## Current revision scope
+The study evaluates incremental predictive value while controlling for the
+extra classifier parameters and ensemble branches introduced by fusion.
+Source separation may make source-related cues easier to exploit; it does
+not create acoustic information absent from the original recording.
 
-### Source-separation systems
+The three empirical objectives are to assess incremental stem value against
+matched mixture-only controls, examine a fixed sequence of stem additions,
+and characterize outcomes across genre, mood/theme, and binary emotion
+settings. These are proposed empirical contributions. Separation, stem fusion,
+and combining separation with pretrained representations have prior precedent;
+the project makes no general first-use claim.
 
-- HT-Demucs `htdemucs_6s`, which produces vocals, drums, bass, piano,
-  guitar, and other.
+## Revised pipeline and scope
 
-The revised fusion configurations retain the original mixture and add guitar,
-drums and piano, then bass, then vocals. The separator's `other` output is
-excluded from these comparisons.
+The original mixture remains an independent input. Frozen pretrained
+HT-Demucs `htdemucs_6s` supplies separated audio, and frozen representation
+extractors encode the mixture and selected stems separately. Only downstream
+classifiers are trained.
 
-### Feature extractors
+HT-Demucs produces six sources natively. Revised comparisons use guitar,
+drums, piano, bass, and vocals, excluding `other`. The mixture input must
+come from the original recording, rather than a reconstruction from stems.
 
-- MusicFM-MSD features with temporal average pooling.
-- The reproduced Kang and Herremans feature set: frozen MERT-95M features,
-  BTC chord estimates, and an inferred global key.
+Two representation pipelines are retained:
 
-RMS extraction remains available for historical weighted-fusion experiments.
+- MusicFM-MSD: seventh Conformer-layer features with temporal mean pooling.
+- Kang & Herremans-style features: frozen MERT-95M layers five/six plus
+  reconstructed chord and global-key descriptors.
 
-### Fusion models
+The inspected FMA piano training cache contains 1,024-dimensional
+`torch.float32` vectors. This confirms the width for that cache; feature
+dimensions, checkpoint/layer provenance, pooling, and track alignment still
+need verification across the remaining inputs. MERT plus chord/key dimensions
+must be measured separately.
 
-- Mid-fusion: concatenate source features and classify them with a
-  three-layer MLP.
-- Late fusion with an unweighted sum: classify each source independently and
-  sum the resulting logits.
+## Planned comparisons
 
-The revised design adds parameter-matched mixture-only MLPs and
-ensemble-matched mixture-only controls. These are planned comparisons;
-the existing RMS-weighted implementation is outside the revised primary matrix.
+Keep the original single-MLP mixture-only baseline. Evaluate both
+feature-concatenation mid-fusion and unweighted prediction-level late-fusion
+for the following fixed nested configurations.
 
-### Datasets and tasks
+Here `M` is the original mixture, `G` guitar, `D` drums, `P` piano,
+`B` bass, and `V` vocals.
 
-| Task | Datasets |
-| --- | --- |
-| Genre classification | FMA-Medium, GTZAN, ISMIR04 |
-| Mood/theme tagging | MTG-Jamendo |
-| Valence and arousal classification | PMEmo, EmoMusic, DEAM |
+| Fusion inputs | Input views | Mixture-only control for mid-fusion | Mixture-only control for late-fusion |
+| --- | ---: | --- | --- |
+| `M+G+D+P` | 4 | MLP matched to the fusion model's trainable parameter count | 4 independently trained mixture classifiers |
+| `M+G+D+P+B` | 5 | MLP matched to the fusion model's trainable parameter count | 5 independently trained mixture classifiers |
+| `M+G+D+P+B+V` (`M+All Stems`) | 6 | MLP matched to the fusion model's trainable parameter count | 6 independently trained mixture classifiers |
 
-The revised question is whether stems add predictive value beyond pretrained
-mixture representations after controlling for classifier capacity and
-ensembling. Conclusions depend on the planned controlled experiments; apparent
-differences across tasks remain conditional on datasets and representations.
+For mid-fusion, the planned control widens a mixture-only MLP while retaining
+the original mixture representation. Compute matched widths from the actual
+architecture and report full trainable parameter counts. Repeating the same
+mixture vector is not the intended capacity control.
 
-## Repository organization
+For late-fusion, all control branches receive the same mixture features but
+have independent initialization and training randomness. Use the same branch
+architectures, validation selection, aggregation rule, and training budget
+for stem fusion and its corresponding mixture ensemble.
 
-The cleaned repository should be organized by reusable pipeline component,
-not by duplicated dataset-specific training scripts.
+Parameter matching does not equalize optimization difficulty, inductive bias,
+or computation. Fair comparisons also require consistent splits,
+preprocessing, losses, regularization, metrics, and training settings within
+each dataset, representation, and target.
+
+These three configurations examine adding bass, then vocals, to one selected
+starting group. They are representative nested sets, not an exhaustive search
+or evidence of globally optimal stem combinations. Mid- and late-fusion are
+evaluation strategies, not claimed new algorithms.
+
+## Planned datasets and representations
+
+| Dataset | Task / target | Representation pipeline |
+| --- | --- | --- |
+| FMA-Medium | 16-class genre classification | MusicFM |
+| GTZAN | 10-class genre classification | MusicFM |
+| ISMIR04 | 6-class genre classification | MusicFM |
+| MTG-Jamendo mood/theme | Multilabel tagging; 56 tags in the original manuscript | MusicFM and MERT + chord/key, evaluated separately |
+| PMEmo | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
+| EmoMusic | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
+| DEAM | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
+
+This gives 11 dataset × representation × target settings in the full proposed
+matrix. The emotion tasks binarize annotations; they are not regression
+experiments. Exact label conversion, sample IDs, and split provenance require
+verification before rerunning.
+
+## Planned training and reporting protocol
+
+Retain existing train/validation/test partitions, subject to checks for
+duplicate IDs, overlap, and feature alignment. Fix five outer training seeds
+before new runs; the actual seed list is still open. Derive independent
+late-fusion branch seeds deterministically from each outer seed.
+
+The provisionally agreed rules retain the original task-specific training
+budgets:
+
+| Task | Optimizer and training budget | Validation checkpoint criterion | Primary reported metric |
+| --- | --- | --- | --- |
+| Genre | Adam, learning rate `1e-4`, batch size 128, up to 20 epochs | Maximum accuracy + PR-AUC + ROC-AUC, all on a 0–1 scale | Accuracy |
+| Mood/theme | Adam, learning rate `1e-4`, batch size 8, up to 500 epochs; patience 10, minimum delta `1e-4` | Maximum PR-AUC | PR-AUC |
+| Binary valence/arousal | Adam, learning rate `1e-4`, batch size 8, up to 500 epochs; patience 10, minimum delta `1e-4` | Maximum accuracy, provisionally pending label-balance/code checks | Accuracy |
+
+Exact metric averaging, PR-AUC computation, threshold selection, tie handling,
+and undefined-AUC handling must be fixed before evaluation. Choose thresholds
+using validation data only. Apply the same selection criterion to every
+compared model within a setting; historical checkpoints selected differently
+are not automatically reusable.
+
+Report mean ± sample standard deviation (`ddof=1`) over five runs, plus the
+mean of paired per-seed differences between fusion and its matched control.
+Retain appropriate secondary metrics. Formal significance tests and bootstrap
+confidence intervals are optional; standard deviation alone does not
+establish statistical significance.
+
+Save per-track IDs, labels, scores/probabilities, predictions, validation-chosen
+thresholds, configs, seeds, trainable parameter counts, checkpoint metadata,
+and validation histories. Keep branch outputs so nested late-fusion ensembles
+can be evaluated without retraining compatible branches.
+
+## Interpretation and historical limitations
+
+The selected separator and stem configurations were influenced by earlier
+FMA-Medium test results. Fixing them for revised runs does not make that
+previously examined test split an independent confirmatory holdout. Preserve
+and disclose this exploratory history.
+
+Task comparisons also differ in datasets, labels, and representation
+pipelines. Treat explanations such as instrument-localized genre cues versus
+holistic emotion cues as hypotheses. Report positive, negligible, and negative
+outcomes without asserting a universal task-type rule.
+
+The Kang & Herremans chord/key stages were reconstructed because the original
+extraction scripts were unavailable. The original manuscript documents a
+reproduction gap. Compare stem fusion against the local mixture-only baseline
+under the same implementation, and distinguish it from published results;
+the reasons for the gap remain possible explanations rather than proven causes.
+
+## Current repository layout
+
+The tree below shows the current main files and directories, rather than a
+proposed future package structure.
 
 ```text
 stem-fusion-music-classification/
 ├── README.md
+├── RESEARCH_DIRECTION.md
+├── PHASE1_NOVELTY_REVISION.md
+├── PHASE2_EXPERIMENTAL_DESIGN.md
+├── STEM_Separation.pdf
 ├── pyproject.toml
-├── .gitignore
-├── paper/
-│   └── STEM_Separation.pdf
 ├── configs/
-│   ├── paths.example.yaml
-│   ├── datasets/
 │   ├── separators/
 │   ├── features/
-│   ├── fusion/
 │   ├── training/
-│   └── experiments/
-│       └── paper/
-├── src/
-│   └── stemfusion/
-│       ├── cli.py
-│       ├── config.py
-│       ├── constants.py
-│       ├── reproducibility.py
-│       ├── data/
-│       │   └── datasets/
-│       ├── separation/
-│       ├── features/
-│       ├── models/
-│       ├── tasks/
-│       ├── training/
-│       ├── evaluation/
-│       └── pipelines/
-├── scripts/
-├── tests/
-│   ├── unit/
-│   └── integration/
+│   └── experiments/fma_medium/
+│       ├── extraction.yaml
+│       ├── mid_fusion.yaml
+│       └── late_fusion.yaml
+├── src/stemfusion/
+│   ├── cli.py
+│   ├── configuration.py
+│   ├── data/
+│   ├── separation/
+│   ├── features/
+│   ├── models/
+│   ├── training/
+│   └── experiments/fma_medium/
+│       ├── extraction.py
+│       ├── train_mid.py
+│       └── train_late.py
+├── tests/unit/
 ├── docs/
-├── reference_results/
-├── data/
+├── data/manifests/
 └── outputs/
 ```
 
-Each current directory contains its own README describing its responsibility,
-files, inputs, outputs, and relevant commands. Start with
-`configs/README.md`, `src/README.md`, `docs/README.md`, or `tests/README.md`
-when navigating the repository.
+Directory guides explain their code, inputs, outputs, and usage. Start with
+[configs](configs/README.md), [source code](src/README.md),
+[documentation](docs/README.md), or [tests](tests/README.md).
 
-### Configuration layout
+Public tasks now load their standard YAML presets automatically. Use
+`--config PATH` to load an experiment or alternate preset; explicit CLI
+arguments override YAML values. For training, `--run NAME` selects one source
+condition from the experiment file. See [configuration usage](docs/configuration.md).
+The [FMA-Medium configuration directory](configs/experiments/fma_medium/README.md)
+contains the selected input matrices and references retained training presets.
+These matrices do not implement the pending matched controls or five-seed
+evaluation. Old paper-table manifests are archived.
 
-Reusable configuration groups should describe datasets, separators, feature
-extractors, fusion models, and training protocols. Experiment manifests should
-map directly to the paper tables:
+The retained late-fusion runner trains all source branches jointly through
+summed logits and selects one whole-model checkpoint. Independent branch
+training and checkpoint selection required by Phase 2 remain to be implemented.
+Mid-fusion's retained zero-vector exclusion also requires a common-track-set
+audit before new comparisons.
 
-```text
-configs/experiments/paper/
-├── table_03_fma_htdemucs.yaml
-├── table_04_fma_fusion.yaml
-├── table_05_gtzan.yaml
-├── table_06_ismir04.yaml
-├── table_07_jamendo_musicfm.yaml
-├── table_08_jamendo_mert.yaml
-├── table_09_pmemo_valence.yaml
-├── table_10_pmemo_arousal.yaml
-├── table_11_emomusic_valence.yaml
-├── table_12_emomusic_arousal.yaml
-├── table_13_deam_valence.yaml
-└── table_14_deam_arousal.yaml
-```
+## Using the current code
 
-Each table manifest may enumerate several source or fusion variants, but all
-directly comparable variants must inherit the same training hyperparameters.
-
-## Intended command-line workflow
-
-Separation, feature extraction, training, and evaluation must remain separate
-stages because the first two are expensive and their outputs should be cached.
+From the repository root, inspect the supported commands without installing
+the package:
 
 ```bash
-stemfusion separate --config configs/experiments/paper/table_03_fma_htdemucs.yaml
-stemfusion extract --config configs/experiments/paper/table_03_fma_htdemucs.yaml
-stemfusion train --config configs/experiments/paper/table_03_fma_htdemucs.yaml
-stemfusion evaluate --config configs/experiments/paper/table_03_fma_htdemucs.yaml
-stemfusion reproduce --table 3
+PYTHONPATH=src python -m stemfusion --help
+PYTHONPATH=src python -m stemfusion separate htdemucs --help
+PYTHONPATH=src python -m stemfusion data fma-manifest --help
+PYTHONPATH=src python -m stemfusion extract fma-medium --help
+PYTHONPATH=src python -m stemfusion train fma-medium mid-fusion --help
+PYTHONPATH=src python -m stemfusion train fma-medium late-fusion --help
 ```
 
-## Data and artifact policy
+Python 3.10 or newer is required. Editable installation is available with
+`python -m pip install -e .`; optional dependency groups in
+[pyproject.toml](pyproject.toml) are `htdemucs`, `musicfm`, and `training`.
+The upstream MusicFM repository and checkpoints remain external dependencies.
 
-The following must not be mixed with source code or committed to the
-repository:
+See the [separation guide](docs/htdemucs_separation.md),
+[feature-extraction guide](docs/fma_medium_extraction.md), and
+[training guide](docs/fma_htdemucs_training.md) for complete commands and local
+path arguments. These guides describe the retained runners in their new
+dataset-specific organization.
+There are no standalone `evaluate` or `reproduce` CLI commands.
 
-- raw datasets;
-- separated audio files;
-- feature caches;
-- model checkpoints;
-- TensorBoard or other training logs;
-- local virtual environments;
-- machine-specific paths.
+Run the existing tests with:
 
-Local paths should be supplied through an ignored local configuration derived
-from `configs/paths.example.yaml`.
-
-Generated runs should follow a predictable layout:
-
-```text
-outputs/<experiment>/<run_id>/
-├── resolved_config.yaml
-├── environment.json
-├── data_manifest_checksum.txt
-├── metrics.json
-├── predictions.npz
-├── checkpoint.pt
-└── logs/
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
 ```
 
-The resolved configuration, seed, software versions, data-manifest checksum,
-and source revision should be recorded for every run.
+The tests use temporary synthetic inputs and mocked external inference.
+They do not establish real-model feature equivalence or revised research
+findings.
 
-## Canonical data conventions
+## Data, artifacts, and next implementation steps
 
-- Use the source names `mixture`, `guitar`, `drums`, `piano`, `bass`,
-  `vocals`, and `other` throughout the cleaned code.
-- Support old names such as `mix`, `drum`, and `vocal` only at the legacy
-  import boundary.
-- Store track IDs explicitly as strings rather than deriving them throughout
-  the training code from arbitrary file paths.
-- Build one aligned manifest per dataset containing the track ID, split,
-  labels, mixture path, and available stem paths.
-- Detect missing, corrupt, and silent sources while constructing or validating
-  the manifest. Directly comparable methods must use the same track set.
-- Keep the RMS value separate from the learned embedding. Legacy feature files
-  that append RMS as an extra dimension should be converted by a migration
-  adapter.
-- Fit preprocessing statistics only on the training split.
-- Select checkpoints and classification thresholds using validation data only.
+Keep raw audio, separated stems, feature caches, checkpoints, training logs,
+and local environments out of source control. Supply machine-specific paths
+through CLI arguments or ignored local YAML overrides. Reuse existing features
+after verifying their
+provenance and alignment rather than automatically rerunning separation or
+pretrained extraction.
 
-## Task-specific behavior
+Current FMA trainers write run artifacts under a chosen output directory,
+including `resolved_config.json`, `environment.json`,
+`data_manifest_checksum.txt`, `training_history.json`, `metrics.json`,
+`predictions.npz`, and `checkpoint.pt`. Revised runs should use distinct,
+versioned output directories under `outputs/`. Historical artifacts remain in
+the external recovery archive described in the cleanup record.
 
-The cleaned implementation must explicitly distinguish these task types:
+The remaining work is:
 
-- multiclass genre classification;
-- multilabel mood/theme tagging;
-- binary valence classification;
-- binary arousal classification.
+1. Audit existing features, split manifests, labels, metrics, actual MLP
+   parameters, and late-fusion aggregation. Verify ISMIR04 split provenance
+   without inventing an official split or citation.
+2. Lock the five seeds and precise per-setting protocol before examining new
+   test outcomes.
+3. Implement matched controls and consistent prediction/configuration saving,
+   preserving the original mixture-only reference.
+4. Complete migration of the remaining dataset and representation pipelines,
+   validate a small pilot, then run the agreed repeated comparisons.
+5. Analyze matched differences and limitations, and revise results-dependent
+   manuscript claims after the evidence is available.
 
-Loss functions, averaging modes, checkpoint criteria, threshold selection,
-and reported metrics must be declared in configuration rather than hidden in
-dataset-specific scripts.
-
-## Testing priorities
-
-Tests should cover the parts of the pipeline most likely to silently change an
-experiment:
-
-- dataset split integrity and leakage detection;
-- track and source alignment;
-- deterministic source ordering;
-- embedding and RMS dimensions;
-- mid-fusion concatenation order;
-- unweighted and RMS-weighted late-fusion calculations;
-- metric averaging conventions;
-- validation-only threshold selection;
-- checkpoint selection criteria;
-- behavior for missing, corrupt, and silent audio;
-- a small end-to-end run using synthetic cached features.
-
-## Migration and validation plan
-
-1. Inventory the original scripts, configurations, cached features, result
-   files, and checkpoints associated with each paper table.
-2. Record the mapping in `docs/legacy_map.md`, including which original file
-   is authoritative and which files are abandoned experiments.
-3. Create dataset manifests and validate their splits and source alignment.
-4. Implement legacy feature readers before changing any stored feature format.
-5. Consolidate common models, metrics, and training behavior into the package.
-6. Reproduce one small genre experiment end to end before migrating the full
-   experiment matrix.
-7. Compare cleaned outputs with the paper values stored in
-   `reference_results/paper_metrics.csv`.
-8. Migrate the remaining paper tables and document expected deviations.
-9. Archive or remove original code only after its cleaned replacement has been
-   identified and validated.
-
-## Questions that must be resolved from the original code
-
-- Whether each reported HT-Demucs "All Stems" result uses the five named stems
-  or all six HT-Demucs outputs including `other`.
-- Whether legacy MusicFM caches were generated with command-line checkpoint or
-  layer overrides. The cleaned reproduction consistently follows the paper's
-  MusicFM-MSD layer-7 specification.
-- The exact macro, micro, or weighted averaging convention for every reported
-  F1, ROC-AUC, and PR-AUC value.
-- The authoritative classifier dimensions, dropout settings, loss functions,
-  and checkpoint-selection rule for each experiment family.
-- The exact continuous-to-binary label conversion used for valence and
-  arousal.
-- Whether weighted late-fusion logits are summed directly or normalized by the
-  total predicted weight.
-- Which random seeds and number of repeated runs produced the reported values.
-- Which original scripts and checkpoints correspond to the final manuscript,
-  especially where filenames contain labels such as `old`, `fixed`, `newest`,
-  or `wrong`.
-
-## Current source-code situation
-
-The existing work is distributed across multiple directories, including the
-FMA HT-Demucs experiments, GTZAN, ISMIR04, MTG-Jamendo, and
-Music2Emotion. Source files are currently mixed with large cached features,
-checkpoints, logs, and local environments. Many scripts repeat data loading,
-model definitions, metric calculation, and training loops with small changes.
-
-Those directories are evidence for reconstructing the paper and should be
-treated as read-only inputs during the first migration phase.
+See [the legacy migration map](docs/legacy_map.md) for existing source mappings.
+Further code changes, experiments, and manuscript edits proceed through
+specific author requests.

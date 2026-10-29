@@ -6,13 +6,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from stemfusion.features.htdemucs import (
+from stemfusion.experiments.fma_medium.extraction import (
     MusicFMExtractionConfig,
     extract_musicfm,
 )
 
 
-class HTDemucsMusicFMExtractionTests(unittest.TestCase):
+class FMAMediumMusicFMExtractionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary_directory.name)

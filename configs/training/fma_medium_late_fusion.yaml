@@ -1,4 +1,4 @@
-# Table 4: FMA-Medium genre classification with HT-Demucs unweighted late fusion.
+# Retained FMA-Medium unweighted late-fusion training settings.
 task:
   name: genre_classification
   label_type: multiclass
@@ -47,3 +47,7 @@ reproducibility:
   seed: 42
   cudnn_deterministic: true
   cudnn_benchmark: false
+
+runtime:
+  device: auto
+  num_workers: 0

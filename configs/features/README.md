@@ -1,25 +1,19 @@
 # Feature configurations
 
-## Purpose
+`musicfm_msd_layer7.yaml` is the shared preset referenced by the FMA task's
+default `configs/experiments/fma_medium/extraction.yaml`. The FMA entry point
+selects that task YAML. This feature preset supplies checkpoint/statistics names,
+sample rate, duration handling, encoder layer, pooling, dimension, runtime,
+and split defaults.
 
-This directory records settings for frozen feature extractors.
+```bash
+stemfusion extract fma-medium --help
+```
 
-## Contents
+Use `--config PATH` for an alternate preset or an experiment referencing
+this file. Explicit CLI values override configured ones. Checkpoint/statistics
+basenames are resolved under the supplied MusicFM checkout's `data/`
+directory unless an explicit file path overrides them.
 
-| File | Purpose |
-| --- | --- |
-| `musicfm_msd_layer7.yaml` | Paper-aligned MusicFM-MSD layer-7 extraction for HT-Demucs mixtures and stems. |
-| `rms_mean_scaled20.yaml` | HT-Demucs mean frame-level RMS, scaling factor 20.0, and separate one-value caches for weighted fusion. |
-
-## How to use these settings
-
-Use these files to review the effective model, audio, layer, pooling, RMS,
-runtime, and output settings. Their values correspond to the defaults
-shown by:
-
-    stemfusion extract htdemucs musicfm --help
-    stemfusion extract htdemucs rms --help
-
-Checkpoint files and feature caches do not belong in this directory. Supply
-the local MusicFM repository and checkpoint paths to
-`stemfusion extract htdemucs musicfm`.
+See [configuration usage](../../docs/configuration.md). The RMS preset remains
+archived outside the project.

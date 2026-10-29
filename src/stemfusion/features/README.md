@@ -1,41 +1,30 @@
-# Feature extraction
+# Shared feature implementations
 
-## Purpose
+This package contains reusable frozen feature extraction. `_musicfm.py`
+handles MusicFM loading, layer extraction, temporal mean pooling, and
+cache/report writing. It contains no CLI parser. Public dataset tasks in
+`experiments/` own their parsers and choose their default YAML configurations.
 
-This package contains the frozen feature-extraction workflows used after music
-source separation.
+`extract_musicfm_sources()` processes a job's sources sequentially with a
+shared encoder. Dry runs and fully cached sources do not initialize the model.
 
-## Public workflows
+The FMA-Medium task is
+[experiments/fma_medium/extraction.py](../experiments/fma_medium/extraction.py):
 
-| File | Separation model | Features written |
-| --- | --- | --- |
-| `htdemucs.py` | HT-Demucs | MusicFM-MSD layer-7 embeddings and separate mean-RMS energy values for the mixture and six HT-Demucs stems. |
+```bash
+stemfusion extract fma-medium --help
+```
 
-`htdemucs.py` is the public workflow entry point. Its commands are:
+It reads an aligned JSONL audio manifest and writes source/split caches keyed
+by six-digit FMA track IDs. Complete caches are written atomically; failures
+produce partial caches and reports.
 
-    stemfusion extract htdemucs musicfm --help
-    stemfusion extract htdemucs rms --help
+Defaults remain MusicFM-MSD, layer 7, mean pooling, 1024 dimensions, mono
+24 kHz audio, and full duration, loaded from the feature YAML preset.
+Explicit CLI settings override YAML. The revised FMA matrix uses mixture, guitar,
+drums, piano, bass, and vocals. The shared implementation still supports
+`other`, although it is excluded from those comparisons.
 
-The HT-Demucs RMS mode writes one separate scaled scalar per track and source.
-It never appends energy to a MusicFM embedding.
-
-## Private implementation helpers
-
-`_musicfm.py` holds MusicFM model loading, layer extraction, temporal mean
-pooling, cache writing, and failure reporting. `_htdemucs_rms.py` holds the
-HT-Demucs RMS implementation. Access both through the public HT-Demucs module.
-
-Both extraction modes read aligned JSONL manifests and write one cache per source and
-dataset split. Cache keys are stable FMA track IDs. Complete outputs are
-written atomically; failures produce a partial cache and JSON report.
-
-## How to use it
-
-Build a dataset manifest first, then use the HT-Demucs subcommands. Complete
-commands and output filenames are in `docs/fma_htdemucs_features.md`.
-
-The revised primary design uses the mixture and five named stems, excluding
-`other`. RMS mode and `other` support remain available as historical utilities.
-
-The upstream MusicFM repository and model files remain external dependencies
-and must not be copied into this package.
+RMS extraction is archived. MusicFM code/checkpoints remain external
+dependencies. See [the FMA extraction guide](../../../docs/fma_medium_extraction.md)
+for inputs, commands, settings, and output names.

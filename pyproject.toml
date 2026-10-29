@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Source separation and feature fusion for music classification"
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = ["PyYAML>=6,<7", "tqdm>=4.66,<5"]
 
 [project.optional-dependencies]
 htdemucs = ["demucs==4.0.1"]
@@ -30,3 +31,9 @@ stemfusion = "stemfusion.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.data-files]
+"share/stemfusion/configs/features" = ["configs/features/*.yaml"]
+"share/stemfusion/configs/training" = ["configs/training/*.yaml"]
+"share/stemfusion/configs/separators" = ["configs/separators/*.yaml"]
+"share/stemfusion/configs/experiments/fma_medium" = ["configs/experiments/fma_medium/*.yaml"]

@@ -1,0 +1,10 @@
+# Dataset extraction task; settings are shared through the feature profile.
+dataset: fma_medium
+task: genre_classification
+command: extract fma-medium
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+separator_profile: ../../separators/htdemucs_6s.yaml
+sources: [mixture, guitar, drums, piano, bass, vocals]
+paths:
+  output_dir: ../../../data/features/fma_medium/musicfm_msd_layer7
+# Remaining local paths and the individual source are supplied explicitly.

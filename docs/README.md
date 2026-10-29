@@ -1,18 +1,23 @@
 
-Completed numeric comparisons are stored separately in `reference_results/`.
 # Documentation
 
 ## Purpose
 
 This directory contains component-level provenance and usage guides.
 
+Previous result artifacts are no longer kept in the active project. Future
+run metrics, predictions, and checkpoints belong under `outputs/`, accompanied
+by their resolved configurations and validation-selection metadata.
+
 ## Contents
 
 | File | Contents |
 | --- | --- |
+| `configuration.md` | Active YAML loading, defaults/overrides, named runs, local paths, validation, and provenance. |
 | `htdemucs_separation.md` | Consolidated HT-Demucs configuration, storage handling, and command. |
-| `fma_htdemucs_features.md` | Multi-disk FMA HT-Demucs manifest plus vanilla MusicFM and separate RMS extraction. |
-| `fma_htdemucs_training.md` | Table 3 mid fusion and Table 4 unweighted and RMS-weighted late-fusion training. |
+| `fma_medium_extraction.md` | Multi-disk FMA HT-Demucs manifest and MusicFM extraction. |
+| `fma_htdemucs_training.md` | Active FMA-Medium mid-/late-fusion commands, retained behavior, and pending protocol changes. |
+| `fma_medium_organization.md` | Dataset organization, archived legacy code, command changes, and recovery paths. |
 | `cleanup_20261028.md` | Retired separator cleanup, preserved shared components, and recovery archive. |
 | `legacy_map.md` | Mapping from original research scripts to cleaned replacements and validation status. |
 

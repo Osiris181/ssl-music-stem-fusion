@@ -1,36 +1,29 @@
-# Training
+# Shared training engines
 
-## Purpose
-
-This directory contains reusable downstream training workflows. It consumes
-cached features and dataset manifests; it does not run source separation or
-feature extraction.
-
-## Contents
+This package consumes cached features and aligned manifests. Public
+dataset entry points live in [experiments](../experiments/README.md).
 
 | File | Purpose |
 | --- | --- |
-| `genre.py` | Shared mid-fusion FMA multiclass genre training and evaluation. |
-| `htdemucs_mid_fusion.py` | Public Table 3 HT-Demucs mid-fusion workflow. |
-| `htdemucs_late_fusion.py` | Public Table 4 unweighted late-fusion workflow. |
-| `htdemucs_rms_weighted_late_fusion.py` | Public Table 4 RMS-weighted late-fusion workflow. |
+| `genre.py` | Single-source or concatenation MLP, cache adapters, metrics, and reproducibility artifacts. |
+| `late_fusion.py` | Retained joint-training source MLPs with equal logit summation. |
 
-The genre workflow supports one source or a deterministic concatenation of
-several sources. `genre.py` supplies shared loading, metrics and training
-helpers used by the HT-Demucs workflows and the original-mixture reference.
+Use the [FMA-Medium entry points](../experiments/fma_medium/README.md):
 
-Inspect all options with:
+```bash
+stemfusion train fma-medium mid-fusion --help
+stemfusion train fma-medium late-fusion --help
+```
 
-    stemfusion train fma-genre --help
-    stemfusion train fma-htdemucs-mid-fusion --help
-    stemfusion train fma-htdemucs-late-fusion --help
-    stemfusion train fma-htdemucs-rms-weighted-late-fusion --help
+Both retain Adam at `1e-4`, batch size 128, 20 epochs, seed 42, hidden
+widths 1024/512, dropout 0.2, and validation accuracy + macro ROC-AUC +
+macro PR-AUC checkpoint selection.
 
-The defaults retain the historical Table 3 and Table 4 training
-protocol: Adam at `1e-4`, batch size 128, 20 epochs, seed 42, hidden dimensions
-1024 and 512, and dropout 0.2. Checkpoint selection maximizes validation
-accuracy plus macro ROC-AUC plus macro PR-AUC.
+The public tasks load these defaults from their YAML training presets. Use
+`--config` and optional `--run` to select an experiment condition; explicit
+CLI arguments override YAML. Effective configs include source-file hashes.
 
-The revised matched controls and five-seed protocol remain planned work.
-RMS-weighted late fusion is historical functionality outside the revised
-primary matrix.
+The current late runner selects a whole-model checkpoint after joint training;
+it does not yet train/select branches independently. The revised matched
+controls and five-seed protocol remain pending. RMS weighting and the old
+public wrappers are archived outside the active project.

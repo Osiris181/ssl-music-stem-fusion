@@ -14,6 +14,8 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from stemfusion.configuration import configuration_dict
+
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_EXTENSIONS = (".mp3",)
@@ -54,6 +56,7 @@ class HTDemucsSeparationConfig:
     continue_on_error: bool = True
     limit: int | None = None
     dry_run: bool = False
+    config_provenance: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -73,6 +76,7 @@ class HTDemucsSeparationSummary:
     rescue_attempts: int = 0
     failed_batches: int = 0
     failures: list[HTDemucsSeparationFailure] = field(default_factory=list)
+    resolved_config: dict[str, Any] = field(default_factory=dict)
 
     @property
     def failed(self) -> int:
@@ -546,6 +550,7 @@ def config_from_args(args: argparse.Namespace) -> HTDemucsSeparationConfig:
         continue_on_error=not args.fail_fast,
         limit=args.limit,
         dry_run=args.dry_run,
+        config_provenance=getattr(args, "yaml_provenance", {}),
     )
 
 
@@ -553,6 +558,7 @@ def run_from_args(args: argparse.Namespace) -> int:
     try:
         config = config_from_args(args)
         summary = separate_dataset(config)
+        summary.resolved_config = configuration_dict(config)
     except HTDemucsConfigurationError as error:
         LOGGER.error("%s", error)
         return 2
