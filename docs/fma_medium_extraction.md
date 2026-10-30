@@ -4,8 +4,10 @@
 
 The dataset task is implemented in
 [experiments/fma_medium/extraction.py](../src/stemfusion/experiments/fma_medium/extraction.py).
-It owns the FMA argument parser and configuration-to-extraction handoff,
-then calls the shared MusicFM implementation in `features/_musicfm.py`.
+It selects the FMA task's default YAML and uses the shared parser and
+configuration handoff in `experiments/_extraction.py`, which calls
+`features/_musicfm.py`. GTZAN uses the same parser, encoder, and pooling path
+with its own dataset adapter and YAML.
 The task can be run directly as a Python file, or through
 `stemfusion extract fma-medium`. Both use the same parser and configuration.
 

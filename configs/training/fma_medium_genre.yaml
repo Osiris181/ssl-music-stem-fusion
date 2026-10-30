@@ -1,68 +1,7 @@
-# Shared settings for every FMA-Medium baseline, control, and fusion model.
-# Both fusion profiles inherit this file. CLI options override supported values.
-# Method names and protocol conventions are validated against the implementation;
-# editing a fixed field does not implement a new loss, optimizer, or stopping rule.
-
-# Classification target. Genre-to-index assignments come from the manifest.
+# Dataset-specific labels and paths; all genre hyperparameters are shared.
+training_profile: genre.yaml
 task:
-  name: genre_classification  # Select the genre task's loss and evaluation rules.
-  label_type: multiclass  # Exactly one mutually exclusive genre label per track.
-  number_of_classes: 16  # Number of output logits and expected genre labels.
-
-# Properties of the cached, frozen embeddings consumed by the classifier.
-features:
-  name: musicfm_msd_layer7  # MusicFM-MSD checkpoint, Conformer layer index 7.
-  dimension_per_source: 1024  # Width of one source's temporally pooled vector.
-  source_order: [mixture, guitar, drums, piano, bass, vocals]  # Fixed source/branch order; excludes other.
-  silent_vector_policy: retain  # Keep valid all-zero vectors in the common track set.
-  normalization: none  # Apply no additional scaling to the cached embeddings.
-
-# Standard branch/reference MLP. Capacity controls adjust only the first width.
-model:
-  hidden_dimensions: [1024, 512]  # Units in the first and second hidden layers.
-  activation: relu  # Nonlinearity after each hidden linear layer.
-  dropout: 0.2  # Drop probability after each hidden activation during training.
-
-# The same optimization settings apply to every compared classifier.
-optimization:
-  loss: cross_entropy  # Unweighted multiclass loss on logits and integer labels.
-  optimizer: adam  # Update trainable MLP parameters with Adam.
-  learning_rate: 0.0001  # Adam's step-size setting; fixed across training epochs.
-  betas: [0.9, 0.999]  # Decay rates for Adam's first and second moment estimates.
-  epsilon: 0.00000001  # Numerical-stability constant in Adam's denominator.
-  weight_decay: 0.0  # Disable optimizer weight-decay regularization.
-  scheduler: none  # Do not change the learning rate through a scheduler.
-  early_stopping: none  # Run the full epoch budget; no patience/min_delta is active.
-  batch_size: 128  # Number of tracks per batch; retain the final smaller batch.
-  epochs: 20  # Number of complete passes over the training split.
-
-# Save the best validation checkpoint independently for each classifier/branch.
-checkpoint:
-  split: validation  # Use this split to select weights; test scores do not select them.
-  maximize: [accuracy_micro, roc_auc_macro, pr_auc_macro]  # Score components, each on [0, 1].
-  aggregation: sum  # Add the three components with equal weights.
-  ties: earliest_epoch  # Replace the checkpoint only on a strictly higher score.
-
-# Evaluate the selected model. Class averages give equal weight to each genre.
-evaluation:
-  accuracy: micro  # Fraction of all tracks assigned the correct genre by argmax.
-  precision: macro  # Unweighted mean of per-class precision.
-  recall: macro  # Unweighted mean of per-class recall.
-  f1: macro  # Compute F1 separately per class, then take its unweighted mean.
-  roc_auc: macro_one_vs_rest  # Mean of the per-class one-versus-rest ROC areas.
-  pr_auc: macro_average_precision  # Mean per-class average precision, not trapezoidal PR area.
-  absent_classes: error  # Require every class in each split to avoid undefined AUCs.
-
-# Keep splits fixed and vary training randomness over these five outer runs.
-reproducibility:
-  seeds: [32, 64, 128, 256, 512]  # Outer seeds; branch seeds use branch_seed().
-  cudnn_deterministic: true  # Request deterministic cuDNN algorithm choices.
-  cudnn_benchmark: false  # Disable cuDNN's runtime algorithm benchmarking.
-
-# Execution settings; these do not change the dataset partitions.
-runtime:
-  device: auto  # Use cuda:0 when CUDA is available, otherwise CPU.
-  num_workers: 0  # DataLoader worker processes; zero loads data in the main process.
+  number_of_classes: 16  # FMA-Medium genre classes.
 
 # Relative paths resolve against this YAML file, not the command's working directory.
 paths:

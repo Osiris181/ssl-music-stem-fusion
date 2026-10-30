@@ -1,0 +1,17 @@
+# Independently train/select branches, then sum logits equally.
+dataset: gtzan
+task: genre_classification
+number_of_classes: 10
+separator: htdemucs_6s
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+training_profile: ../../training/gtzan_late_fusion.yaml
+command: train gtzan late-fusion
+implementation_status: phase2_independent_branches
+
+runs:
+  mixture_ensemble_4: {kind: mixture_ensemble, sources: [mixture], matched_sources: 4}
+  mixture_ensemble_5: {kind: mixture_ensemble, sources: [mixture], matched_sources: 5}
+  mixture_ensemble_6: {kind: mixture_ensemble, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}

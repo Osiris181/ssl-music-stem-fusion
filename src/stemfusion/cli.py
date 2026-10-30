@@ -21,6 +21,10 @@ from stemfusion.experiments.fma_medium.train_late import (
 from stemfusion.experiments.fma_medium.train_mid import (
     configure_parser as configure_fma_mid_fusion_parser,
 )
+from stemfusion.experiments.gtzan import extraction as gtzan_extraction
+from stemfusion.experiments.gtzan import prepare_manifest as gtzan_manifest
+from stemfusion.experiments.gtzan import train_mid as gtzan_mid
+from stemfusion.experiments.gtzan import train_late as gtzan_late
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,8 +56,10 @@ def build_parser() -> argparse.ArgumentParser:
     data_commands = data_parser.add_subparsers(
         dest="data_command",
         required=True,
+        parser_class=YAMLArgumentParser,
     )
     configure_fma_parser(data_commands.add_parser("fma-manifest"))
+    gtzan_manifest.configure_parser(data_commands.add_parser("gtzan-manifest"))
 
     extract_parser = commands.add_parser(
         "extract",
@@ -70,6 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
             help="Extract FMA-Medium mixture/stem MusicFM features.",
         )
     )
+    gtzan_extraction.configure_parser(extractors.add_parser("gtzan"))
 
     train_parser = commands.add_parser(
         "train",
@@ -90,6 +97,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     configure_fma_mid_fusion_parser(methods.add_parser("mid-fusion"))
     configure_fma_late_fusion_parser(methods.add_parser("late-fusion"))
+    gtzan_parser = datasets.add_parser("gtzan", help="GTZAN genre-classification experiments.")
+    gtzan_methods = gtzan_parser.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
+    gtzan_mid.configure_parser(gtzan_methods.add_parser("mid-fusion"))
+    gtzan_late.configure_parser(gtzan_methods.add_parser("late-fusion"))
     return parser
 
 

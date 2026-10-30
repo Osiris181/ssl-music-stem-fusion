@@ -57,14 +57,15 @@ Comparisons are made within each dataset, representation, and target.
 ## Implementation
 
 Runnable extraction and training scripts are provided for
-[FMA-Medium](src/stemfusion/experiments/fma_medium/README.md). Dataset scripts
+[FMA-Medium](src/stemfusion/experiments/fma_medium/README.md) and
+[GTZAN](src/stemfusion/experiments/gtzan/README.md). Dataset scripts
 load YAML settings and call shared modules for data loading, feature
 extraction, model training, evaluation, and reporting.
 
 | Component | Implementation |
 | --- | --- |
 | Source separation | Frozen HT-Demucs `htdemucs_6s`; retain the original mixture and five selected stems. |
-| FMA feature extraction | Frozen MusicFM-MSD, layer 7, temporal mean pooling, 1,024-dimensional embeddings; full-duration mono audio at 24 kHz. |
+| Genre feature extraction | Shared frozen MusicFM-MSD, layer 7, temporal mean pooling, 1,024-dimensional embeddings; full-duration mono audio at 24 kHz. |
 | Mid-fusion | Concatenate selected embeddings and train one MLP. Compare against the standard mixture-only MLP and capacity-matched mixture-only MLPs. |
 | Late-fusion | Train and select source MLPs independently, then sum their logits equally. Compare against independently trained mixture-only ensembles with the same branch counts. |
 | Evaluation | Select checkpoints using validation data, evaluate the selected models on the test split, and save per-track predictions and aggregate metrics. |
@@ -81,7 +82,7 @@ the following selected input configurations:
 Here `M` denotes the original mixture. “All stems” means the five selected
 instrument/vocal stems; the separator's native `other` output is excluded.
 
-For FMA-Medium, the standard MLP has two hidden layers of 1,024 and 512 units,
+For FMA-Medium and GTZAN, the standard MLP has two hidden layers of 1,024 and 512 units,
 with ReLU and dropout `0.2`. Training uses cross-entropy, Adam at `1e-4`,
 batch size `128`, and `20` epochs. Capacity-matched mixture controls widen
 the first hidden layer to approximately match their corresponding fusion
@@ -107,7 +108,7 @@ stem-fusion-music-classification/
 │   ├── separators/                  # HT-Demucs settings
 │   ├── features/                    # MusicFM settings and checkout location
 │   ├── training/                    # Shared classifier settings and paths
-│   └── experiments/fma_medium/      # Extraction and training matrices
+│   └── experiments/                 # FMA-Medium and GTZAN task configurations
 ├── context/                         # Research motivation and experimental design notes
 ├── data/                            # Local manifests and cached features
 ├── docs/                            # Detailed configuration and usage guides
@@ -120,7 +121,7 @@ stem-fusion-music-classification/
 │   ├── features/                    # Frozen representation extraction
 │   ├── models/                      # MLP and ensemble architectures
 │   ├── training/                    # Shared trainer, fusion, metrics, and reporting
-│   └── experiments/fma_medium/      # Runnable dataset scripts and scheduling
+│   └── experiments/                 # Dataset entry scripts and shared orchestration
 ├── tests/                           # Synthetic tests for data, training, and reporting
 ├── STEM_Separation.pdf               # Research manuscript
 └── pyproject.toml                   # Package metadata and dependencies
@@ -145,7 +146,8 @@ checkpoint/statistics files. Configure the paths in:
 
 - [MusicFM settings](configs/features/musicfm_msd_layer7.yaml).
 - [FMA extraction settings](configs/experiments/fma_medium/extraction.yaml).
-- [Shared FMA training settings](configs/training/fma_medium_genre.yaml).
+- [Common genre training settings](configs/training/genre.yaml).
+- Dataset paths: [FMA-Medium](configs/training/fma_medium_genre.yaml) and [GTZAN](configs/training/gtzan_genre.yaml).
 
 Prepare the aligned manifest and features using the
 [extraction guide](docs/fma_medium_extraction.md). Then run:
@@ -170,8 +172,24 @@ command-line options override YAML. Use `--help` to inspect options,
 features without training. Complete, compatible runs are verified and reused
 automatically.
 
+GTZAN uses the same workflow from `src/stemfusion/experiments/gtzan/`:
+
+```bash
+python prepare_manifest.py
+python train_mid.py --validate-only
+python train_mid.py
+python train_late.py
+```
+
+Set local split/audio paths in `configs/experiments/gtzan/manifest.yaml` first.
+Its provided stratified splits retain 499/250/250 available tracks after the
+explicit exclusion of `jazz.00054`. Validated existing features can be reused;
+`python extraction.py` is available when new extraction is needed. Both NumPy
+and PyTorch cached vectors are supported. See the
+[GTZAN guide](src/stemfusion/experiments/gtzan/README.md).
+
 Training includes test evaluation and prints a results table when finished.
-The complete reports are saved in `outputs/fma_medium/`:
+The complete reports are saved in `outputs/fma_medium/` or `outputs/gtzan/`:
 
 ```text
 summary_mid_fusion.txt

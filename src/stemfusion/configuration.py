@@ -82,7 +82,7 @@ _EXTRACTION_FIXED = {
     "audio.channels": "mono",
     "features.dtype": "float32",
     "output.format": "pickle",
-    "output.key": "zero_padded_fma_track_id",
+    "output.key": "track_id",
 }
 _TRAINING_FIXED = {
     "task.name": "genre_classification",
@@ -130,6 +130,7 @@ _METADATA = {
     "suggested_output_directory",
 }
 _PATHS = {
+    "gtzan_manifest": {"train_split", "validation_split", "test_split", "mixture_root", "htdemucs_root", "output"},
     "extraction": {"manifest", "output_dir", "musicfm_root", "stats_path", "checkpoint_path", "report"},
     "mid_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
     "late_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
@@ -290,6 +291,30 @@ def load_configuration(
 
     data = load(path, ())
     yaml_snapshot = json.loads(json.dumps(data, default=str))
+    if role == "gtzan_manifest":
+        defaults = dict(data.pop("paths", {}))
+        flat = _flatten(data)
+        fixed = {"dataset": "gtzan", "sources": _SOURCE_ORDER}
+        settings = {"audio.mixture_extension": ("mixture_extension", "str"),
+                    "audio.stem_extension": ("stem_extension", "str"),
+                    "execution.check_audio": ("check_audio", "bool"),
+                    "execution.overwrite": ("overwrite", "bool"),
+                    "execution.dry_run": ("dry_run", "bool")}
+        if set(defaults) != _PATHS[role]:
+            raise ConfigurationError("GTZAN manifest configuration must provide all split, audio, and output paths.")
+        if set(flat) != set(fixed) | set(settings) | {"excluded_track_ids"}:
+            raise ConfigurationError("Unknown or missing GTZAN manifest configuration settings.")
+        for name, expected in fixed.items():
+            if flat.get(name) != expected:
+                raise ConfigurationError(f"{name} must be {expected!r}.")
+        excluded = flat["excluded_track_ids"]
+        if not isinstance(excluded, list) or any(not isinstance(item, str) or not item for item in excluded):
+            raise ConfigurationError("excluded_track_ids must be a list of track ID strings.")
+        defaults["exclude_track_id"] = excluded
+        for name, (destination, kind) in settings.items():
+            defaults[destination] = _coerce(flat[name], kind, name)
+        return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
+                          "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
     defaults: dict[str, Any] = {}
     mappings = dict(_EXTRACTION if role == "extraction" else _SEPARATOR if role == "separation" else _TRAINING)
     fixed = dict(_EXTRACTION_FIXED if role == "extraction" else _SEPARATOR_FIXED if role == "separation" else _TRAINING_FIXED)
@@ -306,17 +331,22 @@ def load_configuration(
     for key in _METADATA - {"task"}:
         if key in data and not (key == "separator" and isinstance(data[key], dict)):
             metadata[key] = data.pop(key)
+    dataset = metadata.get("dataset", "fma_medium")
+    classes = {"fma_medium": 16, "gtzan": 10}
+    if dataset not in classes:
+        raise ConfigurationError(f"Unsupported dataset configuration: {dataset}")
+    command_dataset = dataset.replace("_", "-")
     expected_command = {
-        "extraction": "extract fma-medium",
-        "mid_fusion": "train fma-medium mid-fusion",
-        "late_fusion": "train fma-medium late-fusion",
+        "extraction": f"extract {command_dataset}",
+        "mid_fusion": f"train {command_dataset} mid-fusion",
+        "late_fusion": f"train {command_dataset} late-fusion",
     }.get(role)
     if metadata.get("command", expected_command) != expected_command:
         raise ConfigurationError(f"Configuration command does not match {expected_command}.")
-    if metadata.get("dataset", "fma_medium") != "fma_medium":
-        raise ConfigurationError("Only FMA-Medium dataset configurations are supported.")
-    if metadata.get("number_of_classes", 16) != 16:
-        raise ConfigurationError("FMA-Medium configurations must describe 16 classes.")
+    if metadata.get("number_of_classes", classes[dataset]) != classes[dataset]:
+        raise ConfigurationError(f"{dataset} configurations must describe {classes[dataset]} classes.")
+    if role in {"mid_fusion", "late_fusion"}:
+        fixed["task.number_of_classes"] = classes[dataset]
     for name in ("implementation_status", "suggested_output_directory", "source", "separator"):
         if name in metadata:
             _coerce(metadata[name], "str", name)

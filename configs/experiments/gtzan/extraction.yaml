@@ -1,0 +1,10 @@
+# Same MusicFM encoder, audio handling, and pooling as FMA-Medium.
+dataset: gtzan
+task: genre_classification
+command: extract gtzan
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+separator_profile: ../../separators/htdemucs_6s.yaml
+sources: [mixture, guitar, drums, piano, bass, vocals]
+paths:
+  manifest: ../../../data/manifests/gtzan/gtzan_htdemucs.jsonl
+  output_dir: ../../../data/features/gtzan/musicfm_msd_layer7

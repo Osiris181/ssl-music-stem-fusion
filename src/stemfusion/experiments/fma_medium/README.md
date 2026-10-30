@@ -10,8 +10,8 @@ class mapping are preserved; `other` is excluded.
 | `extraction.py` | Runnable MusicFM extraction interface. |
 | `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
-| `training.py` | FMA-specific parser, dataset handoff, condition validation, seed scheduling, branch reuse, and summary assembly. |
-| `stem_results.py` | Verify completed source branches and aggregate their standalone metrics without training, inference, or checkpoint reselection. |
+| `training.py` | Compatibility interface to shared genre orchestration in `experiments/_genre.py`. |
+| `stem_results.py` | Compatibility interface to shared saved-branch analysis in `experiments/_stem_results.py`. |
 
 Shared training functions are in `training/`, model architectures in
 `models/`, and strict feature loading in `data/fma_features.py`.
@@ -22,6 +22,7 @@ Each public file supports direct execution without PYTHONPATH.
 - MusicFM settings and checkout location: `configs/features/musicfm_msd_layer7.yaml`.
 - Extraction manifest/output/source list: `configs/experiments/fma_medium/extraction.yaml`.
 - Shared classifier settings and manifest/feature/output paths: `configs/training/fma_medium_genre.yaml`.
+- Common genre hyperparameters inherited by FMA-Medium and GTZAN: `configs/training/genre.yaml`.
 - Conditions: `configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`.
 
 CLI paths override YAML paths. Relative YAML paths resolve against the YAML

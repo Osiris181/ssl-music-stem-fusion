@@ -1,0 +1,5 @@
+training_profile: gtzan_genre.yaml
+features:
+  fusion: concatenate
+model:
+  name: deep_mlp

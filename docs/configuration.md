@@ -11,6 +11,10 @@ separation, and selecting a run does not launch a batch of experiments.
 | `extract fma-medium` | `configs/experiments/fma_medium/extraction.yaml`, referencing the shared MusicFM preset |
 | `train fma-medium mid-fusion` | `configs/experiments/fma_medium/mid_fusion.yaml`, inheriting the shared genre profile |
 | `train fma-medium late-fusion` | `configs/experiments/fma_medium/late_fusion.yaml`, inheriting the shared genre profile |
+| `data gtzan-manifest` | `configs/experiments/gtzan/manifest.yaml` |
+| `extract gtzan` | `configs/experiments/gtzan/extraction.yaml`, referencing the same MusicFM preset |
+| `train gtzan mid-fusion` | `configs/experiments/gtzan/mid_fusion.yaml`, inheriting the shared genre profile |
+| `train gtzan late-fusion` | `configs/experiments/gtzan/late_fusion.yaml`, inheriting the shared genre profile |
 | `separate htdemucs` | `configs/separators/htdemucs_6s.yaml` |
 
 Use `--config PATH` to load another preset or an experiment file. Experiment
@@ -18,9 +22,9 @@ files can refer to `feature_profile` or `training_profile`; the current
 task's referenced preset is loaded first, then experiment settings override
 it. Explicit CLI arguments override those YAML values.
 
-The FMA extraction entry point owns its argument parser and default task-YAML
-selection. The shared `features/_musicfm.py` has no CLI parser. A future
-dataset entry point can select its own preset and argument interface.
+Each extraction entry point selects its dataset's default task YAML and uses
+the shared parser in `experiments/_extraction.py`. The shared
+`features/_musicfm.py` has no CLI parser.
 
 For example, a YAML layer value of 12 with an explicit `--layer-index 7`
 uses layer 7. Repeated CLI values such as `--source` or `--split` replace
@@ -77,7 +81,10 @@ Without `--run`, training runs the entire matrix in the default experiment
 file. Both methods inherit `configs/training/fma_medium_genre.yaml` for common
 paths, hyperparameters, metric definitions, and outer seeds
 `[32, 64, 128, 256, 512]`. Repeated `--seed` selects a subset and replaces
-the YAML seed list. Training uses the agreed named conditions rather than
+the YAML seed list. GTZAN uses `configs/training/gtzan_genre.yaml` for its
+ten-class target and paths. Both dataset profiles inherit architecture,
+optimization, evaluation, and seed settings from `configs/training/genre.yaml`.
+Training uses the agreed named conditions rather than
 arbitrary `--source` lists. Source-subset arguments remain available for extraction.
 
 The FMA implementation includes capacity-matched mixture controls,
@@ -99,6 +106,14 @@ and output paths; those stay separate from the shared encoder settings so
 future datasets can reuse the MusicFM profile. A separate `paths.local.yaml`
 is no longer needed. Explicit `--musicfm-root`, `--manifest`, and `--output-dir`
 arguments still override the corresponding configured paths.
+
+GTZAN's `configs/experiments/gtzan/manifest.yaml` defines `train_split`,
+`validation_split`, `test_split`, `mixture_root`, `htdemucs_root`, and `output`.
+It binds the provided split IDs to local paths, with unavailable track IDs
+listed explicitly in `excluded_track_ids`. Audio scanning is disabled unless
+`execution.check_audio` or `--check-audio` is enabled. The generated manifest
+and its sidecars remain ignored by Git. See the
+[GTZAN guide](../src/stemfusion/experiments/gtzan/README.md).
 
 A legacy `source: guitar` field still selects one source; prefer
 `sources: [guitar, piano]` for a subset.

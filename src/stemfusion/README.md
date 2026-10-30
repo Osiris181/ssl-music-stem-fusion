@@ -13,7 +13,7 @@ Current subpackages:
 - `features/`: frozen feature extraction.
 - `models/`: reusable downstream classifier architectures.
 - `training/`: downstream training and evaluation workflows.
-- `experiments/fma_medium/`: the only active dataset entry points.
+- `experiments/fma_medium/` and `experiments/gtzan/`: dataset entry points using shared extraction and genre orchestration.
 
 `configuration.py` loads/validates YAML presets and records configuration
 provenance. `cli.py` assembles the command-line interface, while `__main__.py` supports
@@ -29,8 +29,12 @@ Inspect the available stages and their arguments with:
     python -m stemfusion extract fma-medium --help
     python -m stemfusion train fma-medium mid-fusion --help
     python -m stemfusion train fma-medium late-fusion --help
+    python -m stemfusion data gtzan-manifest --help
+    python -m stemfusion extract gtzan --help
+    python -m stemfusion train gtzan mid-fusion --help
 
 Start with [the FMA-Medium guide](experiments/fma_medium/README.md).
+The [GTZAN guide](experiments/gtzan/README.md) covers its fixed splits and imported caches.
 See [configuration usage](../../docs/configuration.md) for automatic presets,
 `--config`, `--run`, and CLI overrides.
 Keep reusable implementation in the shared subpackages; dataset folders

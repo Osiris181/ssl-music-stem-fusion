@@ -1,0 +1,18 @@
+# Seven mid-fusion conditions, each run over the shared five outer seeds.
+dataset: gtzan
+task: genre_classification
+number_of_classes: 10
+separator: htdemucs_6s
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+training_profile: ../../training/gtzan_mid_fusion.yaml
+command: train gtzan mid-fusion
+implementation_status: phase2_capacity_controls
+
+runs:
+  mixture_only: {kind: reference, sources: [mixture]}
+  matched_mixture_4: {kind: capacity_matched, sources: [mixture], matched_sources: 4}
+  matched_mixture_5: {kind: capacity_matched, sources: [mixture], matched_sources: 5}
+  matched_mixture_6: {kind: capacity_matched, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}

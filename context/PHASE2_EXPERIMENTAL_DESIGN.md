@@ -106,12 +106,12 @@ This is a **representation pipeline**, **not** a source-separation model. The re
 
 ### B.1.4 Dataset manifests, labels, and target shapes
 
-The following are dataset characteristics and split descriptions **reported in the manuscript**, not independent validation of every CSV file. Keep exact IDs and class maps from the repository rather than regenerating labels from these summaries.
+The following are dataset characteristics and split descriptions **reported in the manuscript**, with author-confirmed decisions marked separately; they are not independent validation of every CSV file. Keep exact IDs and class maps from the repository rather than regenerating labels from these summaries.
 
 | Dataset | Original manuscript description | Split handling / checks |
 | --- | --- | --- |
 | **FMA-Medium** | 25,000 clips, **30 s** each; **16** unbalanced genre classes | **[MANUSCRIPT]** official train/validation/test partitions; **[VERIFY]** actual track-ID sets and counts |
-| **GTZAN** | 1,000 clips, **30 s**, ten genres (100 each) | **[MANUSCRIPT]** artist-filtered **500/250/250** train/validation/test partition, attributed there to **Kereliuk et al. (2015)**; **[VERIFY]** manifests and artist overlap |
+| **GTZAN** | 1,000 clips, **30 s**, ten genres (100 each) | **[DECIDED]** retain the provided stratified split files: `train_stratified.txt`, `valid_stratified.txt`, and `test_stratified.txt` (**500/250/250** IDs). Imported six-source caches contain **499/250/250** tracks; record the exclusion of training track `jazz.00054` consistently for every condition. |
 | **ISMIR04 genre** | 1,458 full tracks, **6** genre labels; originally **729 training + 729 test** in the contest description | **[USER-REPORTED]** existing `ismir04_genre` **train/validation/test CSVs**; **[VERIFY]** provenance and whether validation is drawn only from the original training portion, no duplicate tracks; author prefers to retain existing split |
 | **MTG-Jamendo mood/theme** | **17,982** tracks, **56** simultaneous mood/theme labels; multi-label, imbalanced | **[MANUSCRIPT]** official train/validation/test; **[VERIFY]** exact tag list and manifest correspondence |
 | **PMEmo** | **794** clips with continuously annotated valence/arousal | **[MANUSCRIPT]** use splits from Kang & Herremans; **[VERIFY]** precise binary-label construction/thresholds and IDs |
@@ -122,7 +122,7 @@ The following are dataset characteristics and split descriptions **reported in t
 - **Mood/theme targets:** a multi-hot vector of 56 tags per track; metric and threshold handling must support multi-label evaluation. **[MANUSCRIPT / VERIFY encoding]**
 - **Emotion targets:** *separate binary valence and binary arousal classifiers* for each of three datasets; do not turn these into regression tasks or a new four-way label unless specifically authorized. **[MANUSCRIPT / DECIDED]**
 - **Overlap checks:** train/validation/test IDs must be pairwise disjoint; also check for known artist/recording duplicates where metadata permits. **[VERIFY]**
-- **IS MIR 2004 citation caution:** Teacher recalled a 2015 source, but the exact source for the current `ismir04_genre` CSVs has **not** been established. Do not cite the GTZAN 2015 split paper as the ISMIR04 split source without evidence.
+- **IS MIR 2004 citation caution:** Teacher recalled a 2015 source, but the exact source for the current `ismir04_genre` CSVs has **not** been established. Do not attribute these splits to a paper without evidence.
 
 ### B.1.5 Models, loss, optimizer, and original training settings
 
@@ -322,6 +322,8 @@ Use the same original branch MLP architecture (`input -> 1024 -> 512 -> C`, subj
 ## F. Dataset splits, validation, and checkpoints
 
 **Retain existing dataset splits** for the revised comparisons, subject to a non-destructive audit of track IDs and overlap. The author reports that the current `ismir04_genre` dataset uses **three CSV manifests (train/validation/test)**. The teacher recalls that the split came from a 2015 paper, but the exact provenance/citation has **not** been established; **do not invent a citation or silently claim the split is official**. Preserve the existing CSVs; verify uniqueness/overlap and mapping to original partitions before evaluation.
+
+**GTZAN split decision:** use the provided stratified train/validation/test text files as the source of split assignments, with a fixed genre-to-index mapping. Preserve these assignments across all five seeds and all conditions. The imported features retain 999 tracks after the recorded exclusion of `jazz.00054`. Describe these as the **provided stratified splits**; no artist-filtering or official-split provenance claim is made.
 
 **Decided task-specific checkpoint rules:**
 

@@ -57,6 +57,7 @@ class MusicFMExtractionConfig:
     dry_run: bool = False
     report_path: Path | None = None
     config_provenance: dict[str, Any] = field(default_factory=dict)
+    dataset: str = "fma_medium"
 
     @property
     def effective_stats_path(self) -> Path:
@@ -121,6 +122,8 @@ class MusicFMExtractionSummary:
 
 
 def _validate_config(config: MusicFMExtractionConfig) -> None:
+    if config.dataset not in {"fma_medium", "gtzan"}:
+        raise MusicFMExtractionError(f"Unsupported extraction dataset: {config.dataset}")
     if not config.manifest_path.is_file():
         raise MusicFMExtractionError(
             f"Manifest does not exist: {config.manifest_path}"
@@ -294,7 +297,9 @@ def _feature_dimension(feature: Any) -> int | None:
 
 
 def _cache_path(config: MusicFMExtractionConfig, split: str) -> Path:
-    return config.output_dir / f"fma_musicfm_{config.source}_{split}.pkl"
+    prefix = "fma" if config.dataset == "fma_medium" else "gtzan"
+    source = "mix" if config.dataset == "gtzan" and config.source == "mixture" else config.source
+    return config.output_dir / f"{prefix}_musicfm_{source}_{split}.pkl"
 
 
 def _partial_cache_path(path: Path) -> Path:

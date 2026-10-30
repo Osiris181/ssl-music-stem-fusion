@@ -1,0 +1,9 @@
+# Same training settings as FMA-Medium; only labels and paths differ.
+training_profile: genre.yaml
+task:
+  number_of_classes: 10  # GTZAN genre classes.
+paths:
+  manifest: ../../data/manifests/gtzan/gtzan_htdemucs.jsonl
+  feature_dir: ../../data/features/gtzan/musicfm_msd_layer7
+  output_dir: ../../outputs/gtzan/runs
+  summary_dir: ../../outputs/gtzan

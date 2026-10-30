@@ -27,7 +27,7 @@ runtime:
 
 output:
   format: pickle
-  key: zero_padded_fma_track_id
+  key: track_id
   files_per_source:
     - train
     - validation

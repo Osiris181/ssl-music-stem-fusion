@@ -13,6 +13,9 @@ data/
     │   ├── fma_medium_htdemucs.jsonl
     │   └── fma_medium_htdemucs.report.json
     └── gtzan/
+        ├── gtzan_htdemucs.jsonl
+        ├── gtzan_htdemucs.metadata.json
+        ├── gtzan_htdemucs.report.json
         ├── gtzan_data_teacher_setting.pkl
         ├── train_stratified.txt
         ├── valid_stratified.txt
@@ -64,8 +67,10 @@ embed checkpoint or layer metadata; these settings are inferred from that script
 
 `manifests/gtzan/gtzan_data_teacher_setting.pkl` preserves the original list of
 training pairs, validation pairs, test pairs, and genre-to-index mapping. Each
-pair contains a track ID and its class label. The three accompanying text files
-preserve the existing split lists.
+pair contains a track ID and its class label. It is retained as a reference
+copy. Use the provided `train_stratified.txt`, `valid_stratified.txt`, and
+`test_stratified.txt` files as the source of split assignments when building
+the GTZAN manifest, with the fixed label mapping below.
 
 | Split | Metadata tracks | Tracks available in every selected source |
 | --- | ---: | ---: |
@@ -75,8 +80,8 @@ preserve the existing split lists.
 
 `jazz.00054` is absent from all six training caches. The imported metadata remains
 unchanged; downstream loading must use the same 999 available tracks for every
-condition and record this exclusion. The split track IDs are disjoint. Artist
-filtering has not been verified for these existing stratified split lists.
+condition and record this exclusion. The split track IDs are disjoint. Retain
+these provided stratified splits across every condition and all five seeds.
 
 The labels are `blues=0`, `classical=1`, `country=2`, `disco=3`, `hiphop=4`,
 `jazz=5`, `metal=6`, `pop=7`, `reggae=8`, and `rock=9`.
@@ -88,6 +93,8 @@ paths, SHA-256 checksums, vector validation, retained IDs, and the missing track
 The copied caches and metadata were verified against their sources; source files
 were preserved.
 
-The GTZAN training loader must handle these string track IDs, the `mix` filename
-alias, and ten classes. The existing FMA-specific loader is not suitable for
-these files without a dataset-specific adapter.
+The GTZAN loader handles string track IDs, the `mix` filename alias, ten
+classes, and either NumPy or PyTorch vectors. It validates all 18 caches
+against the manifest and their import audit or shared-extractor reports.
+The original metadata pickle is not used by the code. Run the dataset scripts
+as described in the [GTZAN guide](../src/stemfusion/experiments/gtzan/README.md).
