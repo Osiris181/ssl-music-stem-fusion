@@ -22,6 +22,12 @@ Both avoid training. Compatible selected branches are shared between workflows
 automatically, and completed runs are reused with verified checksums.
 `--resume` remains accepted; `--overwrite` explicitly requests retraining.
 
+The five standalone stem evaluations reuse saved late-fusion branch results;
+they are not additional training conditions in the YAML matrix. Full
+late-fusion runs report them automatically. Run
+`python train_late.py --report-stems-only` from the FMA experiment directory
+to generate supporting summaries from existing branches without training.
+
 Set the MusicFM checkout path in `configs/features/musicfm_msd_layer7.yaml`.
 Extraction never starts training or separation. The revised matrices exclude
 `other`, Banquet, and RMS weighting.

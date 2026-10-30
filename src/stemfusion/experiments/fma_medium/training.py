@@ -11,6 +11,7 @@ from typing import Any
 
 from stemfusion.configuration import YAMLArgumentParser, configure_yaml
 from stemfusion.data.fma_features import SOURCES, cache_paths, inspect_manifest, load_fma_features
+from stemfusion.experiments.fma_medium.stem_results import collect_stem_results, stem_report_config
 from stemfusion.training.late_fusion import assemble_ensemble, branch_seed, train_branch
 from stemfusion.training.metrics import GenreMetrics
 from stemfusion.training.mid_fusion import match_capacity, model_parameter_count, train_mid_condition
@@ -57,6 +58,9 @@ def configure_parser(parser: argparse.ArgumentParser, family: str) -> None:
     parser.add_argument("--num-workers", type=int)
     parser.add_argument("--dry-run", action="store_true", help="Show the plan and check local paths without reading feature contents or training.")
     parser.add_argument("--validate-only", action="store_true", help="Check all feature contents and reports without training or writing outputs.")
+    if family == "late_fusion":
+        parser.add_argument("--report-stems-only", action="store_true",
+                            help="Generate standalone stem summaries from saved branch results without training or inference.")
     output_mode = parser.add_mutually_exclusive_group()
     output_mode.add_argument("--resume", action="store_true", default=True,
                              help="Reuse verified complete runs (the default); accepted for compatibility.")
@@ -206,6 +210,10 @@ def run_experiment(config: FMAExperimentConfig, *, data=None) -> dict:
                     "feature_dimension": data.dimension, "split_counts": data.audit["split_counts"],
                     "training_settings": vars(config.settings),
                     "historical_selection_note": "The fixed nested stem sets were influenced by historical FMA test results; these reruns are not an independent confirmatory holdout."})
+    if config.family == "late_fusion" and any(tuple(condition["sources"]) == SOURCES for condition in conditions.values()):
+        stem_summary = save_stem_results(config)
+        summary["standalone_stems"] = stem_summary["conditions"]
+        summary["standalone_stem_summary"] = str(summary_file(stem_report_config(config)))
     summary_path = summary_file(config)
     write_json(summary_path, summary)
     write_readable_summary(summary_path, summary)
@@ -218,6 +226,15 @@ def summary_file(config: FMAExperimentConfig) -> Path:
     if config.selected_run is not None or config.seeds != (32, 64, 128, 256, 512):
         suffix += f"_seeds_{'_'.join(map(str, config.seeds))}"
     return (config.summary_directory or config.output_directory) / f"summary_{config.family}{suffix}.json"
+
+
+def save_stem_results(config: FMAExperimentConfig) -> dict:
+    summary = collect_stem_results(config)
+    path = summary_file(stem_report_config(config))
+    write_json(path, summary)
+    write_readable_summary(path, summary)
+    LOGGER.info("Saved standalone stem results: %s", path)
+    return summary
 
 
 def write_readable_summary(json_path: Path, summary: dict) -> Path:
@@ -248,6 +265,8 @@ def format_results(summary: dict) -> str:
         "mixture_guitar_drums_piano": "M+G+D+P",
         "mixture_guitar_drums_piano_bass": "M+G+D+P+B",
         "mixture_all_five_stems": "M+G+D+P+B+V",
+        "guitar_only": "Guitar only", "drums_only": "Drums only", "piano_only": "Piano only",
+        "bass_only": "Bass only", "vocals_only": "Vocals only",
     }
 
     def cells(metrics: dict, signed: bool = False) -> list[str]:
@@ -292,6 +311,9 @@ def format_results(summary: dict) -> str:
     if "mixture_only_reference" in summary and "mixture_only" not in metrics:
         metrics = {"mixture_only": summary["mixture_only_reference"], **metrics}
     lines.extend(["", table("Condition", [[names.get(name, name), *cells(values)] for name, values in metrics.items()])])
+    if "standalone_stems" in summary:
+        rows = [[names.get(name, name), *cells(values)] for name, values in summary["standalone_stems"].items()]
+        lines.extend(["", "Supporting analysis: individual stem classifiers", table("Condition", rows)])
     paired = summary["paired_differences"]
     if paired:
         rows = [[f"{names.get(name, name)} vs {names.get(values['control'], values['control'])}",
@@ -299,12 +321,18 @@ def format_results(summary: dict) -> str:
         lines.extend(["", "Paired differences (fusion minus matched control):", table("Comparison", rows)])
     lines.extend(["", "Reading the results:",
                   "M = original mixture; G = guitar; D = drums; P = piano; B = bass; V = vocals.",
-                  "The native 'other' stem is excluded. M+G+D+P+B+V uses all five selected stems.",
-                  "Matched mixture (k): one mixture-only MLP with approximately the parameter count of k-source mid-fusion.",
-                  "Mixture ensemble (k): k independently trained mixture-only classifiers.",
-                  "Late fusion sums selected branch logits equally, then applies softmax.",
-                  "PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.",
-                  "Paired differences use the same outer seed; positive values favor stem fusion.",
+                  "The native 'other' stem is excluded."])
+    if summary["family"] == "stem_only" or "standalone_stems" in summary:
+        lines.extend(["Each stem-only row evaluates one existing, independently trained late-fusion branch on its own.",
+                      "The mixture-only row is the shared single-MLP reference.",
+                      "Standalone scores are supporting analysis, not evidence of incremental benefit beyond the mixture."])
+    if summary["family"] != "stem_only":
+        lines.extend(["M+G+D+P+B+V uses all five selected stems.",
+                      "Matched mixture (k): one mixture-only MLP with approximately the parameter count of k-source mid-fusion.",
+                      "Mixture ensemble (k): k independently trained mixture-only classifiers.",
+                      "Late fusion sums selected branch logits equally, then applies softmax.",
+                      "Paired differences use the same outer seed; positive values favor stem fusion."])
+    lines.extend(["PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.",
                   "Sample SD describes training-run variability. No significance tests were performed."])
     return "\n".join(lines)
 
@@ -312,6 +340,15 @@ def format_results(summary: dict) -> str:
 def run_from_args(args: argparse.Namespace) -> int:
     try:
         config = config_from_args(args)
+        if getattr(args, "report_stems_only", False):
+            if config.dry_run or config.validate_only or config.overwrite or config.selected_run is not None:
+                raise ValueError("--report-stems-only reads saved results; use it without --dry-run, --validate-only, --overwrite, or --run.")
+            selected_conditions(config)
+            result = save_stem_results(config)
+            print(format_results(result))
+            path = summary_file(stem_report_config(config))
+            print(f"\nReadable report: {path.with_suffix('.txt')}\nDetailed results: {path}")
+            return 0
         result = run_experiment(config)
         if config.dry_run:
             print(json.dumps(result, indent=2, sort_keys=True))

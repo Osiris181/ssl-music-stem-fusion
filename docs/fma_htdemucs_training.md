@@ -30,6 +30,21 @@ python train_mid.py
 python train_late.py
 ```
 
+For supporting individual-stem results from already trained branches:
+
+```bash
+python train_late.py --report-stems-only
+```
+
+This command aggregates saved Guitar/Drums/Piano/Bass/Vocals metrics over the
+selected outer seeds, with the original mixture-only classifier as a shared
+reference. It verifies artifact checksums, the implemented branch seeds,
+common training/evaluation settings, and prediction IDs/labels against the
+manifest. It does not load audio or feature caches, train models, run new
+inference, or select checkpoints again. Missing/incompatible runs are errors.
+Do not combine this reporting mode with `--run`, `--overwrite`, `--dry-run`,
+or `--validate-only`; `--seed` and directory overrides remain available.
+
 Dry runs inspect the manifest, cache paths, condition definitions, parameter
 counts, and seed schedule without loading feature contents or writing outputs.
 Validation-only runs check all cached vectors and extraction reports without
@@ -118,6 +133,14 @@ controls this location; `--summary-dir` overrides it. An explicit
 `--output-dir` also redirects summaries there unless `--summary-dir` is given.
 Single-condition or seed-subset reports retain identifying suffixes so they
 do not overwrite the complete five-seed reports.
+
+The supporting reports are `summary_stem_only.txt` and
+`summary_stem_only.json`. A complete late-fusion training command generates
+them automatically after all five source branches are available, and adds
+the standalone results to its own summary. Use `--report-stems-only` to create
+the supporting reports separately without changing existing fusion summaries.
+The diagnostic scores are not paired improvements against matched controls;
+they measure standalone classifier performance.
 
 Each fit writes checkpoint.pt, resolved_config.json, environment.json,
 training_history.json, validation_predictions.npz, predictions.npz,

@@ -178,12 +178,19 @@ summary_mid_fusion.txt
 summary_mid_fusion.json
 summary_late_fusion.txt
 summary_late_fusion.json
+summary_stem_only.txt
+summary_stem_only.json
 ```
 
 TXT files provide readable tables and metric explanations. JSON files contain
 detailed per-seed results and checkpoint references. Both summary formats can
 be tracked by Git; raw audio, feature caches, checkpoints, prediction arrays,
 and intermediate run artifacts remain excluded.
+
+The stem-only reports summarize the five independently trained late-fusion
+source classifiers. Complete late-fusion runs generate them automatically.
+From the FMA experiment directory, `python train_late.py --report-stems-only`
+regenerates them from saved branch results without training or new inference.
 
 For more detail, see the [separation guide](docs/htdemucs_separation.md),
 [training guide](docs/fma_htdemucs_training.md), and

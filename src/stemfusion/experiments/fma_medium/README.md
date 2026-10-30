@@ -10,6 +10,7 @@ class mapping are preserved; `other` is excluded.
 | `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
 | `training.py` | FMA-specific parser, dataset handoff, condition validation, seed scheduling, branch reuse, and summary assembly. |
+| `stem_results.py` | Verify completed source branches and aggregate their standalone metrics without training, inference, or checkpoint reselection. |
 
 Shared training functions are in `training/`, model architectures in
 `models/`, and strict feature loading in `data/fma_features.py`.
@@ -41,6 +42,19 @@ To run the complete matrices:
 python train_mid.py
 python train_late.py
 ```
+
+Full late-fusion runs also generate standalone Guitar/Drums/Piano/Bass/Vocals
+summaries from the selected branch results. To generate those summaries from
+an already completed experiment without loading audio or feature caches:
+
+```bash
+python train_late.py --report-stems-only
+```
+
+This reads existing branch artifacts only and checks their completion hashes,
+seeds, training settings, labels, and validation/test prediction alignment.
+Missing or incompatible branches cause an error; reporting never starts
+training to fill them in. Use `--seed 32` for a single-seed report.
 
 These commands train over seeds `32, 64, 128, 256, 512`. Without `--run`,
 each runs its whole condition matrix. The default common output root is
@@ -99,6 +113,13 @@ and `summary_late_fusion.txt`/`.json`. The shared YAML's `paths.summary_dir`
 sets that location, separately from the artifact root. Condition/seed subsets
 keep descriptive filename suffixes. An explicit `--output-dir` redirects
 summaries too unless `--summary-dir` is supplied.
+
+Supporting standalone results are saved as `summary_stem_only.txt`/`.json`
+in the same directory. They include all five source classifiers, the shared
+mixture-only reference, and the actual outer/branch seeds. The late-fusion
+summary also includes a standalone-stem table when the all-five-stems
+condition is run. Standalone scores describe each source's predictive
+effectiveness; the matched fusion comparisons evaluate incremental value.
 
 Completed, compatible runs are verified and reused automatically. `--resume`
 remains accepted but is not required. Use `--overwrite` explicitly to retrain

@@ -16,7 +16,7 @@ datasets or model checkpoints.
 | `test_fma_manifest.py` | FMA splits, distributed HT-Demucs roots, and aligned missing-file handling. |
 | `test_musicfm_features.py` | HT-Demucs MusicFM cache keys, reports, dry runs, and partial failures. |
 | `test_feature_entry_points.py` | MusicFM routing and rejection of archived RMS commands. |
-| `test_training_protocol.py` | Complete synthetic five-seed matrix, matched parameter counts, exact cache alignment, independent branch reuse, deterministic fits, validation-only selection, artifact checksums, paired summaries, and direct training scripts. |
+| `test_training_protocol.py` | Complete synthetic five-seed matrix, matched parameter counts, exact cache alignment, independent branch reuse, deterministic fits, validation-only selection, artifact checksums, paired summaries, standalone stem reporting without training, and direct training scripts. |
 
 ## How to run them
 

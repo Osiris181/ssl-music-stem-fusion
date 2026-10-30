@@ -21,7 +21,7 @@ from stemfusion.cli import build_parser
 from stemfusion.configuration import default_config_path, load_configuration
 from stemfusion.data.features import FeatureDataError
 from stemfusion.data.fma_features import SOURCES, load_fma_features
-from stemfusion.experiments.fma_medium.training import FMAExperimentConfig, config_from_args, run_experiment
+from stemfusion.experiments.fma_medium.training import FMAExperimentConfig, config_from_args, run_experiment, save_stem_results
 from stemfusion.training.late_fusion import assemble_ensemble, branch_seed
 from stemfusion.training.metrics import GenreMetrics
 from stemfusion.training.mid_fusion import match_capacity, model_parameter_count, train_mid_condition
@@ -147,6 +147,28 @@ class TrainingProtocolTests(unittest.TestCase):
         self.assertEqual(len(late["conditions"]), 6)
         self.assertEqual(len(mid["paired_differences"]), 3)
         self.assertEqual(len(late["paired_differences"]), 3)
+        self.assertEqual(len(late["standalone_stems"]), 5)
+        standalone_path = self.output / "summary_stem_only.json"
+        standalone = json.loads(standalone_path.read_text())
+        self.assertEqual(standalone["analysis_role"], "supporting")
+        self.assertFalse(standalone["new_training_performed"])
+        self.assertFalse(standalone["new_inference_performed"])
+        self.assertFalse(standalone["checkpoint_reselection_performed"])
+        self.assertEqual(standalone["seeds"], list(SEEDS))
+        self.assertEqual(set(standalone["conditions"]), {f"{source}_only" for source in SOURCES[1:]})
+        saved_accuracies = []
+        for seed in SEEDS:
+            branch = self.output / "branches" / f"seed_{seed}" / "guitar" / "metrics.json"
+            record = json.loads(branch.read_text())
+            saved_accuracies.append(record["test"]["accuracy"])
+            self.assertEqual(standalone["runs"]["guitar_only"][str(seed)]["branch_seed"], record["seed"])
+        self.assertEqual(standalone["conditions"]["guitar_only"]["accuracy"]["mean"], statistics.mean(saved_accuracies))
+        self.assertEqual(standalone["conditions"]["guitar_only"]["accuracy"]["sample_sd"], statistics.stdev(saved_accuracies))
+        text = standalone_path.with_suffix(".txt").read_text()
+        self.assertIn("Guitar only", text)
+        self.assertIn("Mixture only", text)
+        self.assertIn("supporting analysis", text)
+        self.assertNotIn("Study context:", text)
         for family in ("mid_fusion", "late_fusion"):
             report = self.output / f"summary_{family}.txt"
             text = report.read_text()
@@ -257,6 +279,23 @@ class TrainingProtocolTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             summarize_results({"a": {32: metric}, "b": {32: {**metric, "data_fingerprint": "b"}}}, (32,), {"a": "b"})
 
+    def test_stem_reporting_never_trains_when_branches_are_missing_or_incompatible(self) -> None:
+        config = self.config("late_fusion", seeds=(32,))
+        run_experiment(config, data=self.data)
+        with patch("torch.optim.Adam", side_effect=AssertionError("Reporting must not train.")), patch(
+            "stemfusion.experiments.fma_medium.training.load_fma_features", side_effect=AssertionError("Reporting must not load features.")
+        ):
+            summary = save_stem_results(config)
+            self.assertEqual(len(summary["conditions"]), 5)
+            with self.assertRaisesRegex(ValueError, "Completed branch required"):
+                save_stem_results(replace(config, seeds=SEEDS))
+        self.assertFalse((self.output / "summary_stem_only.json").exists())
+        directory = self.output / "branches/seed_32/guitar"
+        self.train(directory, sources=("guitar",), seed=branch_seed(32, 1),
+                   settings=replace(self.settings, dropout=0.0), overwrite=True)
+        with self.assertRaisesRegex(ValueError, "share data and training/evaluation settings"):
+            save_stem_results(config)
+
     def test_dry_run_and_validate_only_do_not_train_or_write_outputs(self) -> None:
         with patch("stemfusion.training.trainer.fit_classifier", side_effect=AssertionError("training forbidden")):
             plan = run_experiment(self.config(dry_run=True))
@@ -339,6 +378,22 @@ class TrainingProtocolTests(unittest.TestCase):
         self.assertIn("Mixture only", readable)
         self.assertIn("Detailed JSON: summary_mid_fusion_mixture_only_seeds_32.json", readable)
         self.assertIn(f"Readable report: {text_report}", result.stdout)
+        late_script = project / "src/stemfusion/experiments/fma_medium/train_late.py"
+        common = ["--manifest", str(self.manifest), "--feature-dir", str(self.feature_dir),
+                  "--output-dir", str(self.output), "--seed", "32", "--epochs", "1",
+                  "--hidden-dimensions", "8", "4", "--device", "cpu", "--expected-feature-dimension", "4"]
+        late = subprocess.run([sys.executable, str(late_script), *common], cwd=self.root,
+                              env=environment, text=True, capture_output=True, timeout=30)
+        self.assertEqual(late.returncode, 0, late.stderr)
+        self.assertIn("Supporting analysis: individual stem classifiers", late.stdout)
+        checkpoints = {path: path.read_bytes() for path in self.output.rglob("checkpoint.pt")}
+        report_only = subprocess.run([sys.executable, str(late_script), *common, "--report-stems-only"],
+                                     cwd=self.root, env=environment, text=True, capture_output=True, timeout=30)
+        self.assertEqual(report_only.returncode, 0, report_only.stderr)
+        self.assertIn("Stem only test results", report_only.stdout)
+        self.assertIn("Guitar only", report_only.stdout)
+        self.assertTrue((self.output / "summary_stem_only_seeds_32.json").is_file())
+        self.assertEqual(checkpoints, {path: path.read_bytes() for path in self.output.rglob("checkpoint.pt")})
 
 
 if __name__ == "__main__":

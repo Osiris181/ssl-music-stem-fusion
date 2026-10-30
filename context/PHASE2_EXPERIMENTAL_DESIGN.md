@@ -1,6 +1,6 @@
 # Phase 2 — Experimental Design and Fairness Controls (Codex Handoff)
 
-> **Status (2026-10-28): DESIGN ONLY.** The author has agreed to the main experimental matrix and the proposed reporting protocol. **No code changes, checkpoint reruns, or new experimental results are implied by this document.** The codebase is still the original, not-yet-cleaned implementation of the submitted paper.
+> **Status (updated 2026-10-30): REVISED DESIGN + PARTIAL RESULTS.** The agreed matrix now includes five **standalone stem-branch evaluations** as supporting analyses across all dataset/extractor/target settings. These reuse the independently trained late-fusion branches; **no additional stem-only training jobs** are added. The author has supplied five-seed **FMA-Medium mid- and late-fusion summaries**; the remaining dataset results and standalone stem-branch results have not been provided here. The original repository's implementation/cleanup status has not been independently audited.
 >
 > **Purpose:** Tell Codex **why** the revision needs new experiments, **which comparisons have been agreed**, and **what still must be checked** before implementing anything. Do not infer existing filenames, implementations, feature sizes, or successful experiments from this plan.
 >
@@ -13,8 +13,10 @@
 **Three linked objectives / contributions:**
 
 1. Does mixture-plus-stem fusion improve performance **relative to strong mixture-only controls**, not just relative to a smaller single MLP?
-2. What happens when **bass**, then **vocals**, are progressively included in the selected nested sequence? Does adding more stems consistently help?
+2. **Effects of different stem combinations:** How do the **three selected nested mixture-plus-stem configurations** affect classification performance, and does adding bass, then vocals, consistently improve the evaluated metrics along this particular sequence?
 3. How do positive, negligible, and negative effects differ across the evaluated genre, mood/theme, and binary-emotion **dataset/representation settings**?
+
+**Supporting analysis (not a separate contribution):** Evaluate the individual G/D/P/B/V classifiers already trained as late-fusion branches. Report their standalone performance as context for the mixture–stem fusion results, including possible explanations for unweighted late-fusion degradation. Standalone results do **not** test whether a stem representation adds predictive value beyond the mixture. They may appear in the main Results tables without changing Contribution 2.
 
 **Interpretation limits:** This is a comparative representation study, not a new separation algorithm, fusion mechanism, or an assertion that separation introduces information absent from the mixture waveform. Mid/late fusion are **evaluation strategies**, not claimed methodological novelties. Do not infer a causal task-type law from data collected with different feature extractors or datasets.
 
@@ -26,8 +28,10 @@
 | Stems | **G**uitar, **D**rums, **P**iano, **B**ass, **V**ocals | The native HT-Demucs checkpoint also outputs `other`, which is excluded from these five selected stems. Here **All Stems means all five named stems, NOT `other`.** |
 | Representation pipelines | Frozen **MusicFM**; frozen **Kang & Herremans-style MERT + chord/key** pipeline | Keep both existing feature-extraction paths. Check how chord/key descriptors are attached to mixture/stem inputs before assuming equal embedding sizes. |
 | Fusion architectures | **Mid-fusion MLP** and **unweighted late-fusion MLP ensemble** | **RMS-weighted late-fusion is removed from the revised primary scope.** |
-| Stem sets | **M+G+D+P**, **M+G+D+P+B**, **M+G+D+P+B+V** | `M` means original mixture; third setting is called `M+All Stems`. These are fixed representative nested sets, **not optimized or exhaustive combinations**. |
-| Main repetitions | **Five predetermined outer seeds** | Exact seed values still need to be fixed in implementation. Same train/validation/test partitions for each run. |
+| Main fusion stem sets | **M+G+D+P**, **M+G+D+P+B**, **M+G+D+P+B+V** | `M` means original mixture; `M+All Stems` means the mixture plus five selected stems. The three nested sets were historically influenced by FMA-Medium test results; they are **not optimized, exhaustive, or independently prespecified**. |
+| Supporting standalone inputs | **G Only, D Only, P Only, B Only, V Only** | Evaluate the five **existing late-fusion stem branches separately** across **all 11 dataset × extractor × target settings** and five outer seeds. No new mid-fusion or stem-only classifier training is required if the same branch checkpoints/predictions are reusable. |
+| Excluded additions | **No `M+G` or `M+G+D` progression**, no `M+each individual stem` primary matrix | Additional progressively added inputs and separate mixture-plus-one-stem configurations are **not part of the frozen scope**. |
+| Main repetitions | **Five actual outer seeds: `32`, `64`, `128`, `256`, `512`** | These replace the example seed identifiers in the earlier draft; apply the same fixed split and task protocol to each run. |
 | Main reporting | **Mean ± sample standard deviation** over the five independent runs; mean paired differences | Formal significance tests and confidence intervals are **optional**, not mandatory, and must not be claimed if not performed. |
 
 ### Fixed dataset/feature-extractor plan
@@ -74,7 +78,7 @@ The seven datasets are **not seven identical model settings**: treating valence/
 | Temporal aggregation | **Average-pool framewise features** to obtain a track/audio-level vector | **[MANUSCRIPT]** §3.3 |
 | Trainability | Keep pretrained MusicFM **frozen**; train downstream MLP(s) only | **[MANUSCRIPT]** §1 system overview; **[DECIDED]** retained |
 | Audio views | Extract/use features for the **original mixture** and the **selected HT-Demucs stems** in each fusion condition | **[MANUSCRIPT]** §§3.1, 3.3; **[DECIDED]** retained |
-| Embedding width | **Assume 1024 only for initial capacity-control calculations**; measure saved vectors and the actual first MLP layer | **[PROVISIONAL / VERIFY]** not demonstrated by manuscript |
+| Embedding width | **1024 for MusicFM**, confirmed by the author for the FMA-Medium runs; verify each dataset's saved vectors and the exact first MLP layer | **[AUTHOR-CONFIRMED FMA]**; audit other settings |
 | Technical extraction details | Exact MusicFM package/commit, sample rate and conversion, mono/stereo policy, audio length/cropping or windowing, frame mask/padding, batching, mean-pooling axes, optional normalization, saved tensor format and feature filenames | **[VERIFY]** from repository/features; **do not guess** |
 
 **Expected data contract (after verification):** one deterministic track-level embedding for each `(dataset, track_id, source_view)` entry. If a saved tensor is `(N_tracks, d)`, the final axis is `d`; if it is `(N_tracks, T, d)`, verify that the original pooling step still needs to be applied rather than assuming it has been performed.
@@ -176,14 +180,107 @@ When the user **later requests an audit**, Codex should **report** — not silen
 | **M+G+D+P** | Yes | Yes | Compare mid against matched (4), late against mixture ensemble (4). |
 | **M+G+D+P+B** | Yes | Yes | Compare mid against matched (5), late against mixture ensemble (5). |
 | **M+All Stems** | Yes | Yes | Compare mid against matched (6), late against mixture ensemble (6). |
+| **Guitar Only (`G`)** | — | **Evaluate branch** | Standalone accuracy/F1/AUC/AP of the existing guitar late-fusion branch; supporting, not evidence of added information beyond M. |
+| **Drums Only (`D`)** | — | **Evaluate branch** | Same standalone analysis for drums. |
+| **Piano Only (`P`)** | — | **Evaluate branch** | Same standalone analysis for piano. |
+| **Bass Only (`B`)** | — | **Evaluate branch** | Same standalone analysis for bass. |
+| **Vocals Only (`V`)** | — | **Evaluate branch** | Same standalone analysis for vocals. |
+
+**Standalone-stem analysis policy:** Report all five stem-branch metrics **for each of the 11 dataset/extractor/target settings and five outer seeds**, subject to checkpoint/prediction availability. These are **evaluations of the already trained late-fusion branches**, not a new fusion architecture or a second checkpoint-tuning procedure. Use the exact fixed split and the branch checkpoints selected using the predetermined validation rules; do not select new checkpoints based on stem-only test scores. For the MERT+chord/key path, **verify the source of chord/key descriptors**. If any stem branch receives descriptors extracted from the original mixture, call the condition "stem audio representation + mixture-derived chord/key descriptors," **not strictly stem-only**. Differences in standalone accuracy indicate different *predictive effectiveness* of representations, **not** new waveform information and **not** incremental benefit beyond M. Weaker individual branches may help explain late-fusion failure but are not sufficient: also examine complementary errors and logit scales if making mechanistic claims.
 
 Report each proposed fusion model **against its corresponding matched control**. Also retain the ordinary single-MLP mixture-only reference for interpretability. Do not present fusion versus a single mixture MLP as proof that stem features outperform a capacity/ensemble-controlled baseline.
+
+## C.1 Complete seeded evaluation matrix — fixed scope, partial completion
+
+**Fixed outer-seed IDs:** `32`, `64`, `128`, `256`, `512`, matching the author's five-seed FMA-Medium experiments. Earlier example IDs (`42`, `123`, `2024`, `2025`, `2026`) were **not** the actual runs and have been removed from the planning manifests. Keep the same dataset partitions across seeds. Checkmarks below mean **required by the final matrix**, not that every dataset's run is complete.
+
+| Reportable model / setting | 32 | 64 | 128 | 256 | 512 | Independent trainings per outer seed |
+| --- | :---: | :---: | :---: | :---: | :---: | ---: |
+| Mixture Only (`M1`) | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: matched Mixture Only (4 inputs) | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: matched Mixture Only (5 inputs) | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: matched Mixture Only (6 inputs) | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: M+G+D+P | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: M+G+D+P+B | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Mid: M+All Stems (=M+G+D+P+B+V) | ✓ | ✓ | ✓ | ✓ | ✓ | 1 |
+| Late: Mixture Ensemble (4) | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse mixture branches) |
+| Late: Mixture Ensemble (5) | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse mixture branches) |
+| Late: Mixture Ensemble (6) | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse mixture branches) |
+| Late: M+G+D+P | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse M1+G+D+P) |
+| Late: M+G+D+P+B | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse M1+G+D+P+B) |
+| Late: M+All Stems | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (reuse M1+G+D+P+B+V) |
+| **Supporting: Guitar Only** | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (evaluate late `G` branch) |
+| **Supporting: Drums Only** | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (evaluate late `D` branch) |
+| **Supporting: Piano Only** | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (evaluate late `P` branch) |
+| **Supporting: Bass Only** | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (evaluate late `B` branch) |
+| **Supporting: Vocals Only** | ✓ | ✓ | ✓ | ✓ | ✓ | **0 new** (evaluate late `V` branch) |
+
+Late-fusion ensembles still require **five additional mixture branches (`M2..M6`) and five stem branches (`G,D,P,B,V`)** in addition to the seven ordinary mid/single MLP jobs. Reusing compatible `M1` yields **17 independent classifier trainings** but now **18 reportable evaluations** (13 former main comparisons + 5 standalone stems) per dataset/extractor/target per outer seed. No extra training comes from reporting stem-only branch performance. If the stems' checkpoints/predictions are missing, or the task's pipeline differs, audit/recover them before asserting reuse.
+
+**Dataset / feature-pipeline / target coverage (five seeds and all 18 evaluations for every setting):**
+
+| Dataset | Feature pipeline | Target(s) | Outer seeds | Nominal distinct MLP trainings (with reuse) |
+| --- | --- | --- | --- | ---: |
+| FMA-Medium | MusicFM | Genre | 32, 64, 128, 256, 512 | 85 |
+| GTZAN | MusicFM | Genre | 32, 64, 128, 256, 512 | 85 |
+| ISMIR04 | MusicFM | Genre | 32, 64, 128, 256, 512 | 85 |
+| MTG-Jamendo | MusicFM | Mood/theme | 32, 64, 128, 256, 512 | 85 |
+| MTG-Jamendo | MERT+chord/key | Mood/theme | 32, 64, 128, 256, 512 | 85 |
+| PMEmo | MERT+chord/key | Valence | 32, 64, 128, 256, 512 | 85 |
+| PMEmo | MERT+chord/key | Arousal | 32, 64, 128, 256, 512 | 85 |
+| EmoMusic | MERT+chord/key | Valence | 32, 64, 128, 256, 512 | 85 |
+| EmoMusic | MERT+chord/key | Arousal | 32, 64, 128, 256, 512 | 85 |
+| DEAM | MERT+chord/key | Valence | 32, 64, 128, 256, 512 | 85 |
+| DEAM | MERT+chord/key | Arousal | 32, 64, 128, 256, 512 | 85 |
+| **Total** | **11 settings** | | **5 outer seeds each** | **935 training jobs; 990 reportable evaluations** |
+
+**Late-fusion deterministic branch-seed convention — retain the implemented FMA-Medium approach:** Use the existing [`branch_seed()` implementation](../src/stemfusion/training/late_fusion.py) for all dataset/extractor/target settings. The outer seeds remain `[32, 64, 128, 256, 512]`. For outer seed `s`, branch index `0` uses `s`; indices `1..5` use the first four bytes of the SHA256 digest of the UTF-8 string `stemfusion-phase2:{s}:{index}`, interpreted as an unsigned big-endian integer:
+
+```python
+import hashlib
+
+def branch_seed(outer_seed: int, index: int) -> int:
+    if index == 0:
+        return outer_seed
+    message = f"stemfusion-phase2:{outer_seed}:{index}".encode("utf-8")
+    return int.from_bytes(hashlib.sha256(message).digest()[:4], "big")
+```
+
+| Branch index | Mixture-only branch | Stem branch at the same position |
+| --- | --- | --- |
+| 0 | M1; also the ordinary single-MLP mixture reference | Original mixture branch in stem ensembles |
+| 1 | M2 | Guitar |
+| 2 | M3 | Drums |
+| 3 | M4 | Piano |
+| 4 | M5 | Bass |
+| 5 | M6 | Vocals |
+
+For outer seed `32`, the six position seeds are `32, 2682760092, 2560740051, 3596998195, 2746825346, 2361236136`. Mixture-only and stem branches at matching positions receive the same derived seed, but are trained separately on their respective features. Branch seeds within each ensemble are distinct. M1 is shared with the original mixture-only reference when settings match.
+
+All **55 saved FMA-Medium branch records** (11 branches × 5 outer seeds) were checked against this function and agree. **Preserve these seeds, checkpoints, and results; no FMA retraining or seed reassignment is required.** Any planning-manifest field named `actual_training_seed` must follow this implemented convention. For other datasets, the derived schedule specifies intended seeds; completion must still be established from the saved run records.
+
+**Machine-readable planning manifests:** [`PHASE2_SEEDED_EXPERIMENT_MATRIX.csv`](PHASE2_SEEDED_EXPERIMENT_MATRIX.csv) now has **990 reportable dataset × outer-seed × model rows** (`11 × 5 × 18`). [`PHASE2_SEEDED_TRAINING_JOBS.csv`](PHASE2_SEEDED_TRAINING_JOBS.csv) retains **935 nominal MLP training jobs** (`11 × 5 × 17`). The manifests are **planning inventories**, not proof that runs have been executed. The newly added stem-only report rows **reuse** existing `late_stem_*` training jobs.
+
+## C.2 FMA-Medium results received from author (not yet independently audited)
+
+For the five outer seeds above, the author supplied these aggregate metrics (accuracy in %, macro ROC-AUC unit scale). These results are **specific to FMA-Medium / MusicFM** and should not be generalized before other dataset results are available.
+
+| Condition (matched comparison) | Fusion accuracy | Matched control accuracy | Fusion macro ROC-AUC | Matched control macro ROC-AUC |
+| --- | ---: | ---: | ---: | ---: |
+| Mid M+G+D+P vs matched (4) | 70.60 | 70.31 | 0.9007 | 0.8897 |
+| Mid M+G+D+P+B vs matched (5) | 70.53 | 70.89 | 0.9073 | 0.8909 |
+| Mid M+G+D+P+B+V vs matched (6) | 70.49 | 70.43 | 0.9044 | 0.8906 |
+| Late M+G+D+P vs mixture ensemble (4) | 69.05 | 70.74 | 0.8933 | 0.8941 |
+| Late M+G+D+P+B vs mixture ensemble (5) | 68.98 | 70.93 | 0.8939 | 0.8947 |
+| Late M+G+D+P+B+V vs mixture ensemble (6) | 68.91 | 70.92 | 0.8981 | 0.8948 |
+
+The ordinary Mixture Only reference was **70.52 ± 0.27% accuracy** and **0.8944 ± 0.0032 macro ROC-AUC**. Mid-fusion improves mean macro ROC-AUC in all three matched comparisons but has mixed accuracy/F1/AP; unweighted late-fusion underperforms matched mixture ensembles on accuracy, F1 and AP in all three configurations. **No individual-stem-only metrics have yet been provided in this conversation.** Do not insert invented values. These comparisons do **not** establish statistical significance; the FMA test set was historically used in configuration selection.
 
 ## D. Mid-fusion parameter-matching design — provisionally specified
 
 **Existing architecture (author-reported):** a three-linear-layer MLP with hidden widths **1024 and 512**, i.e. `input -> 1024 -> 512 -> output`. The exact code may have dropout, normalization, additional trainable layers, or other details; **audit it rather than assuming the prose describes every parameter**.
 
-**Provisional assumption:** MusicFM per-source embedding dimension `d = 1024`. **This is unverified**, not a confirmed feature shape. MERT+chord/key final input dimension must be measured separately.
+**Author-confirmed for FMA-Medium:** MusicFM per-source embedding dimension `d = 1024`. Audit actual saved feature widths for remaining settings. MERT+chord/key final input dimension must be measured separately.
 
 For a source embedding width `d`, output width `C`, and `k` inputs (the mixture plus `k-1` stems):
 
@@ -192,7 +289,7 @@ For a source embedding width `d`, output width `C`, and `k` inputs (the mixture 
 - For **three biased linear layers only**, trainable parameters of `D -> h1 -> h2 -> C` are `(D+1)*h1 + (h1+1)*h2 + (h2+1)*C`.
 - Under the same restricted assumptions, a first-hidden-layer width approximately matching a `k`-input fusion model is `h_k ≈ 1024*(k*d + 513)/(d + 513)`, rounded to a positive integer with minimum actual parameter-count difference. **Compute from the real model, not just this expression**, if it includes other trainable components.
 
-**Illustrative FMA-Medium calculation only** (`d=1024`, `C=16`, three biased linear layers and nothing else):
+**Illustrative FMA-Medium calculation** (`d=1024`, `C=16`, three biased linear layers and nothing else; not a substitute for auditing trainable model counts):
 
 | Model | Architecture | Trainable parameters |
 | --- | --- | ---: |
@@ -218,7 +315,7 @@ Use the same original branch MLP architecture (`input -> 1024 -> 512 -> C`, subj
 
 `M1`–`M6` **all receive the same original mixture embedding**, but must have **independent initializations/training stochasticity**. Do not copy one trained model six times. For each outer run, the five stem-specific branches and the six mixture-only branches can be **reused** when assembling nested configurations, if their training/selection procedures truly match. The single mixture-only MLP may be shared with `M1` and the mid-fusion mixture-only reference if implementations and settings are identical.
 
-**Must inspect:** Does the original late-fusion code aggregate **logits, probabilities, or already-thresholded predictions**? Is unweighted "sum" normalized? Decide and document one precise rule, then use it **identically** for all stem-fusion and mixture-only ensemble controls. Check any thresholding/calibration using validation data only. Avoid inadvertently comparing probability averaging against logit summing.
+**Author-confirmed implementation rule:** late-fusion **sums branch logits without per-branch weighting, then applies softmax** for multiclass prediction. For multilabel/binary heads, verify the equivalent head-specific output transformation in code; do not assume softmax is valid for multilabel tasks. Use the **same logit-sum rule** for stem-fusion and matched mixture-only ensembles. Preserve per-branch raw logits for standalone evaluation and diagnosis; check any thresholding/calibration using validation data only. Audit code to confirm that all task-specific pathways implement the reported rule.
 
 **Selection principle:** Prefer selecting **each branch checkpoint** under the task's predefined validation criterion, then aggregating the selected branches without additional test-driven ensemble selection. Apply the same branch procedure in both types of ensemble. This is the planned procedure, not an observed fact about original code.
 
@@ -238,19 +335,21 @@ These are **provisionally chosen rules**, not necessarily the exact rules alread
 
 ## G. Five-seed evaluation and results reporting
 
-1. Fix a **list of five outer training seeds** before running. The five listed examples in past discussions were illustrative and are **not yet locked**. Keep splits fixed across runs; vary training randomness. For late fusion, derive distinct branch seeds deterministically for each outer seed.
+1. Use the **fixed outer seed list `[32, 64, 128, 256, 512]`** and the **existing FMA-Medium SHA256 branch-seed convention** in Section **C.1** for every dataset/extractor/target setting. Keep dataset splits fixed across runs; vary training randomness. Do not treat different branches within one ensemble as separate outer runs.
 2. Run the full comparison consistently within each dataset/extractor/target setting. Do not reuse a checkpoint trained under incompatible features, labels, split, metric definition, or architecture.
 3. Report **mean ± sample SD (`ddof=1`)** across five runs for each reported metric. Also report the **mean of per-seed paired differences** between each fusion system and the corresponding matched control; optionally its SD. Match the outer run/seed conditions for each difference.
 4. **Formal tests / bootstrap confidence intervals are optional.** Five seeds and SD characterize *training-run variability*, **not statistical significance**. Never write "statistically significant" without a justified performed test. Do not interpret overlapping/nonoverlapping SD ranges as significance testing.
 5. Save for every run: model/training config and seed; checkpoint path/epoch/validation metric; per-track IDs and ground truth; per-track output probabilities or logits; final metrics; trainable parameter counts; any validation-chosen thresholds. Preserve source-level branch predictions for late fusion so ensembles can be analyzed without retraining.
 6. Report mixed, null, and negative findings, and separate exploratory diagnostic metrics from primary task metrics: **genre accuracy**, **mood/theme PR-AUC**, and **binary emotion accuracy** (valence and arousal separately) are proposed primary headline measures. Still report agreed secondary metrics where defined.
+7. For the **five standalone stem branches**, collect metrics for **every** dataset/extractor/target setting using the existing late-fusion branch checkpoints and saved logits. Compare descriptively against the matching mixture-only single-branch classifier; do **not** treat lower standalone accuracy as proof that the stem contains no complementary information. Where feasible, report branch error agreement, positive/negative decision changes after fusion, and logit-scale summaries to examine possible explanations for late-fusion degradation. Never claim such an explanation is established from standalone scores alone.
 
 **Optional future analyses:** paired example-level uncertainty intervals, formal tests with multiple-comparison handling, per-class genre/per-tag mood analyses. These are not preconditions for starting the agreed design, but keeping predictions now makes them feasible later.
 
 ## H. Important scientific/reporting constraints
 
 - **Historical FMA test selection cannot be undone:** The three nested stem configurations and original decision to favor HT-Demucs were influenced by prior FMA-Medium **test** scores. They may be fixed *now* for the revised matrix, but do **not** label them "predetermined before any test results" or claim a rerun on the same test split is newly independent/confirmatory. Report the historical exploratory selection transparently. Removing Banquet from the revised scope does not erase the history.
-- **The three stem combinations are intentionally limited:** They test one nested addition sequence (bass, then vocals), not global optimality, exhaustive combinations, source attribution, or the effect of all possible inclusion orders. Additional two-stem/leave-one-out analyses are **not required by the current agreed design**; they may be added only as a separately specified extension.
+- **The three stem combinations are intentionally limited:** They test one nested addition sequence (bass, then vocals), not global optimality, exhaustive combinations, source attribution, or the effect of all possible inclusion orders. **Neither `M+G` nor `M+G+D` is included.** Extra mixture-plus-one-stem/two-stem/leave-one-out experiments are **not** required by the current agreed design.
+- **Stem-only results are supporting diagnostics:** The five late-fusion branches are evaluated alone across all 11 settings. Their classification scores measure standalone predictive performance, **not** whether a stem supplies incremental predictive value *conditional on M*. Strong/weak stems do not automatically make a late ensemble improve/degrade. Preserve the MERT chord/key provenance caveat. No new training is assumed under valid checkpoint reuse.
 - **Kang & Herremans reproduction discrepancy is already addressed at the reporting level:** The original manuscript reports published MTG-Jamendo PR-AUC `0.1521`, our reproduced mixture-only `0.1279`, and mixture+all-stems `0.1421`. It explains that key/chord extraction scripts were unavailable and had to be reconstructed; classifier hyperparameters also differ. These are **plausible** sources of the gap, not proven causal explanations. Preserve transparent comparison; do not claim our fusion exceeds the published paper's result or require a new reproduction experiment just to restate this limitation.
 - **Do not overclaim task effects:** Performance contrasts between MusicFM on genre and MERT+chord/key on emotion are confounded by representation and datasets; use a conditional, descriptive interpretation. MTG-Jamendo contains both feature setups and may provide a within-dataset comparison.
 - **Fairness isn't only a parameter count:** Preserve matching splits, preprocessing, losses, optimizer/scheduler, batch construction, regularization, validation selection, metric definitions, and comparable training budgets. Report mismatches honestly.
@@ -261,12 +360,12 @@ These are **provisionally chosen rules**, not necessarily the exact rules alread
 This section describes checks to perform **when implementation is explicitly requested later**. It is **not permission to refactor or run** now.
 
 - [ ] Locate source modules, configs, scripts, original result files, saved features, and split CSVs. Record provenance; do not rename/delete them.
-- [ ] Verify MusicFM actual per-track embedding dimension (1024 is a working assumption), MERT/chord/key dimensions, temporal pooling/normalization, correct mixture/stem alignment, `other`-stem omission, data types and sample IDs.
+- [ ] Reconfirm author-reported MusicFM 1024-dimensional FMA embeddings against feature files; verify remaining MusicFM and MERT/chord/key dimensions, temporal pooling/normalization, correct mixture/stem alignment, `other`-stem omission, data types and sample IDs.
 - [ ] Inspect the **actual** three-layer MLP and count trainable parameters including optional normalization. Produce exact width matching from real counts for every dataset/extractor/target.
-- [ ] Verify late-fusion output aggregation and existing branch checkpoint selection; ensure deterministic and independent mixture ensemble branch training.
+- [ ] Verify author-reported unweighted **logit sum → softmax** for multiclass genre; audit multilabel/binary heads and branch checkpoint selection. Ensure independent mixture ensemble branch training, and preserve each stem branch's per-example logits and standalone scores across all settings.
 - [ ] Check all dataset split overlaps and especially the `ismir04_genre` train/validation/test CSV manifests. Identify 2015 split provenance only if available; do not fabricate.
 - [ ] Audit existing mood/theme and emotion early-stopping metric; implement the agreed criterion consistently for **all** baselines if it differs.
-- [ ] Freeze metrics (averaging, label binarization, thresholds, positive-class orientation) and five outer seeds in a manifest before any new test-based exploration.
+- [ ] Freeze metrics (averaging, label binarization, thresholds, positive-class orientation) and the fixed five outer seeds in a manifest before any new test-based exploration.
 - [ ] Preserve original code/outputs. Place any future revised experiment implementation in clearly versioned configs or modules, with an explicit review/diff before execution.
 - [ ] Preserve complete predictions and trained checkpoint metadata so results can be recomputed without new training.
 
@@ -276,16 +375,16 @@ Under the **full** matrix, for **one dataset × extractor × target setting and 
 
 - Mid-fusion: **1** standard mixture-only + **3** wider matched mixture-only + **3** stem-fusion classifiers = **7**.
 - Late-fusion: **6** independently trained mixture-only branches + **5** independent stem branches = **11**, reused to form 4/5/6-member ensembles.
-- If the mid-fusion single mixture-only model is identical to late-fusion's `M1`, **one training can be shared**, giving **17 distinct trainings per outer seed**.
+- If the mid-fusion single mixture-only model is identical to late-fusion's `M1`, **one training can be shared**, giving **17 distinct trainings per outer seed** and **18 reportable model evaluations**, five of which are standalone evaluations of already-trained stem branches.
 
 At 5 seeds × 11 settings, this is a *nominal upper planning figure* of **935 distinct classifier trainings** before accounting for existing valid checkpoints or changes to scope. This figure is conditional on the assumptions above; **do not schedule experiments from it**, and do not confuse it with separator or feature-extractor inference costs. The number of ensemble evaluations is not the number of independently trained branches.
 
 ## J. Current handoff state
 
-**Decided in conversation:** separator and fusion scope, nested stems, matched-control principles, both feature pipelines, task-specific validation metric proposal, five-seed mean±SD reporting, optional significance tests, and retaining current split manifests.
+**Decided in conversation:** separator and fusion scope, **three existing nested mixture-plus-stem sets** (no incremental 1/2-stem additions), **five standalone stem-only diagnostic evaluations across all settings**, matched-control principles, both feature pipelines, actual outer seeds `32,64,128,256,512`, task-specific validation metric proposal, five-seed mean±SD reporting, optional significance tests, and retaining current split manifests.
 
-**Provisional / must verify from implementation:** MusicFM dimension, sample rate/cropping/normalization and feature pooling; exact MLP activations/dropout/norm/loss and optimizer kwargs; MERT layers 5/6 combination plus chord/key encoding and stem-specific handling; actual late-fusion aggregation; exact mood/emotion early-stopping code; class imbalance/metric definitions and emotion-label binarization; exact seed list; ISMIR04 CSV overlap and bibliographic provenance; feasibility of running the full matrix. Consult detailed inventory in **B.1**.
+**Provisional / must verify from implementation:** MusicFM feature-file width beyond author-confirmed FMA `d=1024`, sample rate/cropping/normalization and feature pooling; exact MLP activations/dropout/norm/loss and optimizer kwargs; MERT layers 5/6 combination plus chord/key encoding and stem-specific handling; author-reported logit-sum aggregation in each task head; exact mood/emotion early-stopping code; class imbalance/metric definitions and emotion-label binarization; consistent application of the verified FMA-Medium SHA256 branch-seed convention to remaining datasets; ISMIR04 CSV overlap and bibliographic provenance; availability of all stem-branch checkpoints/predictions. Consult detailed inventory in **B.1**.
 
-**Not done:** code cleanup, implementation of matched controls, five-seed retraining, any new results, paper-result table updates, abstract/conclusion finalization, independent-holdout resolution of historical test selection.
+**Not completed / not independently audited:** code cleanup, end-to-end matched comparisons across the remaining datasets, standalone-stem metrics, paper-result table updates, abstract/conclusion finalization, independent-holdout resolution of historical FMA test selection. **Five-seed FMA-Medium mid- and late-fusion summaries have been supplied by the author**, as captured in §C.2; do not imply that no new experiments exist.
 
 **Codex instruction:** Treat this as a **design and purpose document**. **Do not edit application code, clean the repository, train models, delete previous experiments, or revise the manuscript automatically** merely because this file is present. Wait for a specific author request, then audit before implementing.

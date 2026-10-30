@@ -1,6 +1,6 @@
 # Phase 1 — Research Direction, Contributions, and Related Work
 
-> **Status (updated 2026-10-28):** Phase 1 novelty/research-direction revisions have been discussed and revised by the author. The paragraphs below preserve earlier **drafting/reference language**, not necessarily the author's exact latest LaTeX and not evidence that the new controls have been run. The abstract remains deferred until results are available.
+> **Status (updated 2026-10-30):** Phase 1 novelty/research-direction revisions have been discussed and revised by the author. The paragraphs below preserve **drafting/reference language**, not necessarily the author's exact latest LaTeX. Five-seed FMA-Medium mid-/late-fusion summaries have now been supplied, but other dataset and standalone stem results remain pending. The abstract and final contribution wording remain deferred until the full results are available.
 >
 > **Phase 2 agreed design:** [PHASE2_EXPERIMENTAL_DESIGN.md](PHASE2_EXPERIMENTAL_DESIGN.md). Use that file, not preliminary proposals in this Phase 1 draft, for current separator, fusion, stem and statistical decisions. **Do not rewrite the manuscript or change code automatically.**
 >
@@ -26,11 +26,15 @@ The revised study is organized around three empirical objectives:
 
 1. **Incremental predictive value of separated stems given pretrained mixture representations.** We evaluate explicit mixture-plus-stem feature fusion using a fixed pretrained HT-Demucs MSS model and frozen music representation extractors, comparing it against mixture-only baselines. The revised experimental design will include appropriate controls for the increased trainable classifier capacity and ensemble effects introduced by fusion.
 
-2. **Complementarity of selected stem combinations.** We investigate whether adding selected groups of instrument stems to the mixture representation changes downstream predictive performance, and whether adding more stems consistently provides additional benefit. This analysis concerns **mixture-plus-stem combinations**, which should be distinguished from combining separated stems without an original-mixture input. The selection of stem subsets will be specified and not described as exhaustive.
+2. **Effects of different stem combinations.** We analyze how selected combinations of separated musical stems affect classification performance when combined with the original mixture representation, examining whether different stems provide additional predictive benefits and whether incorporating more stems consistently improves performance.
 
 3. **Variation across downstream classification tasks.** We characterize the benefits, negligible effects, and possible performance degradations of mixture-plus-stem fusion across genre classification, mood/theme tagging, and binary valence/arousal classification. Any explanation in terms of instrument-localized versus holistic musical cues is treated as a hypothesis to be examined, not an established universal principle.
 
-> Writing caution: The phrase “will include” in Contribution 1 is deliberate: capacity-/ensemble-matched controls are planned but not yet completed. Reword to completed-work tense only once corresponding experiments are finished. The **current agreed** stem analysis uses three nested combinations (`M+G+D+P`, `M+G+D+P+B`, `M+All Stems`); mixture-plus-two-stem experiments are **not required** under that selected-combination objective. Do not claim this sequence is exhaustive or proves globally optimal subsets.
+**Supporting experiment, not part of Contribution 2:** The Guitar/Drums/Piano/Bass/Vocals-only results evaluate the independently trained late-fusion classifiers on their own. They can be reported in the main Results tables as explanatory context for the fusion findings, without being elevated to a headline contribution. A weak standalone stem classifier does not establish that its representation has no complementary predictive value beyond the mixture. Only the fusion-versus-matched-mixture comparisons directly evaluate that question. The three selected nested stem combinations are not an exhaustive search or a claim of optimality.
+
+**Seed protocol:** Retain the completed FMA-Medium approach for all settings: outer seeds `32, 64, 128, 256, 512`, with SHA256-derived branch seeds from the existing `branch_seed()` function. Pair derived seeds by branch position across mixture-only and stem ensembles. Existing FMA checkpoints and results retain their original seeds; no retraining is required for this documentation alignment.
+
+> Writing caution: The phrase “will include” in Contribution 1 reflects that **full cross-dataset controlled evaluation is not complete**. Five-seed FMA-Medium matched mid-/late-fusion summaries have been supplied by the author; do not describe all settings as completed until they are verified and reported. The **current agreed** main fusion analysis uses three nested combinations (`M+G+D+P`, `M+G+D+P+B`, `M+All Stems`) plus supporting **G/D/P/B/V-only** evaluations across the same datasets and five seeds. **No `M+G` or `M+G+D` incremental configurations** are required. Standalone stem-only scores must not be described as evidence of added information beyond M. Do not claim this sequence is exhaustive or proves globally optimal subsets.
 
 ## D. Proposed replacement / expansion: Related Work (music classification using separated sources)
 
@@ -63,7 +67,7 @@ The use of pretrained music representations is also relevant. Kang and Herremans
 | Editor concern about scientific significance | Still open | Writing alone is insufficient; depends on resulting experiments |
 | Reviewer concern No. 5: HT-Demucs vs. Banquet overclaim | **Corrected by author** | Banquet removed from revised primary scope; historical code/results still present |
 | Reviewer concern No. 8: test-set selection | **Open / exploratory limitation** | Existing three stem sets were influenced by FMA test results; cannot retroactively make that split independent |
-| Phase 2 experimental design | **Agreed provisionally** | See [PHASE2_EXPERIMENTAL_DESIGN.md](PHASE2_EXPERIMENTAL_DESIGN.md): HT-Demucs, 2 fusion methods, matched controls, five-seed mean ± SD, task-specific validation; code not yet cleaned or modified |
+| Phase 2 experimental design | **Fixed matrix; partially reported FMA results** | See [PHASE2_EXPERIMENTAL_DESIGN.md](PHASE2_EXPERIMENTAL_DESIGN.md): HT-Demucs, two fusion methods, three selected nested combinations, five supporting stem-only branch evaluations, matched controls, five seeds **32/64/128/256/512**, task-specific validation; FMA mid-/late-fusion aggregate results supplied, other settings not yet documented |
 | Abstract | **Deferred** | Revise after final experimental evidence |
 
 ## G. Source starting points
