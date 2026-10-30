@@ -435,13 +435,19 @@ def _parse_track_id(value: str) -> str:
     return f"{number:06d}"
 
 
-def configure_parser(parser: argparse.ArgumentParser) -> None:
+def configure_parser(
+    parser: argparse.ArgumentParser, *, default_output: Path | None = None,
+) -> None:
     parser.description = (
         "Build an aligned FMA-Medium manifest for mixtures and separated "
         "stems."
     )
     parser.add_argument("--tracks-csv", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--output", type=Path, default=default_output,
+        required=default_output is None,
+        help="Manifest JSONL path; metadata and report sidecars are saved beside it.",
+    )
     parser.add_argument("--mixture-root", type=Path)
     parser.add_argument("--mixture-extension", default=".mp3")
     parser.add_argument(

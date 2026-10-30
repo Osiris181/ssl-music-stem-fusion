@@ -66,7 +66,7 @@ runtime:
 
 # Relative paths resolve against this YAML file, not the command's working directory.
 paths:
-  manifest: ../../data/manifests/fma_medium_htdemucs.jsonl  # Track IDs, genres, labels, and fixed splits.
+  manifest: ../../data/manifests/fma_medium/fma_medium_htdemucs.jsonl  # Track IDs, genres, labels, and fixed splits.
   feature_dir: ../../data/features/fma_medium/musicfm_msd_layer7  # Source/split embedding pickle files.
   output_dir: ../../outputs/fma_medium/phase2  # Checkpoints, predictions, and per-run metadata.
   summary_dir: ../../outputs/fma_medium  # Readable TXT and detailed JSON result summaries.

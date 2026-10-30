@@ -32,6 +32,13 @@ Inspect all arguments with:
 
     stemfusion data fma-manifest --help
 
+Alternatively, from `src/stemfusion/experiments/fma_medium/`, run
+`python prepare_manifest.py --help`. This direct entry point uses the same
+builder and defaults its output to
+`data/manifests/fma_medium/fma_medium_htdemucs.jsonl` in the repository. The
+extraction and training YAML files reference that path. The CLI command above
+continues to require an explicit `--output`.
+
 Multi-disk HT-Demucs examples are in `docs/fma_medium_extraction.md`.
 The builder inventories all six separator outputs; revised training selects
 the five named stems and excludes `other`.

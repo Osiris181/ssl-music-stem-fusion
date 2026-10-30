@@ -72,14 +72,22 @@ track across disks.
 
 ## Step 1: build one aligned manifest
 
-    stemfusion data fma-manifest \
+From the repository root:
+
+    python src/stemfusion/experiments/fma_medium/prepare_manifest.py \
       --tracks-csv /path/to/fma_metadata/tracks.csv \
       --mixture-root /path/to/fma_medium \
       --htdemucs-root /path/to/current_htdemucs_outputs \
       --htdemucs-root /path/to/ssd_htdemucs_outputs \
       --htdemucs-root /path/to/hdd_htdemucs_outputs \
       --allow-missing \
-      --output /path/to/manifests/fma_htdemucs.jsonl
+      --output data/manifests/fma_medium/fma_medium_htdemucs.jsonl
+
+From the experiment directory, use `python prepare_manifest.py` with the same
+input arguments. `--output` may be omitted: the script defaults to the path
+above regardless of the working directory. `stemfusion data fma-manifest`
+remains available with an explicit `--output`. The existing manifest does not
+need rebuilding merely because it was moved into the dataset folder.
 
 For a bounded smoke test, add one or more IDs without changing the official
 split or label mapping:
@@ -108,7 +116,7 @@ The defaults in `configs/features/musicfm_msd_layer7.yaml` are:
 Run one command for the configured sources; begin with a dry run:
 
     stemfusion extract fma-medium \
-      --manifest /path/to/manifests/fma_htdemucs.jsonl \
+      --manifest data/manifests/fma_medium/fma_medium_htdemucs.jsonl \
       --musicfm-root /path/to/musicfm \
       --output-dir /path/to/features/fma_medium/musicfm_msd_layer7 \
       --limit-per-split 2 \

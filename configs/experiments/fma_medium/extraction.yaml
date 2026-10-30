@@ -6,6 +6,6 @@ feature_profile: ../../features/musicfm_msd_layer7.yaml
 separator_profile: ../../separators/htdemucs_6s.yaml
 sources: [mixture, guitar, drums, piano, bass, vocals]
 paths:
-  manifest: ../../../data/manifests/fma_medium_htdemucs.jsonl
+  manifest: ../../../data/manifests/fma_medium/fma_medium_htdemucs.jsonl
   output_dir: ../../../data/features/fma_medium/musicfm_msd_layer7
 # Update these dataset paths for your machine; MusicFM's location is in the feature profile.

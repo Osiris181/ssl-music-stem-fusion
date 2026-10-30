@@ -6,6 +6,7 @@ class mapping are preserved; `other` is excluded.
 
 | File | Purpose |
 | --- | --- |
+| `prepare_manifest.py` | Runnable manifest builder from official metadata and aligned audio paths. |
 | `extraction.py` | Runnable MusicFM extraction interface. |
 | `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
@@ -25,6 +26,27 @@ Each public file supports direct execution without PYTHONPATH.
 
 CLI paths override YAML paths. Relative YAML paths resolve against the YAML
 file; relative CLI paths resolve against the current working directory.
+
+## Manifest preparation
+
+From this directory:
+
+```bash
+python prepare_manifest.py \
+  --tracks-csv /path/to/fma_metadata/tracks.csv \
+  --mixture-root /path/to/fma_medium \
+  --htdemucs-root /path/to/htdemucs_outputs
+```
+
+The HT-Demucs output root must contain `htdemucs_6s/`. Repeat
+`--htdemucs-root` for tracks distributed across disks. The script calls the
+shared builder in `data/fma.py` and defaults to
+`data/manifests/fma_medium/fma_medium_htdemucs.jsonl` in this checkout.
+`--output` overrides that path. Input CLI paths are relative to the working
+directory; the default output is independent of it. Use `--allow-missing` only
+to explicitly exclude incomplete tracks, `--dry-run` to inspect without writing,
+and `--overwrite` to replace an existing manifest. Existing manifests can be
+reused directly for extraction and training.
 
 ## Training commands
 
