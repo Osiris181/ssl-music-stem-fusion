@@ -1,38 +1,23 @@
-"""FMA-Medium single-source and mid-fusion training entry point."""
+"""Run FMA-Medium mid-fusion and capacity-matched mixture controls."""
 
 from __future__ import annotations
 
-import argparse
+import sys
+from pathlib import Path
 
-from stemfusion.configuration import configure_yaml
+if __name__ == "__main__" and __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from stemfusion.training.genre import (
-    GenreTrainingConfig,
-    GenreTrainingError,
-    config_from_args,
-    configure_parser as _configure_genre_parser,
-    plan_genre_training,
-    run_from_args,
-    train_genre_classifier,
-)
-
-__all__ = [
-    "GenreTrainingConfig",
-    "GenreTrainingError",
-    "config_from_args",
-    "configure_parser",
-    "plan_genre_training",
-    "run_from_args",
-    "train_genre_classifier",
-]
+from stemfusion.experiments.fma_medium.training import configure_parser as _configure_parser, direct_main
 
 
-def configure_parser(parser: argparse.ArgumentParser) -> None:
-    """Configure the retained FMA-Medium MusicFM MLP runner."""
+def configure_parser(parser) -> None:
+    _configure_parser(parser, "mid_fusion")
 
-    _configure_genre_parser(parser)
-    parser.description = (
-        "Train the FMA-Medium MusicFM mid-fusion MLP. Repeat "
-        "--source to concatenate selected mixture and stem features."
-    )
-    configure_yaml(parser, "mid_fusion", "training/fma_medium_mid_fusion.yaml")
+
+def main(argv=None) -> int:
+    return direct_main("mid_fusion", argv)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

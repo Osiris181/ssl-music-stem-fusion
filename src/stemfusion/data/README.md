@@ -12,6 +12,8 @@ Current implementation:
 | File | Purpose |
 | --- | --- |
 | `fma.py` | Parse FMA-Medium metadata and align mixture and HT-Demucs paths by six-digit track ID. |
+| `fma_features.py` | Verify extraction reports, cache contents, exact split IDs, labels, and dimensions; load the common training track set. |
+| `features.py` | Dataset-independent aligned feature containers passed to training. |
 
 The FMA builder writes JSON Lines records containing `track_id`, `split`,
 `genre`, `label`, and a `paths` mapping. It supports mixture-only manifests and
@@ -36,3 +38,9 @@ the five named stems and excludes `other`.
 
 Manifest builders must preserve official splits, detect duplicate IDs, and
 avoid silently using different track sets for directly comparable methods.
+
+`load_fma_features()` reads local cached embeddings, not audio files. All six
+views must contain exactly the manifest IDs for each split, with finite
+float32 vectors of the configured dimension. Zero vectors are retained and
+counted. Input file checksums and extraction reports are recorded in a data
+audit; no track intersection or additional normalization is applied.

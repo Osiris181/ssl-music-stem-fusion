@@ -10,8 +10,11 @@ __pycache__/
 configs/paths.local.yaml
 data/*
 !data/README.md
-outputs/*
+outputs/**
+!outputs/**/
 !outputs/.gitkeep
+!outputs/**/summary_*.txt
+!outputs/**/summary_*.json
 
 *.ckpt
 *.pkl

@@ -2,30 +2,29 @@
 
 | File | Active usage |
 | --- | --- |
-| `extraction.yaml` | References the feature preset and supplies the fresh MSD/layer-7 output directory. |
-| `mid_fusion.yaml` | References the training preset and lists the mixture reference plus three concatenation conditions. |
-| `late_fusion.yaml` | References the training preset and lists three equal-sum source-logit conditions. |
+| `extraction.yaml` | Shared feature preset, FMA manifest/output paths, and six selected inputs. |
+| `mid_fusion.yaml` | Seven conditions: original mixture, three capacity-matched mixture controls, three source combinations. |
+| `late_fusion.yaml` | Three stem ensembles and three matched mixture-only ensembles with independent branch selection. |
 
-Use these files with `--config`. For example:
+The corresponding entry script loads its experiment YAML automatically.
+Both training matrices inherit common settings from
+`configs/training/fma_medium_genre.yaml`, including outer seeds
+32, 64, 128, 256, 512 and manifest/feature/output paths.
 
-```bash
-stemfusion extract fma-medium --config configs/experiments/fma_medium/extraction.yaml --help
-stemfusion train fma-medium mid-fusion --config configs/experiments/fma_medium/mid_fusion.yaml --run mixture_guitar_drums_piano --help
-```
+Without `--run`, training executes every condition. Use `--run NAME` to
+select one condition, `--seed 32` for one outer seed, or repeated `--seed`
+for a subset. CLI values override YAML. All conditions require the common
+six-source track set, even when the classifier only uses the mixture.
 
-For an actual invocation supply the required manifest/local paths.
-Extraction uses the YAML `sources` list unless `--source` is provided;
-repeat `--source` for a subset. `--help` only displays the interface.
-Use `--dry-run` to validate a fully specified configuration without starting
-processing. Paths inside YAML are relative to that file; explicit CLI values
-take precedence. Without `--run`, supply explicit training sources.
+Use `--dry-run` to inspect paths, conditions, seeds, and parameter counts.
+Use `--validate-only` to check cached vectors and extraction reports.
+Both avoid training. Compatible selected branches are shared between workflows
+automatically, and completed runs are reused with verified checksums.
+`--resume` remains accepted; `--overwrite` explicitly requests retraining.
 
-The extraction `sources` list drives the multi-source job in one command.
-`other` is excluded from the listed revised conditions.
-A training `--run` executes only the selected condition, not the full matrix.
+Set the MusicFM checkout path in `configs/features/musicfm_msd_layer7.yaml`.
+Extraction never starts training or separation. The revised matrices exclude
+`other`, Banquet, and RMS weighting.
 
-See [configuration usage](../../../docs/configuration.md) and
-[the dataset guide](../../../src/stemfusion/experiments/fma_medium/README.md).
-
-These configurations do not implement matched controls, independent branch
-selection, or five-seed aggregation. Seed 42 remains the retained default.
+See [the training guide](../../../docs/fma_htdemucs_training.md) and
+[the dataset scripts](../../../src/stemfusion/experiments/fma_medium/README.md).

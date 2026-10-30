@@ -1,23 +1,18 @@
 # Training configurations
 
-These presets document the retained FMA-Medium classifier settings.
-
 | File | Purpose |
 | --- | --- |
-| `fma_medium_mid_fusion.yaml` | Single-source and concatenation MLP training. |
-| `fma_medium_late_fusion.yaml` | Retained unweighted summed-logit model training. |
+| `fma_medium_genre.yaml` | Shared paths, architecture, optimization, metrics, validation selection, and five outer seeds. |
+| `fma_medium_mid_fusion.yaml` | Inherits the shared settings and selects concatenation. |
+| `fma_medium_late_fusion.yaml` | Inherits the shared settings and selects independent branches with equal logit summation. |
 
-`stemfusion train fma-medium mid-fusion` and
-`stemfusion train fma-medium late-fusion` automatically load their
-corresponding presets. Use
-`--config` for experiment files and `--run` for named conditions. See
-[configuration usage](../../docs/configuration.md).
+Edit the shared file to change settings consistently for both methods.
+The dataset experiment YAMLs in `../experiments/fma_medium/` inherit these
+profiles and define the conditions. They are loaded automatically by
+`train_mid.py` and `train_late.py`. Paths resolve relative to their declaring
+YAML file. Explicit CLI options override YAML and are recorded.
 
-Learning rate, optimizer, batch size, epoch budget, hidden widths, dropout,
-validation selection, and
-seed defaults are unchanged by reorganization.
-
-Source conditions are recorded in `../experiments/fma_medium/`.
-Matched controls, independent late-fusion branch selection, and five-seed
-reporting still require implementation. Old RMS and duplicate presets are
-archived outside the project.
+Outer seeds are fixed to `[32, 64, 128, 256, 512]` by default. For a bounded
+check, `--seed 32` selects a subset; `--run NAME` selects a condition.
+Use a separate output root when changing experimental settings. See
+[the training guide](../../docs/fma_htdemucs_training.md).

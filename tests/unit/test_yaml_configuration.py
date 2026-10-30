@@ -14,8 +14,7 @@ from stemfusion.cli import build_parser
 from stemfusion.configuration import default_config_path, load_configuration
 from stemfusion.experiments.fma_medium.extraction import musicfm_config_from_args
 from stemfusion.features._musicfm import extract_musicfm
-from stemfusion.training.genre import config_from_args as mid_config_from_args
-from stemfusion.training.genre import _config_dict as mid_config_dict
+from stemfusion.experiments.fma_medium.training import config_from_args as mid_config_from_args
 
 
 class YAMLConfigurationTests(unittest.TestCase):
@@ -112,7 +111,7 @@ class YAMLConfigurationTests(unittest.TestCase):
         self.assertEqual(config.source, "piano")
         self.assertEqual(len(config.config_provenance["config_files"]), 2)
 
-    def test_named_training_run_and_repeated_cli_sources_replace_yaml_sources(self) -> None:
+    def test_named_training_run_and_cli_seed_subset(self) -> None:
         experiment = default_config_path("experiments/fma_medium/mid_fusion.yaml")
         base = [
             "train", "fma-medium", "mid-fusion", "--config", str(experiment),
@@ -123,33 +122,33 @@ class YAMLConfigurationTests(unittest.TestCase):
         args = self.parser.parse_args(base)
         self.assertEqual(args.source, ["mixture", "guitar", "drums", "piano"])
 
-        override = self.parser.parse_args([*base, "--source", "mixture", "--source", "bass"])
-        self.assertEqual(override.source, ["mixture", "bass"])
+        override = self.parser.parse_args([*base, "--seed", "32", "--seed", "64"])
+        self.assertEqual(override.seeds, [32, 64])
         again = self.parser.parse_args(base)
         self.assertEqual(again.source, args.source)
 
-    def test_training_yaml_defaults_and_cli_boolean_override(self) -> None:
+    def test_training_yaml_defaults_and_cli_runtime_override(self) -> None:
         path = self.write_yaml({
             "training_profile": str(default_config_path("training/fma_medium_mid_fusion.yaml")),
             "optimization": {"batch_size": 4, "epochs": 3, "learning_rate": 0.002},
             "model": {"hidden_dimensions": [16, 8], "dropout": 0.1},
-            "reproducibility": {"seed": 123},
+            "reproducibility": {"seeds": [123]},
             "sources": ["mixture"],
         })
         args = self.parser.parse_args([
             "train", "fma-medium", "mid-fusion", "--config", str(path),
             "--manifest", "manifest.jsonl", "--feature-dir", "features",
-            "--output-dir", "output", "--no-drop-silent-features", "--dry-run",
+            "--output-dir", "output", "--device", "cpu", "--dry-run",
         ])
         config = mid_config_from_args(args)
 
-        self.assertEqual(config.batch_size, 4)
-        self.assertEqual(config.epochs, 3)
-        self.assertEqual(config.learning_rate, 0.002)
-        self.assertEqual(config.hidden_dimensions, (16, 8))
-        self.assertEqual(config.seed, 123)
-        self.assertFalse(config.drop_silent_features)
-        self.assertEqual(mid_config_dict(config)["config_provenance"]["cli_overrides"]["drop_silent_features"], False)
+        self.assertEqual(config.settings.batch_size, 4)
+        self.assertEqual(config.settings.epochs, 3)
+        self.assertEqual(config.settings.learning_rate, 0.002)
+        self.assertEqual(config.settings.hidden_dimensions, (16, 8))
+        self.assertEqual(config.seeds, (123,))
+        self.assertEqual(config.settings.device, "cpu")
+        self.assertEqual(config.provenance["cli_overrides"]["device"], "cpu")
 
     def test_custom_defaults_do_not_leak_to_a_later_parse(self) -> None:
         path = self.write_yaml(self.extraction_profile(features={"conformer_layer_index": 12}))

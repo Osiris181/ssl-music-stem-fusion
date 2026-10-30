@@ -16,7 +16,7 @@ by their resolved configurations and validation-selection metadata.
 | `configuration.md` | Active YAML loading, defaults/overrides, named runs, local paths, validation, and provenance. |
 | `htdemucs_separation.md` | Consolidated HT-Demucs configuration, storage handling, and command. |
 | `fma_medium_extraction.md` | Multi-disk FMA HT-Demucs manifest and MusicFM extraction. |
-| `fma_htdemucs_training.md` | Active FMA-Medium mid-/late-fusion commands, retained behavior, and pending protocol changes. |
+| `fma_htdemucs_training.md` | Revised FMA training commands, matched controls, independent branches, five-seed reporting, artifacts, and verified reuse. |
 | `fma_medium_organization.md` | Dataset organization, archived legacy code, command changes, and recovery paths. |
 | `cleanup_20261028.md` | Retired separator cleanup, preserved shared components, and recovery archive. |
 | `legacy_map.md` | Mapping from original research scripts to cleaned replacements and validation status. |

@@ -59,7 +59,7 @@ _TRAINING = {
     "optimization.learning_rate": ("learning_rate", "float"),
     "optimization.batch_size": ("batch_size", "int"),
     "optimization.epochs": ("epochs", "int"),
-    "reproducibility.seed": ("seed", "int"),
+    "reproducibility.seeds": ("seeds", "int_list"),
     "runtime.device": ("device", "str"),
     "runtime.num_workers": ("num_workers", "int"),
 }
@@ -74,7 +74,7 @@ _SEPARATOR = {
     "batching.default_tracks_per_process": ("batch_size", "int"),
     "inputs.default_extensions": ("extensions", "str_list"),
 }
-_SOURCE_ORDER = ["mixture", "guitar", "drums", "piano", "bass", "vocals", "other"]
+_SOURCE_ORDER = ["mixture", "guitar", "drums", "piano", "bass", "vocals"]
 _EXTRACTION_FIXED = {
     "extractor.name": "musicfm",
     "extractor.architecture": "MusicFM25Hz",
@@ -93,15 +93,24 @@ _TRAINING_FIXED = {
     "model.activation": "relu",
     "optimization.loss": "cross_entropy",
     "optimization.optimizer": "adam",
+    "optimization.betas": [0.9, 0.999],
+    "optimization.epsilon": 1e-8,
+    "optimization.weight_decay": 0.0,
+    "optimization.scheduler": "none",
+    "optimization.early_stopping": "none",
     "checkpoint.split": "validation",
     "checkpoint.maximize": ["accuracy_micro", "roc_auc_macro", "pr_auc_macro"],
     "checkpoint.aggregation": "sum",
+    "checkpoint.ties": "earliest_epoch",
     "evaluation.accuracy": "micro",
     "evaluation.precision": "macro",
     "evaluation.recall": "macro",
     "evaluation.f1": "macro",
     "evaluation.roc_auc": "macro_one_vs_rest",
-    "evaluation.pr_auc": "macro_one_vs_rest",
+    "evaluation.pr_auc": "macro_average_precision",
+    "evaluation.absent_classes": "error",
+    "features.silent_vector_policy": "retain",
+    "features.normalization": "none",
     "reproducibility.cudnn_deterministic": True,
     "reproducibility.cudnn_benchmark": False,
 }
@@ -122,8 +131,8 @@ _METADATA = {
 }
 _PATHS = {
     "extraction": {"manifest", "output_dir", "musicfm_root", "stats_path", "checkpoint_path", "report"},
-    "mid_fusion": {"manifest", "feature_dir", "output_dir"},
-    "late_fusion": {"manifest", "feature_dir", "output_dir"},
+    "mid_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
+    "late_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
     "separation": {"input_root", "output_root", "existing_output_root", "report"},
 }
 _EXECUTION = {
@@ -134,13 +143,15 @@ _EXECUTION = {
         "dry_run": ("dry_run", "bool"),
     },
     "mid_fusion": {
-        "allow_missing_features": ("allow_missing_features", "bool"),
         "overwrite": ("overwrite", "bool"),
+        "resume": ("resume", "bool"),
+        "validate_only": ("validate_only", "bool"),
         "dry_run": ("dry_run", "bool"),
     },
     "late_fusion": {
-        "allow_missing_features": ("allow_missing_features", "bool"),
         "overwrite": ("overwrite", "bool"),
+        "resume": ("resume", "bool"),
+        "validate_only": ("validate_only", "bool"),
         "dry_run": ("dry_run", "bool"),
     },
     "separation": {
@@ -283,7 +294,6 @@ def load_configuration(
     mappings = dict(_EXTRACTION if role == "extraction" else _SEPARATOR if role == "separation" else _TRAINING)
     fixed = dict(_EXTRACTION_FIXED if role == "extraction" else _SEPARATOR_FIXED if role == "separation" else _TRAINING_FIXED)
     if role == "mid_fusion":
-        mappings["features.legacy_drop_all_zero_source_vectors"] = ("drop_silent_features", "bool")
         fixed.update({"model.name": "deep_mlp", "features.fusion": "concatenate"})
     elif role == "late_fusion":
         fixed.update({"model.name": "per_source_deep_mlp", "features.fusion": "independent_logits_then_equal_sum"})
@@ -317,15 +327,17 @@ def load_configuration(
     if not isinstance(runs, dict):
         raise ConfigurationError("runs must be a mapping.")
     for name, condition in runs.items():
-        if not isinstance(condition, dict) or set(condition) != {"sources"}:
-            raise ConfigurationError(f"Run {name!r} must contain only a sources list.")
+        if not isinstance(condition, dict) or "sources" not in condition or set(condition) - {"sources", "kind", "matched_sources"}:
+            raise ConfigurationError(f"Run {name!r} must contain sources and optional kind/matched_sources.")
         _coerce(condition["sources"], "str_list", f"runs.{name}.sources")
+        if "kind" in condition:
+            _coerce(condition["kind"], "str", f"runs.{name}.kind")
+        if "matched_sources" in condition:
+            _coerce(condition["matched_sources"], "int", f"runs.{name}.matched_sources")
     if run_name is not None:
         if role not in {"mid_fusion", "late_fusion"} or run_name not in runs:
             raise ConfigurationError(f"Unknown/inapplicable run {run_name!r}; available: {', '.join(runs)}")
         selected = runs[run_name]
-        if not isinstance(selected, dict) or set(selected) != {"sources"}:
-            raise ConfigurationError("Each named run must contain only a sources list.")
         defaults["source"] = _coerce(selected["sources"], "str_list", "runs.sources")
     elif role in {"mid_fusion", "late_fusion"} and "sources" in metadata:
         defaults["source"] = _coerce(metadata["sources"], "str_list", "sources")
@@ -461,7 +473,7 @@ def configure_yaml(parser: argparse.ArgumentParser, role: str, preset: str) -> N
         help=f"YAML preset or experiment file. Default preset: configs/{preset}",
     )
     if role in {"mid_fusion", "late_fusion"}:
-        parser.add_argument("--run", help="Named source condition in an experiment YAML.")
+        parser.add_argument("--run", help="Run one named condition; omit to run the complete YAML matrix.")
     if not isinstance(parser, YAMLArgumentParser):
         raise TypeError("Public YAML-configured tasks require YAMLArgumentParser.")
     parser.yaml_role = role

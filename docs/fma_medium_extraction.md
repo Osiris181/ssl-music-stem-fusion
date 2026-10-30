@@ -9,13 +9,13 @@ then calls the shared MusicFM implementation in `features/_musicfm.py`.
 The task can be run directly as a Python file, or through
 `stemfusion extract fma-medium`. Both use the same parser and configuration.
 
-From the repository root, direct execution is:
+Set `paths.musicfm_root` in `configs/features/musicfm_msd_layer7.yaml` to your
+MusicFM checkout and the manifest/output paths in
+`configs/experiments/fma_medium/extraction.yaml`. No separate local-path YAML
+is required. From the repository root, direct execution is:
 
 ```bash
-python src/stemfusion/experiments/fma_medium/extraction.py \
-  --config configs/experiments/fma_medium/extraction.yaml \
-  --manifest data/manifests/fma_medium_htdemucs.jsonl \
-  --musicfm-root /path/to/musicfm
+python src/stemfusion/experiments/fma_medium/extraction.py
 ```
 
 Direct file execution does not require setting `PYTHONPATH`. From another

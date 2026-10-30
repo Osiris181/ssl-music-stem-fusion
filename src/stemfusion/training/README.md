@@ -1,29 +1,31 @@
-# Shared training engines
+# Shared training workflows
 
-This package consumes cached features and aligned manifests. Public
-dataset entry points live in [experiments](../experiments/README.md).
+Dataset entry scripts call these modules; none of the training modules reads
+FMA audio paths or hardcodes dataset cache filenames.
 
-| File | Purpose |
+| File | Responsibility |
 | --- | --- |
-| `genre.py` | Single-source or concatenation MLP, cache adapters, metrics, and reproducibility artifacts. |
-| `late_fusion.py` | Retained joint-training source MLPs with equal logit summation. |
+| `trainer.py` | Seed initialization, batch loading, model fitting, validation checkpoint selection, test evaluation, artifacts, and verified reuse. |
+| `mid_fusion.py` | Concatenate selected embeddings, count actual model parameters, and choose capacity-matched mixture widths. |
+| `late_fusion.py` | Train branches independently and assemble equal-logit-sum ensembles from their selected predictions. |
+| `metrics.py` | Task loss, validation score, and metric definitions. Genre is implemented first; other task adapters remain future work. |
+| `reporting.py` | Atomic artifacts, checksums, mean/sample SD, and paired differences. |
 
-Use the [FMA-Medium entry points](../experiments/fma_medium/README.md):
+FMA settings live in `configs/training/fma_medium_genre.yaml`. Both fusion
+profiles inherit it. The default outer seeds are 32, 64, 128, 256, 512.
+Every condition uses the same tracks, Adam at 1e-4, batch size 128, 20 epochs,
+ReLU/dropout 0.2, and validation accuracy + macro ROC-AUC + macro average
+precision checkpoint selection. Ties retain the earliest epoch.
 
-```bash
-stemfusion train fma-medium mid-fusion --help
-stemfusion train fma-medium late-fusion --help
-```
+Run [the FMA entry scripts](../experiments/fma_medium/README.md). Dataset
+loading belongs in `data/`; dataset conditions/scheduling belong in
+`experiments/`. Additional task adapters can supply different losses,
+selection scores, and metrics to the common trainer. Mood/theme and emotion
+adapters have not been implemented.
 
-Both retain Adam at `1e-4`, batch size 128, 20 epochs, seed 42, hidden
-widths 1024/512, dropout 0.2, and validation accuracy + macro ROC-AUC +
-macro PR-AUC checkpoint selection.
-
-The public tasks load these defaults from their YAML training presets. Use
-`--config` and optional `--run` to select an experiment condition; explicit
-CLI arguments override YAML. Effective configs include source-file hashes.
-
-The current late runner selects a whole-model checkpoint after joint training;
-it does not yet train/select branches independently. The revised matched
-controls and five-seed protocol remain pending. RMS weighting and the old
-public wrappers are archived outside the active project.
+FMA experiment commands automatically reuse only complete runs with matching data, settings,
+implementation/software metadata, and artifact checksums. It does not
+continue an interrupted optimizer state. `--resume` remains an optional alias
+for the default behavior. An incomplete run requires a new
+output directory or explicit `--overwrite`. The original trainer is preserved
+in `/home/osiris181/stem-fusion-training-archive-20261029/`.

@@ -8,9 +8,9 @@ and command-line interface are named `stemfusion`.
 
 ## Current status
 
-As of 2026-10-28, repository cleanup is in progress. The active package contains
-HT-Demucs separation, FMA-Medium manifest construction, MusicFM extraction,
-and historical genre-classification workflows.
+As of 2026-10-29, the active package contains HT-Demucs separation, FMA-Medium
+manifest construction, MusicFM extraction, and the revised FMA genre training
+protocol with matched controls, independent branches, and five-seed reporting.
 
 Banquet code, configurations, dedicated documentation, and Table 2 experiment
 outputs have been removed from the active project with a recovery archive
@@ -24,22 +24,23 @@ Start with [its dataset guide](src/stemfusion/experiments/fma_medium/README.md).
 Shared separation, MusicFM, model, and training code remains available to
 support that experiment.
 
-No previous run artifacts remain in the active project. The obsolete
-`reference_results/` directory has been removed from this project; `outputs/`
-is currently empty and reserved for future runs. Reusable feature caches and
-split manifests are inputs, rather than previous experimental results.
+The obsolete `reference_results/` directory has been removed from this project.
+New metrics, predictions, and checkpoints belong under `outputs/`. Reusable
+feature caches and split manifests are inputs, rather than previous
+experimental results.
 
-The matched mixture-only controls, five-seed evaluation, and revised results
-are **not yet implemented or completed**. Existing code and historical results
-must not be presented as evidence from the revised protocol.
+Matched mixture-only controls and five-seed evaluation are implemented for
+FMA-Medium and verified with synthetic runs. Full real-data training and
+revised research results remain outstanding. Historical results must not be
+presented as evidence from the revised protocol.
 
 The project context is recorded in:
 
-- [Research direction](RESEARCH_DIRECTION.md): scientific question, prior-work
+- [Research direction](context/RESEARCH_DIRECTION.md): scientific question, prior-work
   positioning, historical setup, and interpretation limits.
-- [Phase 1: novelty revision](PHASE1_NOVELTY_REVISION.md): revised motivation,
+- [Phase 1: novelty revision](context/PHASE1_NOVELTY_REVISION.md): revised motivation,
   empirical objectives, and manuscript drafting notes.
-- [Phase 2: experimental design](PHASE2_EXPERIMENTAL_DESIGN.md): the current,
+- [Phase 2: experimental design](context/PHASE2_EXPERIMENTAL_DESIGN.md): the current,
   provisionally agreed comparison matrix and implementation checks.
 
 Phase 2 takes precedence over earlier experimental proposals. The cleanup
@@ -238,15 +239,13 @@ Public tasks now load their standard YAML presets automatically. Use
 arguments override YAML values. For training, `--run NAME` selects one source
 condition from the experiment file. See [configuration usage](docs/configuration.md).
 The [FMA-Medium configuration directory](configs/experiments/fma_medium/README.md)
-contains the selected input matrices and references retained training presets.
-These matrices do not implement the pending matched controls or five-seed
-evaluation. Old paper-table manifests are archived.
-
-The retained late-fusion runner trains all source branches jointly through
-summed logits and selects one whole-model checkpoint. Independent branch
-training and checkpoint selection required by Phase 2 remain to be implemented.
-Mid-fusion's retained zero-vector exclusion also requires a common-track-set
-audit before new comparisons.
+contains seven mid-fusion conditions and six late-fusion conditions. Mid fusion
+includes the original mixture reference, three capacity-matched mixture MLPs,
+and three stem combinations. Late fusion uses independently selected branches
+and corresponding 4/5/6-member mixture-only ensembles. Both use outer seeds
+`32, 64, 128, 256, 512`, a common strict track set, and shared training/metric
+code. Five-seed reports include sample SD and paired differences. Old
+paper-table manifests and the previous joint trainer are archived.
 
 ## Using the current code
 
@@ -270,8 +269,11 @@ The upstream MusicFM repository and checkpoints remain external dependencies.
 See the [separation guide](docs/htdemucs_separation.md),
 [feature-extraction guide](docs/fma_medium_extraction.md), and
 [training guide](docs/fma_htdemucs_training.md) for complete commands and local
-path arguments. These guides describe the retained runners in their new
-dataset-specific organization.
+path arguments. Direct FMA commands are `python train_mid.py` and
+`python train_late.py` from the dataset experiment directory. Compatible
+completed models are verified and reused automatically. Without
+`--run`, each executes its full matrix. Use `--dry-run` to inspect the plan or
+`--validate-only` to check feature contents without training.
 There are no standalone `evaluate` or `reproduce` CLI commands.
 
 Run the existing tests with:

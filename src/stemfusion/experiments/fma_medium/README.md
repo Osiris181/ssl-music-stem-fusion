@@ -1,112 +1,114 @@
 # FMA-Medium genre classification
 
-This is the only active dataset experiment. It uses the original mixture and
-HT-Demucs stems with frozen MusicFM representations for 16-class genre
-classification. Only downstream classifiers are trained.
-
-## Files and responsibilities
+This dataset uses frozen MusicFM-MSD layer-7 embeddings of the mixture and
+five HT-Demucs stems to predict 16 genre classes. The existing splits and
+class mapping are preserved; `other` is excluded.
 
 | File | Purpose |
 | --- | --- |
-| `extraction.py` | Owns the FMA extraction parser, default task YAML, and config construction; calls shared MusicFM extraction. |
-| `train_mid.py` | Dataset entry point for a single source or concatenated source features; delegates to the shared genre trainer. |
-| `train_late.py` | Dataset entry point for equal-sum source logits; delegates to the retained shared late-fusion trainer. |
+| `extraction.py` | Runnable MusicFM extraction interface. |
+| `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
+| `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
+| `training.py` | FMA-specific parser, dataset handoff, condition validation, seed scheduling, branch reuse, and summary assembly. |
 
-Shared engines live in [training](../../training/README.md), not in copied
-dataset training loops. Configuration matrices are in
-[configs/experiments/fma_medium](../../../../configs/experiments/fma_medium/README.md).
+Shared training functions are in `training/`, model architectures in
+`models/`, and strict feature loading in `data/fma_features.py`.
+Each public file supports direct execution without PYTHONPATH.
 
-The public tasks are grouped in this directory:
+## Configuration
 
-```text
-fma_medium/
-├── extraction.py
-├── train_mid.py
-├── train_late.py
-└── README.md
-```
+- MusicFM settings and checkout location: `configs/features/musicfm_msd_layer7.yaml`.
+- Extraction manifest/output/source list: `configs/experiments/fma_medium/extraction.yaml`.
+- Shared classifier settings and manifest/feature/output paths: `configs/training/fma_medium_genre.yaml`.
+- Conditions: `configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`.
 
-## Inputs and commands
+CLI paths override YAML paths. Relative YAML paths resolve against the YAML
+file; relative CLI paths resolve against the current working directory.
 
-Extraction consumes an aligned audio manifest and the local MusicFM checkout
-with MSD weights/statistics. Training consumes the manifest and source/split
-MusicFM caches. Cache names are `fma_musicfm_<source>_<split>.pkl`;
-splits are `train`, `validation`,
-and `test`. The default feature width is 1024. Explicit legacy cache-directory
-adapters remain available; no existing features or splits were changed.
+## Training commands
 
-From the repository root, inspect options with:
+From this directory, inspect the plans and validate feature contents:
 
 ```bash
-python src/stemfusion/experiments/fma_medium/extraction.py --help
-PYTHONPATH=src python -m stemfusion extract fma-medium --help
-PYTHONPATH=src python -m stemfusion train fma-medium mid-fusion --help
-PYTHONPATH=src python -m stemfusion train fma-medium late-fusion --help
+python train_mid.py --dry-run
+python train_late.py --dry-run
+python train_mid.py --validate-only
 ```
 
-`extraction.py` supports direct Python-file execution without `PYTHONPATH`;
-it uses the same parser and YAML settings as the package command.
-
-Each command loads its standard YAML preset automatically. Use `--config`
-to select an experiment file and `--run` to select one named training
-condition; explicit CLI settings override YAML. See
-[configuration usage](../../../../docs/configuration.md) for full examples.
-
-For extraction, the default task YAML is
-`configs/experiments/fma_medium/extraction.yaml`. FMA-only overrides belong
-there; its shared feature profile provides the base MusicFM settings. Numerical
-parser defaults are not duplicated in Python.
-
-One extraction command processes the YAML `sources` list automatically, with
-one encoder reused across sources. Use repeated `--source` options to override
-that list. Individual caches remain source/split-specific; a batch report
-summarizes completion/failures. No shell loop is required.
-
-For a mixture-only reference, select only `--source mixture` in the mid-fusion
-command. To plan a mixture-plus-stem run, use:
+To run the complete matrices:
 
 ```bash
-PYTHONPATH=src python -m stemfusion train fma-medium mid-fusion \
-  --manifest data/manifests/fma_htdemucs.jsonl \
-  --feature-dir data/features/fma_medium/musicfm_msd_layer7 \
-  --source mixture --source guitar --source drums --source piano \
-  --output-dir outputs/fma_medium/mid_fusion/mixture_guitar_drums_piano/seed42 \
-  --dry-run
+python train_mid.py
+python train_late.py
 ```
 
-Use `late-fusion` in place of `mid-fusion` and a separate output directory
-for the other retained runner. Dry runs validate the manifest/cache paths
-without loading feature contents or starting training. Use a new MSD/layer-7
-output directory rather than the copied legacy caches. The extraction workflow
-is in [the extraction guide](../../../../docs/fma_medium_extraction.md).
+These commands train over seeds `32, 64, 128, 256, 512`. Without `--run`,
+each runs its whole condition matrix. The default common output root is
+`outputs/fma_medium/phase2/`. The late command can reuse the standard
+mixture model trained by the mid command when their effective settings match.
 
-## Retained behavior versus revised design
+To run one condition and one seed:
 
-This organization step preserves the existing MLP architectures, Adam
-learning rate `1e-4`, batch size 128, 20-epoch budget, dropout 0.2,
-hidden widths 1024/512, and seed-42 defaults. Comparable settings are shared;
-the final five-seed list is not yet fixed.
+```bash
+python train_mid.py --run matched_mixture_4 --seed 32
+```
 
-The current late-fusion engine optimizes one model containing separate source
-MLPs through a summed-logit loss, and selects a checkpoint for that whole
-model. It does not yet implement the revised independent branch training and
-per-branch checkpoint selection. The current mid-fusion runner also retains
-legacy all-zero-feature exclusion; common retained track sets need checking
-against late fusion before revised comparisons.
+The same workflows are available from the project root:
 
-The revised matrix keeps the original mixture-only reference and three
-nested sets: `M+G+D+P`, `M+G+D+P+B`, and `M+G+D+P+B+V`.
-Matched-capacity mixture MLPs, matched mixture ensembles, independent branch
-selection, and five-seed aggregation remain pending. Do not treat this
-cleanup as completed revised experiments.
+```bash
+PYTHONPATH=src python -m stemfusion train fma-medium mid-fusion
+PYTHONPATH=src python -m stemfusion train fma-medium late-fusion
+```
 
-## Outputs and next step
+## Experiment matrix
 
-Each actual training run writes its checkpoint, resolved config, validation
-history, manifest checksum, environment, test metrics, and per-track
-predictions into its chosen output directory. No real-data experiments were
-run during reorganization.
+Mid fusion has seven conditions: the standard mixture MLP; three wider
+mixture-only controls; and `M+G+D+P`, `M+G+D+P+B`, `M+G+D+P+B+V`.
+The measured matched first-hidden widths are 3071, 3753, 4435 for
+1024-dimensional features and the standard 1024/512 architecture.
 
-Next, audit feature provenance and alignment, split IDs, label mapping,
-metric definitions, and the actual parameter counts before implementing the
-Phase 2 controls. See [the current design](../../../../PHASE2_EXPERIMENTAL_DESIGN.md).
+Late fusion has six conditions: three 4/5/6-member independent mixture-only
+ensembles, and the same three source combinations. The ordinary mixture
+reference is reported alongside them. Every branch is trained and selected
+independently; selected logits are summed equally, then softmax is applied.
+
+Both workflows require exactly aligned, finite float32 source caches. Valid
+zero vectors are retained. Training uses Adam 1e-4, batch size 128, 20 epochs,
+ReLU and dropout 0.2. Selection maximizes validation micro accuracy + macro
+one-vs-rest ROC-AUC + macro average precision, on the 0–1 scale. Ties retain
+the earliest checkpoint. Test metrics never choose checkpoints.
+
+## Artifacts and reuse
+
+Each classifier saves its checkpoint, effective config, environment, epoch
+history, validation/test predictions, metrics, and completion checksums.
+Ensembles save selected branch references and aggregated predictions.
+Data audits record cache/manifest hashes, class mapping, shapes, and zero counts.
+Summary JSON files contain per-seed results, means, sample SD (ddof=1), and
+paired fusion-minus-matched-control differences. A single-seed subset has
+`sample_sd: null`, not a five-seed claim.
+
+When the command finishes, it also prints a concise test-results table,
+paired differences for included controls, and the saved summary path.
+The readable table is also saved to a `.txt` file beside the detailed JSON,
+including settings, source abbreviations, and metric explanations. Git allows
+`outputs/**/summary_*.txt` and `outputs/**/summary_*.json` to be committed for reporting; other generated
+artifacts remain ignored.
+Complete reports are `outputs/fma_medium/summary_mid_fusion.txt`/`.json`
+and `summary_late_fusion.txt`/`.json`. The shared YAML's `paths.summary_dir`
+sets that location, separately from the artifact root. Condition/seed subsets
+keep descriptive filename suffixes. An explicit `--output-dir` redirects
+summaries too unless `--summary-dir` is supplied.
+
+Completed, compatible runs are verified and reused automatically. `--resume`
+remains accepted but is not required. Use `--overwrite` explicitly to retrain
+and replace existing outputs. Interrupted individual
+fits restart from scratch with a new output location or `--overwrite`;
+optimizer-state continuation is not implemented.
+
+Only synthetic training checks have been run during implementation. Historical
+FMA test scores influenced the selected nested stem sets; these reruns are
+not a newly independent confirmatory holdout.
+
+See [the full training guide](../../../../docs/fma_htdemucs_training.md) and
+[the design](../../../../context/PHASE2_EXPERIMENTAL_DESIGN.md).

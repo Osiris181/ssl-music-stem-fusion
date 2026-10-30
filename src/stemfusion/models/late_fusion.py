@@ -1,10 +1,16 @@
-"""Late-fusion MLPs used by the FMA-Medium HT-Demucs experiments."""
+"""Equal-logit-sum model container for independently selected MLP branches.
+
+The revised training workflow fits branches separately and can assemble
+ensembles directly from saved predictions. This container is also available
+when inference from loaded branch weights is needed.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 
 from torch import Tensor, nn
+from stemfusion.models.mlp import DeepMLPClassifier
 
 
 def _validate_mlp_settings(
@@ -23,32 +29,6 @@ def _validate_mlp_settings(
         raise ValueError("Two positive hidden dimensions are required.")
     if not 0.0 <= dropout < 1.0:
         raise ValueError("Dropout must be in the interval [0, 1).")
-
-
-class _StemClassifier(nn.Module):
-    """One three-layer MLP voter with the paper-aligned architecture."""
-
-    def __init__(
-        self,
-        feature_dimension: int,
-        number_of_classes: int,
-        hidden_dimensions: Sequence[int],
-        dropout: float,
-    ) -> None:
-        super().__init__()
-        first_hidden, second_hidden = hidden_dimensions
-        self.network = nn.Sequential(
-            nn.Linear(feature_dimension, first_hidden),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(first_hidden, second_hidden),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(second_hidden, number_of_classes),
-        )
-
-    def forward(self, features: Tensor) -> Tensor:
-        return self.network(features)
 
 
 class UnweightedLateFusionMLP(nn.Module):
@@ -74,7 +54,7 @@ class UnweightedLateFusionMLP(nn.Module):
         self.number_of_sources = number_of_sources
         self.number_of_classes = number_of_classes
         self.stem_classifiers = nn.ModuleList(
-            _StemClassifier(
+            DeepMLPClassifier(
                 feature_dimension,
                 number_of_classes,
                 hidden_dimensions,

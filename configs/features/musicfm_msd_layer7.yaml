@@ -1,4 +1,8 @@
 # Paper-aligned MusicFM configuration for HT-Demucs mixtures and stems.
+# Set this to your local MusicFM checkout, containing data/ with the files below.
+paths:
+  musicfm_root: /home/osiris181/musicfm
+
 extractor:
   name: musicfm
   architecture: MusicFM25Hz

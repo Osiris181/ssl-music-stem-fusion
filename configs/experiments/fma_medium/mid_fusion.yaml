@@ -1,4 +1,4 @@
-# Supported input conditions; matched controls and five-seed evaluation pending.
+# Seven mid-fusion conditions, each run over the shared five outer seeds.
 dataset: fma_medium
 task: genre_classification
 number_of_classes: 16
@@ -6,10 +6,13 @@ separator: htdemucs_6s
 feature_profile: ../../features/musicfm_msd_layer7.yaml
 training_profile: ../../training/fma_medium_mid_fusion.yaml
 command: train fma-medium mid-fusion
-implementation_status: retained_runner_not_revision_complete
+implementation_status: phase2_capacity_controls
 
 runs:
-  mixture_only: {sources: [mixture]}
-  mixture_guitar_drums_piano: {sources: [mixture, guitar, drums, piano]}
-  mixture_guitar_drums_piano_bass: {sources: [mixture, guitar, drums, piano, bass]}
-  mixture_all_five_stems: {sources: [mixture, guitar, drums, piano, bass, vocals]}
+  mixture_only: {kind: reference, sources: [mixture]}
+  matched_mixture_4: {kind: capacity_matched, sources: [mixture], matched_sources: 4}
+  matched_mixture_5: {kind: capacity_matched, sources: [mixture], matched_sources: 5}
+  matched_mixture_6: {kind: capacity_matched, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}
