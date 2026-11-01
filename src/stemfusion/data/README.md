@@ -16,6 +16,9 @@ Current implementation:
 | `features.py` | Dataset-independent aligned feature containers passed to training. |
 | `gtzan.py` | Read provided stratified splits, apply explicit unavailable-track exclusions, assign ten-class labels, and generate audio manifests. |
 | `gtzan_features.py` | Load NumPy or PyTorch GTZAN caches with exact ID alignment and extraction/import provenance validation. |
+| `ismir04.py` | Preserve CSV partitions and six-class labels, exclude confirmed duplicates, and assign collision-safe IDs. |
+| `ismir04_features.py` | Align NumPy/PyTorch ISMIR04 caches to manifest IDs and verify shared layer-7 extraction reports and the full-duration chunk policy. |
+| `audio_duplicates.py` | Read-only file/decoded-PCM hashes, saved audit progress, and reuse of unchanged local files. |
 
 The FMA builder writes JSON Lines records containing `track_id`, `split`,
 `genre`, `label`, and a `paths` mapping. It supports mixture-only manifests and

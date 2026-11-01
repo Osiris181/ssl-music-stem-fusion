@@ -3,6 +3,7 @@
 | File | Active usage |
 | --- | --- |
 | `extraction.yaml` | Shared feature preset, FMA manifest/output paths, and six selected inputs. |
+| `separation.yaml` | Dataset input/output roots; inherits the shared HT-Demucs inference preset. |
 | `mid_fusion.yaml` | Seven conditions: original mixture, three capacity-matched mixture controls, three source combinations. |
 | `late_fusion.yaml` | Three stem ensembles and three matched mixture-only ensembles with independent branch selection. |
 

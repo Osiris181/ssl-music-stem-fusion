@@ -67,18 +67,30 @@ Run a dry run first:
       --python-executable /path/to/demucs/environment/bin/python \
       --dry-run
 
-ISMIR04 can supply all three roots and formats to the same command:
+Each experiment folder provides a direct entry script:
+
+    python separation.py --dry-run
+    python separation.py
+
+It loads `configs/experiments/<dataset>/separation.yaml`, inheriting this same
+shared inference preset. FMA-Medium discovers MP3 inputs; GTZAN discovers WAV
+inputs under `genres/`. Existing complete six-stem folders are reused.
+
+ISMIR04 uses its retained manifest to avoid basename collisions and preserve
+the exact audio-to-stem mapping. Its equivalent unified command is:
 
     stemfusion separate htdemucs \
-      --input-root /path/to/ismir04/audio/training \
-      --input-root /path/to/ismir04/audio/development \
-      --input-root /path/to/ismir04/audio/evaluation \
-      --output-root /path/to/ismir04_separated_htdemucs \
-      --extension .mp3 \
-      --extension .wav \
-      --extension .au \
-      --batch-size 32 \
+      --config configs/experiments/ismir04/separation.yaml \
       --dry-run
+
+In manifest mode, each record's stem paths determine the destination beneath
+`output_root`. All six native stems must exist and be non-empty for a track
+to be skipped. Missing targets are grouped by destination root and sent to
+the same backend using temporary input symlinks with the intended folder
+names. Source audio is not copied or renamed. Symlinks are cleaned after
+execution, and failures report original input paths. Dry runs do not stage
+inputs, run Demucs, or write reports. The ISMIR04 preset uses batches of 32
+and accepts MP3, WAV, and AU inputs.
 
 When completed outputs are distributed across disks, each old location can be
 checked without writing to it:

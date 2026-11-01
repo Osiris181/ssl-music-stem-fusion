@@ -23,3 +23,13 @@ Inspect the required model and path arguments, then begin with a dry run:
 
 Full commands and output layouts are documented in
 `docs/htdemucs_separation.md`.
+
+FMA-Medium, GTZAN, and ISMIR04 also expose `python separation.py` from their
+experiment directories. These thin entry scripts load dataset-specific YAML
+and call this same backend. Run `python separation.py --dry-run` first.
+
+Directory mode discovers unique input basenames. Manifest mode (`--manifest`)
+uses exact per-record stem paths beneath `--output-root`, skips complete native
+six-stem sets, and stages temporary input symlinks for missing targets. This
+preserves distinct recordings with identical filenames. It never edits the
+manifest or source audio; dry runs create no staging/output/report files.

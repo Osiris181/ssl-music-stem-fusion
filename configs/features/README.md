@@ -1,10 +1,16 @@
 # Feature configurations
 
 `musicfm_msd_layer7.yaml` is the shared preset referenced by the FMA-Medium
-and GTZAN task YAMLs in `configs/experiments/`. Each dataset entry point
+and GTZAN/ISMIR04 task YAMLs in `configs/experiments/`. Each dataset entry point
 selects its task YAML. This feature preset supplies checkpoint/statistics names,
 sample rate, duration handling, encoder layer, pooling, dimension, runtime,
 and split defaults.
+
+`audio.chunk_seconds` defaults to null (one forward pass). ISMIR04 overrides
+it to 30 s for long recordings without truncating them. The shared runtime
+pools all latent frames from balanced chunks. Encoder context resets at chunk
+boundaries, so this policy is documented separately from a full-track forward
+pass. `--chunk-seconds N` or `--no-chunking` overrides YAML.
 
 Set `paths.musicfm_root` in this preset to your MusicFM checkout. FMA manifest
 and output paths are configured in `configs/experiments/fma_medium/extraction.yaml`.

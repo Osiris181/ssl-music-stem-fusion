@@ -1,0 +1,7308 @@
+{
+  "analysis_role": "supporting",
+  "branch_artifacts": {
+    "128": {
+      "bass": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/bass",
+        "metrics_sha256": "9b710cfc5d9a93a00c0f80ad38a0680506f735a22d70d6f1f28fc69c503c2a89",
+        "run_manifest_sha256": "f6510f62934284a46ba98d88df982581c745ab33501b579be0b9f899249e4e66",
+        "selected_checkpoint_sha256": "b3b60ddce64cb157a9917dab303ed1f4772e662a46c88d7f35c47599aa96bd19"
+      },
+      "drums": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/drums",
+        "metrics_sha256": "0f3c33fb13e4c15ebfc210be64e8a1f3e049cc608292a597b3210e466bf48873",
+        "run_manifest_sha256": "cb1a9028403106a6c66d98ac69ce04c0276fc2b92413834b4aaa97a7c68420e0",
+        "selected_checkpoint_sha256": "2aea691af7dd4bba716e38daf375139ffa840c8754304a43da97e7e0fdaa3465"
+      },
+      "guitar": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/guitar",
+        "metrics_sha256": "b3ccf076b6731c5ac0fc08f5b1055be6ae6b150606a92a0769361948b71350a2",
+        "run_manifest_sha256": "d7bd81dde1bea2a382546194d1b5dd6efc6b7deecc68d180da38ef56140fd9a1",
+        "selected_checkpoint_sha256": "ae1938fb3a099f486b9a7c068f7da859792dad64456714535afe2f7ebbb13697"
+      },
+      "mixture": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/mixture_1",
+        "metrics_sha256": "2466671a5a33f8874352746ecd6d0394d4e0fcf385fe35c74b7d5a256a59aaaf",
+        "run_manifest_sha256": "ecd5d76d5ffeae16301bc0d2f344848626fe74fd90f74c2c9c3130ca0bd3221a",
+        "selected_checkpoint_sha256": "b4f77ee8c9b1ba3a70b755bff6d6146f62ce7ac67a61f93f5819711fdd2c2f26"
+      },
+      "piano": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/piano",
+        "metrics_sha256": "0ea9e3a6e3a5e79cd87d50101e7df78bba03096c24e832d74cdf577c345c653a",
+        "run_manifest_sha256": "aa37888a43560ab9646124aa985de5509b42303d10c252d2c67ac5fd45bef4ec",
+        "selected_checkpoint_sha256": "602fd279631278d0d4e065362135033a868973535e33f58c6b1c47824b851c81"
+      },
+      "vocals": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/vocals",
+        "metrics_sha256": "5690109d8036497b312a56cc6d16dc310dc6930f91301299f249dca45cd791fa",
+        "run_manifest_sha256": "28c6a002c318422a24eef611417c63c2cc273f801b3d25e197af86ac2e30e87d",
+        "selected_checkpoint_sha256": "bd0bd7635b34a183eedc1b998d605ced2daf21248d61a07cdd00b937b6a06d6f"
+      }
+    },
+    "256": {
+      "bass": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/bass",
+        "metrics_sha256": "d6c8ce43d9d02c18bd5066469fc2e0f680a49fee98eb72ee73996db7bd01c6b1",
+        "run_manifest_sha256": "a21459ce2722ca026cf591adb985c143b27163d8be55accdc40836b378575c15",
+        "selected_checkpoint_sha256": "fd8380ff9b5e668d0ef8da79368b524483767a1ab3cd939905bd00a33bbfe12c"
+      },
+      "drums": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/drums",
+        "metrics_sha256": "b904f9e4a77c35128eb3efe21ddab5cc270f81b697cc5181c08a70031cffe1b6",
+        "run_manifest_sha256": "1314d2dc9bf8f2ffa51f1abfa40d97923b0c57304aa9ff01b722d43a523ce4d6",
+        "selected_checkpoint_sha256": "fed26b7ae96b4beabf4393311ca3605e8899adacb09b196584ca3a0fc34b7706"
+      },
+      "guitar": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/guitar",
+        "metrics_sha256": "c76d3cf4d0689df792c68ce09e6f4572e194b9ca53d9b9abb2c7ff0bdb9e7c3e",
+        "run_manifest_sha256": "3aa3ddc51fab0f5f5672811ad19e64a3fa05040e0db64fa62db6bd1241da08ba",
+        "selected_checkpoint_sha256": "61fed7b9fcb8db06e22f600fadcf659238b8bd3e8669868e35b25ab00486d116"
+      },
+      "mixture": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/mixture_1",
+        "metrics_sha256": "f69ae1cb4b55546628d8e770ae66412cbf70c632e994ff30dade65f35cd0c040",
+        "run_manifest_sha256": "df9ffe45c6f7d6d93cb1eadc495cea1ed09a6ca34942400395eb59de35594ace",
+        "selected_checkpoint_sha256": "ae999641893ab9ccf2eb7bed186884b0b1558c987cde354d78815a0401ee983f"
+      },
+      "piano": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/piano",
+        "metrics_sha256": "3eb4e57b2cab8b54ea0eefbaa5a580bbdf1d57edb6fd66d6a6c3c113a2cbcf0f",
+        "run_manifest_sha256": "261ab9783b744e3e71e5ec753cc23fe1c44c7ec787825c4dda57d76092e7f4d9",
+        "selected_checkpoint_sha256": "a1406fb691552d298594b9d836b38ed841397f8d8f7512b814e7fb91f835ed3f"
+      },
+      "vocals": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/vocals",
+        "metrics_sha256": "e19e28a0992ebb3c5de661ae0559d5faf102bd895acb4537f975d6e2077657d0",
+        "run_manifest_sha256": "428d088b798ac386c86b72c8a361090a1d5c368132de74f1a000fab4dbb3d6c9",
+        "selected_checkpoint_sha256": "11f11aeb41321041d0e0743d89f8aa33ef45733d361930daec8d751ee74877e3"
+      }
+    },
+    "32": {
+      "bass": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/bass",
+        "metrics_sha256": "059b941a00a4f75742423c75adcc4691ba635219452bbaeef8c57d948e80ebf1",
+        "run_manifest_sha256": "4b3972e687a2d7fe819d8a7564a7d527ac5f804b23cd2b885b5557fbbe6864fc",
+        "selected_checkpoint_sha256": "20fe248138dc28972555da3d6c4010e43f952b23025ddf680181975d2002ed79"
+      },
+      "drums": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/drums",
+        "metrics_sha256": "193bc56a528a095be6c9ec14885131c19d4cf70439b35ac422ec1153b23ea29f",
+        "run_manifest_sha256": "c295629586f25d3a9d78dec04546ae14fd15a38f3dcb77176d47836458fc91dc",
+        "selected_checkpoint_sha256": "f79995a9233225d60d71295b2fe171b0bc32e349cc0b40d9c6edb9264793a1cb"
+      },
+      "guitar": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/guitar",
+        "metrics_sha256": "0576b912b9a82b158ea511f944f9cd0f643225a18f32b5ed1194ac0e9eb73fc8",
+        "run_manifest_sha256": "79f77883c9e8760f92ee1378f9588880ba128d6387bead021079e34b81451f66",
+        "selected_checkpoint_sha256": "87b61c0ec1070e8bdcc83cd16cb64f6146ea63ba3c773283f9ff81ddb9c15d8d"
+      },
+      "mixture": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/mixture_1",
+        "metrics_sha256": "d2f1586d455dd7ef4817a32bbe8d55e651699bc871946af5fdb625adefe14f94",
+        "run_manifest_sha256": "6cd0fb8e63cf4dcca1ef403ee52c332d6668ea9575937becd03b61cdef461453",
+        "selected_checkpoint_sha256": "feb844afd1c629ebb7f96454fc2f5173152978b942612ea02470790abb82f5df"
+      },
+      "piano": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/piano",
+        "metrics_sha256": "e235020dae331c1d711e2dee8612f76d95b2ba19952ca29cd37f066acb530791",
+        "run_manifest_sha256": "e19f0e97f3f5774bd232ddc474fe2f36d2258416674e916e245409cc6f0a9535",
+        "selected_checkpoint_sha256": "a1fae359dc79779ab00a4bb71dafe42a79fbf235bb8b17b34bb6df104a43f340"
+      },
+      "vocals": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/vocals",
+        "metrics_sha256": "d6a9593bd8f28c5e2b8f3fce2dd5039b1c5126f7ac9ff4cd0f193331cd4fe263",
+        "run_manifest_sha256": "9cfa6def09a21332730268b73aa3f0e05c7a708fa230066c8c5d04c3054d66af",
+        "selected_checkpoint_sha256": "43ed3fa68bbd92ad82ef5e62d796b3a904ae25fb73f043a6ae5e756dacb176a4"
+      }
+    },
+    "512": {
+      "bass": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/bass",
+        "metrics_sha256": "e063fec6441a6ee76ab0fe9c8b506797bb23349b1c7d44fb34dc74129a4ba327",
+        "run_manifest_sha256": "e5170c1c9eaea71592726c61e031389628fe6b74af6341d01e8ed60a58c6b8e1",
+        "selected_checkpoint_sha256": "4c991850b6a963cd68f5706cc4181b6086e240543d3501d897e1e748874f2c30"
+      },
+      "drums": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/drums",
+        "metrics_sha256": "ebc6122ed7d6456db22647667313e498cd014306dafdf75a0e65302f0101b074",
+        "run_manifest_sha256": "f875dc9b9989a81cae1d842b98bcdaedff0620b4ec3ba8f28869c73b97f095c6",
+        "selected_checkpoint_sha256": "a3fa56339fc4717162b0f843860feef44b317dd8361ef0f151b8435b501720ef"
+      },
+      "guitar": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/guitar",
+        "metrics_sha256": "738d4e064c09931ff66f3190f798a466cc8630989d79b1e1f2bff51244cdba3d",
+        "run_manifest_sha256": "2905d79b3265c075c3ff4ea09614e55b333b0ba9f4b35ad1d31b2e108dc5d266",
+        "selected_checkpoint_sha256": "6d194269e67b3bfc80e7e24a1ca5a2dfa1937c41e22ee3aded466574bc1980d4"
+      },
+      "mixture": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/mixture_1",
+        "metrics_sha256": "fff23057da8c273418b02ed47152c99c04ecda5849a9bd32b236b54601d50f80",
+        "run_manifest_sha256": "84257549ea04e0a80ae6b60b6292f31294de5d488d4b2a4af7fdccf67f4d5204",
+        "selected_checkpoint_sha256": "d6370019b42fd6039b35f27f6082764c3c3fab291b36f98b85dede87df075170"
+      },
+      "piano": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/piano",
+        "metrics_sha256": "a4f6226ec86ba037c892eae45b4e257409e8b4dccd8120001a6fb2e96ca7a615",
+        "run_manifest_sha256": "cb22b9ad3c13aca7f5aaeca1611e012c252a6730b0ba927b941fc80e6e1f189f",
+        "selected_checkpoint_sha256": "f83b7a78e2cd5dea8ea1e064f3a71f3152656287f338a85ebc39a1e904fd7fe2"
+      },
+      "vocals": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/vocals",
+        "metrics_sha256": "03b89f726beaea99baa3e31dd3846d59891af375401c6a756e30db2c21214187",
+        "run_manifest_sha256": "90c1c2a36434304fd253a87c145c43056f35c7d7d8db0ef18e91692dcf1b527b",
+        "selected_checkpoint_sha256": "0ea899757817461314b7d9830570fc434eea997ce231c54c5e69cbd73328c0d9"
+      }
+    },
+    "64": {
+      "bass": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/bass",
+        "metrics_sha256": "79adae6c6599dfc6522a734198dadf7fbf4fb2a55a4c974c516ef3fc7f16b868",
+        "run_manifest_sha256": "bd8fdc35388dc11dc9a162fcd0f7ee412b11c070bcba84c56a89857a5a32ee6f",
+        "selected_checkpoint_sha256": "1c777e399eb3ee95328e345408f8761807cc264c79ae449649df273e750c12f7"
+      },
+      "drums": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/drums",
+        "metrics_sha256": "413944e3ae7d59495541361c6ea4a21f05899324a0e0d0205ee5de0e3e6221b3",
+        "run_manifest_sha256": "920b98f7d809650480889634c13a677b70973495523892aa286659ac83b780f1",
+        "selected_checkpoint_sha256": "c57c9fde58ad56931a97315dd950fa2577b107ba708ba286b676cf3eef73c52c"
+      },
+      "guitar": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/guitar",
+        "metrics_sha256": "e2a2850d7eb38932ec1669343480e77c64ce495090f5242d1957b0f128a8ce4e",
+        "run_manifest_sha256": "0ef367c001f81f8e7ac531e1883e3455e23b294df8fb5a7ce950cae7a78d020d",
+        "selected_checkpoint_sha256": "fb207f8425aaca0864503b15d3a1cb03e384b9f62b3ef3d11c215f077be982dd"
+      },
+      "mixture": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/mixture_1",
+        "metrics_sha256": "acae1a102fa534d8be75834b1441d38067a68759523c4aeaf7cc6154f636feb6",
+        "run_manifest_sha256": "52fb31b6721042cace9ae415cbdfbc58b171a837509ed7fd487aa9ab84f52c42",
+        "selected_checkpoint_sha256": "fa00808dc810fa84398e73f6beabbf5f282460f0cc67db934e5fffa7e2bcec88"
+      },
+      "piano": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/piano",
+        "metrics_sha256": "fd664bf45e095a82e44fc5d7d56272516ae01242f6f372862692d269e3be2bfb",
+        "run_manifest_sha256": "3e7ced5bf019514929058a54f277e847a4b16d98300962e276c15d79501350d8",
+        "selected_checkpoint_sha256": "7a670f86a2a8b3e0bbd818b4bb4adf4fa7c898884383a71cbecc40b1ccf0755a"
+      },
+      "vocals": {
+        "directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/vocals",
+        "metrics_sha256": "5ee4cb0723dbc5292b89ae020bf2af42fde3c2863368082e1463704bbbee42c3",
+        "run_manifest_sha256": "31c997761d52278d0e53c64b51ced33e7adf5a15cd25924f833e1cf2831ae843",
+        "selected_checkpoint_sha256": "467047faae331f2d26b2babe79d4b9ef5b05976aa233e2524e5b749622031084"
+      }
+    }
+  },
+  "checkpoint_reselection_performed": false,
+  "conditions": {
+    "bass_only": {
+      "accuracy": {
+        "mean": 0.7527624368667603,
+        "sample_sd": 0.0030884983088137283,
+        "values": [
+          0.7527624368667603,
+          0.7513812184333801,
+          0.7486187815666199,
+          0.7541436553001404,
+          0.7569060921669006
+        ]
+      },
+      "f1_macro": {
+        "mean": 0.5974672436714172,
+        "sample_sd": 0.012839171857194074,
+        "values": [
+          0.5808134078979492,
+          0.5962797999382019,
+          0.5915496349334717,
+          0.6037183403968811,
+          0.6149750351905823
+        ]
+      },
+      "pr_auc_macro": {
+        "mean": 0.755940043926239,
+        "sample_sd": 0.005924157902348399,
+        "values": [
+          0.7551050782203674,
+          0.7565699219703674,
+          0.754620373249054,
+          0.7484445571899414,
+          0.7649602890014648
+        ]
+      },
+      "precision_macro": {
+        "mean": 0.7471672296524048,
+        "sample_sd": 0.00745544329066317,
+        "values": [
+          0.7487441897392273,
+          0.7368010878562927,
+          0.7556428909301758,
+          0.7428237199783325,
+          0.7518242597579956
+        ]
+      },
+      "recall_macro": {
+        "mean": 0.5718705296516419,
+        "sample_sd": 0.011467484988820336,
+        "values": [
+          0.5600289702415466,
+          0.5706849098205566,
+          0.5619210600852966,
+          0.5800855159759521,
+          0.5866321921348572
+        ]
+      },
+      "roc_auc_macro": {
+        "mean": 0.9433458924293519,
+        "sample_sd": 0.0017147956807160125,
+        "values": [
+          0.9422836303710938,
+          0.9447687268257141,
+          0.9423832893371582,
+          0.9417102336883545,
+          0.9455835819244385
+        ]
+      }
+    },
+    "drums_only": {
+      "accuracy": {
+        "mean": 0.7464088320732116,
+        "sample_sd": 0.005908645174739777,
+        "values": [
+          0.7458563446998596,
+          0.7541436553001404,
+          0.75,
+          0.738950252532959,
+          0.7430939078330994
+        ]
+      },
+      "f1_macro": {
+        "mean": 0.5885177969932556,
+        "sample_sd": 0.009627526991894212,
+        "values": [
+          0.5883743166923523,
+          0.6001846790313721,
+          0.5891748070716858,
+          0.5913720726966858,
+          0.5734831094741821
+        ]
+      },
+      "pr_auc_macro": {
+        "mean": 0.7482948899269104,
+        "sample_sd": 0.004825220941266533,
+        "values": [
+          0.7473304271697998,
+          0.7566993236541748,
+          0.7458341717720032,
+          0.7470532059669495,
+          0.7445573210716248
+        ]
+      },
+      "precision_macro": {
+        "mean": 0.7113491177558899,
+        "sample_sd": 0.02637077793221941,
+        "values": [
+          0.6936461925506592,
+          0.7431456446647644,
+          0.7358927726745605,
+          0.6993942260742188,
+          0.6846667528152466
+        ]
+      },
+      "recall_macro": {
+        "mean": 0.5685721278190613,
+        "sample_sd": 0.01048535529842606,
+        "values": [
+          0.5705686807632446,
+          0.5840216875076294,
+          0.5664708614349365,
+          0.5670213103294373,
+          0.5547780990600586
+        ]
+      },
+      "roc_auc_macro": {
+        "mean": 0.9376813888549804,
+        "sample_sd": 0.0008252273986977257,
+        "values": [
+          0.9376630783081055,
+          0.9388568997383118,
+          0.9367477297782898,
+          0.9380413889884949,
+          0.9370978474617004
+        ]
+      }
+    },
+    "guitar_only": {
+      "accuracy": {
+        "mean": 0.8019336938858033,
+        "sample_sd": 0.007665451213714611,
+        "values": [
+          0.7955800890922546,
+          0.8024861812591553,
+          0.8149171471595764,
+          0.7983425259590149,
+          0.7983425259590149
+        ]
+      },
+      "f1_macro": {
+        "mean": 0.7304200053215026,
+        "sample_sd": 0.012161830009864568,
+        "values": [
+          0.7286473512649536,
+          0.7348308563232422,
+          0.7489343285560608,
+          0.7187150716781616,
+          0.7209724187850952
+        ]
+      },
+      "pr_auc_macro": {
+        "mean": 0.8051459670066834,
+        "sample_sd": 0.004970926706684988,
+        "values": [
+          0.8107433319091797,
+          0.808536946773529,
+          0.8029525279998779,
+          0.8054978251457214,
+          0.7979992032051086
+        ]
+      },
+      "precision_macro": {
+        "mean": 0.7919209241867066,
+        "sample_sd": 0.00960287162636934,
+        "values": [
+          0.7995443940162659,
+          0.7949421405792236,
+          0.8005901575088501,
+          0.786733090877533,
+          0.7777948379516602
+        ]
+      },
+      "recall_macro": {
+        "mean": 0.70288006067276,
+        "sample_sd": 0.01561649180217578,
+        "values": [
+          0.6887180805206299,
+          0.7070150375366211,
+          0.724806010723114,
+          0.6867743134498596,
+          0.7070868611335754
+        ]
+      },
+      "roc_auc_macro": {
+        "mean": 0.9578406095504761,
+        "sample_sd": 0.0007646487300167084,
+        "values": [
+          0.9575030207633972,
+          0.9581783413887024,
+          0.9586002230644226,
+          0.9582497477531433,
+          0.9566717147827148
+        ]
+      }
+    },
+    "piano_only": {
+      "accuracy": {
+        "mean": 0.7430939078330994,
+        "sample_sd": 0.005940845114385449,
+        "values": [
+          0.738950252532959,
+          0.7430939078330994,
+          0.7458563446998596,
+          0.7361878156661987,
+          0.7513812184333801
+        ]
+      },
+      "f1_macro": {
+        "mean": 0.5714139342308044,
+        "sample_sd": 0.021552038652972325,
+        "values": [
+          0.5528263449668884,
+          0.5745412707328796,
+          0.5760746598243713,
+          0.5501430630683899,
+          0.6034843325614929
+        ]
+      },
+      "pr_auc_macro": {
+        "mean": 0.7423601865768432,
+        "sample_sd": 0.003987893887189582,
+        "values": [
+          0.745154082775116,
+          0.7470328211784363,
+          0.7373681664466858,
+          0.7393920421600342,
+          0.7428538203239441
+        ]
+      },
+      "precision_macro": {
+        "mean": 0.7824312925338746,
+        "sample_sd": 0.004452553258843829,
+        "values": [
+          0.7782397270202637,
+          0.7816034555435181,
+          0.7838359475135803,
+          0.779113233089447,
+          0.7893640995025635
+        ]
+      },
+      "recall_macro": {
+        "mean": 0.5486485362052917,
+        "sample_sd": 0.014084751632090883,
+        "values": [
+          0.5365387797355652,
+          0.5502665042877197,
+          0.5517949461936951,
+          0.5348945260047913,
+          0.5697479248046875
+        ]
+      },
+      "roc_auc_macro": {
+        "mean": 0.931458592414856,
+        "sample_sd": 0.0013164247570893097,
+        "values": [
+          0.930761992931366,
+          0.9321929812431335,
+          0.9294917583465576,
+          0.9327216744422913,
+          0.9321245551109314
+        ]
+      }
+    },
+    "vocals_only": {
+      "accuracy": {
+        "mean": 0.7679557919502258,
+        "sample_sd": 0.005168026241521233,
+        "values": [
+          0.769336998462677,
+          0.769336998462677,
+          0.7748618721961975,
+          0.7651933431625366,
+          0.761049747467041
+        ]
+      },
+      "f1_macro": {
+        "mean": 0.5887970447540283,
+        "sample_sd": 0.008700780114500874,
+        "values": [
+          0.5908660888671875,
+          0.5959199666976929,
+          0.5974380373954773,
+          0.5825379490852356,
+          0.5772231817245483
+        ]
+      },
+      "pr_auc_macro": {
+        "mean": 0.7487550497055053,
+        "sample_sd": 0.005923223938779102,
+        "values": [
+          0.738281786441803,
+          0.7524376511573792,
+          0.751994788646698,
+          0.7501516342163086,
+          0.7509093880653381
+        ]
+      },
+      "precision_macro": {
+        "mean": 0.7759531736373901,
+        "sample_sd": 0.02178852660092722,
+        "values": [
+          0.7741040587425232,
+          0.8086172342300415,
+          0.7808981537818909,
+          0.7489968538284302,
+          0.7671495676040649
+        ]
+      },
+      "recall_macro": {
+        "mean": 0.5733869314193726,
+        "sample_sd": 0.005735133623505661,
+        "values": [
+          0.5744402408599854,
+          0.5767521858215332,
+          0.5800424814224243,
+          0.570449709892273,
+          0.565250039100647
+        ]
+      },
+      "roc_auc_macro": {
+        "mean": 0.941295039653778,
+        "sample_sd": 0.0011021506851775767,
+        "values": [
+          0.9400944709777832,
+          0.9408065676689148,
+          0.9423417448997498,
+          0.9425849914550781,
+          0.9406474232673645
+        ]
+      }
+    }
+  },
+  "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+  "dataset": "ISMIR04",
+  "family": "stem_only",
+  "feature_dimension": 1024,
+  "interpretation": "Standalone source-classifier performance is supporting analysis; it does not establish incremental predictive value beyond the mixture.",
+  "label_mapping": {
+    "classical": 0,
+    "electronic": 1,
+    "jazz_blues": 2,
+    "metal_punk": 3,
+    "rock_pop": 4,
+    "world": 5
+  },
+  "manifest_path": "/home/osiris181/stem-fusion-music-classification/data/manifests/ismir04/ismir04_htdemucs.jsonl",
+  "manifest_sha256": "48e2b79d19de54695d2b0b62ce1871fd0b3d3da93fbfed3068fc7232b7981cd2",
+  "metric_conventions": {
+    "absent_classes": "error",
+    "accuracy": "micro",
+    "checkpoint_ties": "earliest_epoch",
+    "f1": "macro",
+    "loss": "cross_entropy",
+    "pr_auc": "macro_average_precision",
+    "prediction": "argmax",
+    "roc_auc": "macro_one_vs_rest",
+    "zero_division_precision_recall_f1": 0
+  },
+  "mixture_only_reference": {
+    "accuracy": {
+      "mean": 0.8640884041786194,
+      "sample_sd": 0.005744938941387158,
+      "values": [
+        0.8577347993850708,
+        0.8646408915519714,
+        0.860497236251831,
+        0.8729282021522522,
+        0.8646408915519714
+      ]
+    },
+    "f1_macro": {
+      "mean": 0.7836048007011414,
+      "sample_sd": 0.011581881043479469,
+      "values": [
+        0.7801305055618286,
+        0.793634831905365,
+        0.7721383571624756,
+        0.7978997230529785,
+        0.7742205858230591
+      ]
+    },
+    "pr_auc_macro": {
+      "mean": 0.8932677626609802,
+      "sample_sd": 0.0035767756875221273,
+      "values": [
+        0.8979103565216064,
+        0.895517885684967,
+        0.8886533379554749,
+        0.8927066922187805,
+        0.8915505409240723
+      ]
+    },
+    "precision_macro": {
+      "mean": 0.845215666294098,
+      "sample_sd": 0.010744245680696235,
+      "values": [
+        0.8333771228790283,
+        0.8433291912078857,
+        0.8376490473747253,
+        0.8599921464920044,
+        0.8517308235168457
+      ]
+    },
+    "recall_macro": {
+      "mean": 0.7600181818008422,
+      "sample_sd": 0.011137157571253848,
+      "values": [
+        0.7615708708763123,
+        0.7705251574516296,
+        0.7505447268486023,
+        0.7707718014717102,
+        0.746678352355957
+      ]
+    },
+    "roc_auc_macro": {
+      "mean": 0.9808743953704834,
+      "sample_sd": 0.0006145159132210655,
+      "values": [
+        0.9815091490745544,
+        0.981173574924469,
+        0.9800925254821777,
+        0.9812428951263428,
+        0.980353832244873
+      ]
+    }
+  },
+  "mixture_only_runs": {
+    "32": {
+      "best_epoch": 20,
+      "best_validation": {
+        "accuracy": 0.8691459894180298,
+        "pr_auc_macro": 0.8975251317024231,
+        "roc_auc_macro": 0.9850522875785828
+      },
+      "branch_seed": 32,
+      "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/mixture_1/checkpoint.pt",
+      "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+      "label_mapping": {
+        "classical": 0,
+        "electronic": 1,
+        "jazz_blues": 2,
+        "metal_punk": 3,
+        "rock_pop": 4,
+        "world": 5
+      },
+      "model": {
+        "architecture": "deep_mlp",
+        "hidden_dimensions": [
+          1024,
+          512
+        ],
+        "input_dimension": 1024,
+        "number_of_classes": 6,
+        "sources": [
+          "mixture"
+        ]
+      },
+      "outer_seed": 32,
+      "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/mixture_1",
+      "seed": 32,
+      "split_examples": {
+        "test": 724,
+        "train": 729,
+        "validation": 726
+      },
+      "test": {
+        "accuracy": 0.8577347993850708,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            0,
+            109,
+            0,
+            0,
+            4,
+            2
+          ],
+          [
+            0,
+            0,
+            13,
+            0,
+            3,
+            10
+          ],
+          [
+            0,
+            2,
+            0,
+            35,
+            7,
+            1
+          ],
+          [
+            0,
+            14,
+            0,
+            17,
+            62,
+            7
+          ],
+          [
+            20,
+            9,
+            0,
+            0,
+            2,
+            88
+          ]
+        ],
+        "f1_macro": 0.7801305055618286,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9954348802566528,
+            "roc_auc": 0.9960293769836426
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9456566572189331,
+            "roc_auc": 0.989962100982666
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9378142356872559,
+            "roc_auc": 0.9965836405754089
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.8112801313400269,
+            "roc_auc": 0.9852070212364197
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8592498898506165,
+            "roc_auc": 0.9651923179626465
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8380260467529297,
+            "roc_auc": 0.9560802578926086
+          }
+        ],
+        "pr_auc_macro": 0.8979103565216064,
+        "precision_macro": 0.8333771228790283,
+        "recall_macro": 0.7615708708763123,
+        "roc_auc_macro": 0.9815091490745544
+      },
+      "trainable_parameters": 1577478,
+      "validation": {
+        "accuracy": 0.8691459894180298,
+        "confusion_matrix": [
+          [
+            313,
+            0,
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            0,
+            108,
+            0,
+            0,
+            1,
+            5
+          ],
+          [
+            1,
+            0,
+            17,
+            0,
+            4,
+            4
+          ],
+          [
+            0,
+            2,
+            0,
+            29,
+            14,
+            0
+          ],
+          [
+            0,
+            12,
+            0,
+            13,
+            69,
+            8
+          ],
+          [
+            13,
+            4,
+            2,
+            0,
+            5,
+            95
+          ]
+        ],
+        "f1_macro": 0.7992960810661316,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9968341588973999,
+            "roc_auc": 0.997136652469635
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.967643141746521,
+            "roc_auc": 0.9940661191940308
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.8976778388023376,
+            "roc_auc": 0.9943406581878662
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.7996350526809692,
+            "roc_auc": 0.9851199388504028
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.849778413772583,
+            "roc_auc": 0.9652620553970337
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8735821843147278,
+            "roc_auc": 0.9743884801864624
+          }
+        ],
+        "pr_auc_macro": 0.8975251317024231,
+        "precision_macro": 0.8232994675636292,
+        "recall_macro": 0.7830955982208252,
+        "roc_auc_macro": 0.9850522875785828
+      },
+      "validation_selection_score": 2.7517234086990356
+    },
+    "64": {
+      "best_epoch": 20,
+      "best_validation": {
+        "accuracy": 0.8705233931541443,
+        "pr_auc_macro": 0.8985121846199036,
+        "roc_auc_macro": 0.9850694537162781
+      },
+      "branch_seed": 64,
+      "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/mixture_1/checkpoint.pt",
+      "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+      "label_mapping": {
+        "classical": 0,
+        "electronic": 1,
+        "jazz_blues": 2,
+        "metal_punk": 3,
+        "rock_pop": 4,
+        "world": 5
+      },
+      "model": {
+        "architecture": "deep_mlp",
+        "hidden_dimensions": [
+          1024,
+          512
+        ],
+        "input_dimension": 1024,
+        "number_of_classes": 6,
+        "sources": [
+          "mixture"
+        ]
+      },
+      "outer_seed": 64,
+      "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/mixture_1",
+      "seed": 64,
+      "split_examples": {
+        "test": 724,
+        "train": 729,
+        "validation": 726
+      },
+      "test": {
+        "accuracy": 0.8646408915519714,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            0,
+            108,
+            0,
+            0,
+            4,
+            3
+          ],
+          [
+            0,
+            0,
+            14,
+            0,
+            3,
+            9
+          ],
+          [
+            0,
+            3,
+            0,
+            33,
+            8,
+            1
+          ],
+          [
+            0,
+            13,
+            0,
+            13,
+            68,
+            6
+          ],
+          [
+            19,
+            9,
+            0,
+            0,
+            2,
+            89
+          ]
+        ],
+        "f1_macro": 0.793634831905365,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9957126379013062,
+            "roc_auc": 0.996307909488678
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9426212310791016,
+            "roc_auc": 0.989605188369751
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9311387538909912,
+            "roc_auc": 0.9957020282745361
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.8045927286148071,
+            "roc_auc": 0.9847816228866577
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8603723049163818,
+            "roc_auc": 0.9648558497428894
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8386695384979248,
+            "roc_auc": 0.9557885527610779
+          }
+        ],
+        "pr_auc_macro": 0.895517885684967,
+        "precision_macro": 0.8433291912078857,
+        "recall_macro": 0.7705251574516296,
+        "roc_auc_macro": 0.981173574924469
+      },
+      "trainable_parameters": 1577478,
+      "validation": {
+        "accuracy": 0.8705233931541443,
+        "confusion_matrix": [
+          [
+            313,
+            0,
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            0,
+            108,
+            0,
+            0,
+            1,
+            5
+          ],
+          [
+            1,
+            0,
+            17,
+            0,
+            2,
+            6
+          ],
+          [
+            0,
+            2,
+            0,
+            28,
+            15,
+            0
+          ],
+          [
+            0,
+            15,
+            0,
+            12,
+            69,
+            6
+          ],
+          [
+            11,
+            3,
+            2,
+            0,
+            6,
+            97
+          ]
+        ],
+        "f1_macro": 0.7989182472229004,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9970127940177917,
+            "roc_auc": 0.9972598552703857
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9669361710548401,
+            "roc_auc": 0.9938510656356812
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9057788252830505,
+            "roc_auc": 0.9950000047683716
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.793649435043335,
+            "roc_auc": 0.9847609996795654
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8485416173934937,
+            "roc_auc": 0.9644922018051147
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8791543245315552,
+            "roc_auc": 0.9750528931617737
+          }
+        ],
+        "pr_auc_macro": 0.8985121846199036,
+        "precision_macro": 0.8241920471191406,
+        "recall_macro": 0.7821930646896362,
+        "roc_auc_macro": 0.9850694537162781
+      },
+      "validation_selection_score": 2.754105031490326
+    },
+    "128": {
+      "best_epoch": 20,
+      "best_validation": {
+        "accuracy": 0.8732782602310181,
+        "pr_auc_macro": 0.8926424384117126,
+        "roc_auc_macro": 0.9846102595329285
+      },
+      "branch_seed": 128,
+      "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/mixture_1/checkpoint.pt",
+      "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+      "label_mapping": {
+        "classical": 0,
+        "electronic": 1,
+        "jazz_blues": 2,
+        "metal_punk": 3,
+        "rock_pop": 4,
+        "world": 5
+      },
+      "model": {
+        "architecture": "deep_mlp",
+        "hidden_dimensions": [
+          1024,
+          512
+        ],
+        "input_dimension": 1024,
+        "number_of_classes": 6,
+        "sources": [
+          "mixture"
+        ]
+      },
+      "outer_seed": 128,
+      "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/mixture_1",
+      "seed": 128,
+      "split_examples": {
+        "test": 724,
+        "train": 729,
+        "validation": 726
+      },
+      "test": {
+        "accuracy": 0.860497236251831,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            0,
+            109,
+            0,
+            0,
+            4,
+            2
+          ],
+          [
+            0,
+            0,
+            11,
+            0,
+            3,
+            12
+          ],
+          [
+            0,
+            3,
+            0,
+            33,
+            8,
+            1
+          ],
+          [
+            0,
+            14,
+            0,
+            14,
+            65,
+            7
+          ],
+          [
+            17,
+            10,
+            0,
+            0,
+            1,
+            91
+          ]
+        ],
+        "f1_macro": 0.7721383571624756,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9954246282577515,
+            "roc_auc": 0.9959905743598938
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9436396360397339,
+            "roc_auc": 0.989690899848938
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9001502990722656,
+            "roc_auc": 0.9935529232025146
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.8014246821403503,
+            "roc_auc": 0.9845525026321411
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8563953042030334,
+            "roc_auc": 0.9626602530479431
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8348855376243591,
+            "roc_auc": 0.9541078805923462
+          }
+        ],
+        "pr_auc_macro": 0.8886533379554749,
+        "precision_macro": 0.8376490473747253,
+        "recall_macro": 0.7505447268486023,
+        "roc_auc_macro": 0.9800925254821777
+      },
+      "trainable_parameters": 1577478,
+      "validation": {
+        "accuracy": 0.8732782602310181,
+        "confusion_matrix": [
+          [
+            312,
+            0,
+            0,
+            0,
+            0,
+            8
+          ],
+          [
+            0,
+            109,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            1,
+            0,
+            14,
+            0,
+            3,
+            8
+          ],
+          [
+            0,
+            2,
+            0,
+            30,
+            13,
+            0
+          ],
+          [
+            0,
+            14,
+            0,
+            12,
+            67,
+            9
+          ],
+          [
+            9,
+            3,
+            1,
+            0,
+            4,
+            102
+          ]
+        ],
+        "f1_macro": 0.7945191860198975,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9970641732215881,
+            "roc_auc": 0.997267484664917
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9682431817054749,
+            "roc_auc": 0.9942236542701721
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.8767508268356323,
+            "roc_auc": 0.9923626184463501
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.7838721871376038,
+            "roc_auc": 0.9845978021621704
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8481220006942749,
+            "roc_auc": 0.9631881713867188
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8818020224571228,
+            "roc_auc": 0.9760220646858215
+          }
+        ],
+        "pr_auc_macro": 0.8926424384117126,
+        "precision_macro": 0.8351613283157349,
+        "recall_macro": 0.7750456929206848,
+        "roc_auc_macro": 0.9846102595329285
+      },
+      "validation_selection_score": 2.750530958175659
+    },
+    "256": {
+      "best_epoch": 20,
+      "best_validation": {
+        "accuracy": 0.8801652789115906,
+        "pr_auc_macro": 0.8972938656806946,
+        "roc_auc_macro": 0.9850354790687561
+      },
+      "branch_seed": 256,
+      "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/mixture_1/checkpoint.pt",
+      "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+      "label_mapping": {
+        "classical": 0,
+        "electronic": 1,
+        "jazz_blues": 2,
+        "metal_punk": 3,
+        "rock_pop": 4,
+        "world": 5
+      },
+      "model": {
+        "architecture": "deep_mlp",
+        "hidden_dimensions": [
+          1024,
+          512
+        ],
+        "input_dimension": 1024,
+        "number_of_classes": 6,
+        "sources": [
+          "mixture"
+        ]
+      },
+      "outer_seed": 256,
+      "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/mixture_1",
+      "seed": 256,
+      "split_examples": {
+        "test": 724,
+        "train": 729,
+        "validation": 726
+      },
+      "test": {
+        "accuracy": 0.8729282021522522,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            0,
+            108,
+            0,
+            0,
+            4,
+            3
+          ],
+          [
+            0,
+            0,
+            12,
+            0,
+            4,
+            10
+          ],
+          [
+            0,
+            2,
+            0,
+            33,
+            9,
+            1
+          ],
+          [
+            0,
+            11,
+            0,
+            8,
+            75,
+            6
+          ],
+          [
+            18,
+            8,
+            0,
+            0,
+            3,
+            90
+          ]
+        ],
+        "f1_macro": 0.7978997230529785,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9957879781723022,
+            "roc_auc": 0.9963310956954956
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9444171190261841,
+            "roc_auc": 0.9898479580879211
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9115793704986572,
+            "roc_auc": 0.9947101473808289
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.8095608949661255,
+            "roc_auc": 0.9856324195861816
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8577537536621094,
+            "roc_auc": 0.9646474123001099
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8371414542198181,
+            "roc_auc": 0.9562886357307434
+          }
+        ],
+        "pr_auc_macro": 0.8927066922187805,
+        "precision_macro": 0.8599921464920044,
+        "recall_macro": 0.7707718014717102,
+        "roc_auc_macro": 0.9812428951263428
+      },
+      "trainable_parameters": 1577478,
+      "validation": {
+        "accuracy": 0.8801652789115906,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            6
+          ],
+          [
+            0,
+            107,
+            0,
+            0,
+            1,
+            6
+          ],
+          [
+            1,
+            0,
+            15,
+            0,
+            6,
+            4
+          ],
+          [
+            0,
+            2,
+            0,
+            27,
+            16,
+            0
+          ],
+          [
+            0,
+            9,
+            0,
+            9,
+            76,
+            8
+          ],
+          [
+            9,
+            3,
+            1,
+            0,
+            6,
+            100
+          ]
+        ],
+        "f1_macro": 0.8040151000022888,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9971761703491211,
+            "roc_auc": 0.9973675608634949
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9681546688079834,
+            "roc_auc": 0.9940659999847412
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.889717698097229,
+            "roc_auc": 0.99329674243927
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.7997599840164185,
+            "roc_auc": 0.9848588109016418
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8445454835891724,
+            "roc_auc": 0.9647122025489807
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8844093680381775,
+            "roc_auc": 0.9759112596511841
+          }
+        ],
+        "pr_auc_macro": 0.8972938656806946,
+        "precision_macro": 0.8451991081237793,
+        "recall_macro": 0.7803673148155212,
+        "roc_auc_macro": 0.9850354790687561
+      },
+      "validation_selection_score": 2.7624946236610413
+    },
+    "512": {
+      "best_epoch": 20,
+      "best_validation": {
+        "accuracy": 0.8746556639671326,
+        "pr_auc_macro": 0.8917832374572754,
+        "roc_auc_macro": 0.9842663407325745
+      },
+      "branch_seed": 512,
+      "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/mixture_1/checkpoint.pt",
+      "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+      "label_mapping": {
+        "classical": 0,
+        "electronic": 1,
+        "jazz_blues": 2,
+        "metal_punk": 3,
+        "rock_pop": 4,
+        "world": 5
+      },
+      "model": {
+        "architecture": "deep_mlp",
+        "hidden_dimensions": [
+          1024,
+          512
+        ],
+        "input_dimension": 1024,
+        "number_of_classes": 6,
+        "sources": [
+          "mixture"
+        ]
+      },
+      "outer_seed": 512,
+      "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/mixture_1",
+      "seed": 512,
+      "split_examples": {
+        "test": 724,
+        "train": 729,
+        "validation": 726
+      },
+      "test": {
+        "accuracy": 0.8646408915519714,
+        "confusion_matrix": [
+          [
+            314,
+            0,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            0,
+            108,
+            0,
+            0,
+            4,
+            3
+          ],
+          [
+            0,
+            0,
+            10,
+            0,
+            1,
+            15
+          ],
+          [
+            0,
+            4,
+            0,
+            31,
+            9,
+            1
+          ],
+          [
+            0,
+            13,
+            0,
+            8,
+            71,
+            8
+          ],
+          [
+            16,
+            9,
+            0,
+            0,
+            2,
+            92
+          ]
+        ],
+        "f1_macro": 0.7742205858230591,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9957343339920044,
+            "roc_auc": 0.9962846636772156
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9436821937561035,
+            "roc_auc": 0.989690899848938
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.9032814502716064,
+            "roc_auc": 0.9942693114280701
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.8164362907409668,
+            "roc_auc": 0.9850761294364929
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8596049547195435,
+            "roc_auc": 0.9637500047683716
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8305640816688538,
+            "roc_auc": 0.9530524015426636
+          }
+        ],
+        "pr_auc_macro": 0.8915505409240723,
+        "precision_macro": 0.8517308235168457,
+        "recall_macro": 0.746678352355957,
+        "roc_auc_macro": 0.980353832244873
+      },
+      "trainable_parameters": 1577478,
+      "validation": {
+        "accuracy": 0.8746556639671326,
+        "confusion_matrix": [
+          [
+            313,
+            0,
+            0,
+            0,
+            0,
+            7
+          ],
+          [
+            0,
+            109,
+            0,
+            0,
+            0,
+            5
+          ],
+          [
+            1,
+            0,
+            14,
+            0,
+            3,
+            8
+          ],
+          [
+            0,
+            2,
+            0,
+            27,
+            16,
+            0
+          ],
+          [
+            0,
+            13,
+            0,
+            7,
+            72,
+            10
+          ],
+          [
+            9,
+            3,
+            1,
+            0,
+            6,
+            100
+          ]
+        ],
+        "f1_macro": 0.7952379584312439,
+        "per_class": [
+          {
+            "label": 0,
+            "pr_auc": 0.9968916177749634,
+            "roc_auc": 0.9970674514770508
+          },
+          {
+            "label": 1,
+            "pr_auc": 0.9667134881019592,
+            "roc_auc": 0.9937937259674072
+          },
+          {
+            "label": 2,
+            "pr_auc": 0.8773132562637329,
+            "roc_auc": 0.9927471876144409
+          },
+          {
+            "label": 3,
+            "pr_auc": 0.7931802272796631,
+            "roc_auc": 0.9848914742469788
+          },
+          {
+            "label": 4,
+            "pr_auc": 0.8414149284362793,
+            "roc_auc": 0.9631253480911255
+          },
+          {
+            "label": 5,
+            "pr_auc": 0.8751855492591858,
+            "roc_auc": 0.9739731550216675
+          }
+        ],
+        "pr_auc_macro": 0.8917832374572754,
+        "precision_macro": 0.844376266002655,
+        "recall_macro": 0.7698242664337158,
+        "roc_auc_macro": 0.9842663407325745
+      },
+      "validation_selection_score": 2.7507052421569824
+    }
+  },
+  "new_inference_performed": false,
+  "new_training_performed": false,
+  "number_of_classes": 6,
+  "number_of_runs": 5,
+  "paired_differences": {},
+  "runs": {
+    "bass_only": {
+      "32": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.774104654788971,
+          "pr_auc_macro": 0.7715832591056824,
+          "roc_auc_macro": 0.9512969851493835
+        },
+        "branch_seed": 2746825346,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/bass/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "bass"
+          ]
+        },
+        "outer_seed": 32,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/bass",
+        "seed": 2746825346,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7527624368667603,
+          "confusion_matrix": [
+            [
+              313,
+              1,
+              0,
+              0,
+              0,
+              5
+            ],
+            [
+              1,
+              99,
+              0,
+              1,
+              8,
+              6
+            ],
+            [
+              3,
+              0,
+              4,
+              0,
+              12,
+              7
+            ],
+            [
+              0,
+              5,
+              0,
+              13,
+              26,
+              1
+            ],
+            [
+              3,
+              15,
+              0,
+              2,
+              63,
+              17
+            ],
+            [
+              41,
+              18,
+              0,
+              1,
+              6,
+              53
+            ]
+          ],
+          "f1_macro": 0.5808134078979492,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9627609848976135,
+              "roc_auc": 0.974348783493042
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8676649928092957,
+              "roc_auc": 0.9710859060287476
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7039226293563843,
+              "roc_auc": 0.9644588232040405
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7211889624595642,
+              "roc_auc": 0.971166729927063
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6630617380142212,
+              "roc_auc": 0.9217628240585327
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.612031102180481,
+              "roc_auc": 0.8508785367012024
+            }
+          ],
+          "pr_auc_macro": 0.7551050782203674,
+          "precision_macro": 0.7487441897392273,
+          "recall_macro": 0.5600289702415466,
+          "roc_auc_macro": 0.9422836303710938
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.774104654788971,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              98,
+              0,
+              0,
+              3,
+              12
+            ],
+            [
+              8,
+              1,
+              4,
+              0,
+              9,
+              4
+            ],
+            [
+              0,
+              6,
+              0,
+              15,
+              24,
+              0
+            ],
+            [
+              0,
+              9,
+              0,
+              0,
+              75,
+              18
+            ],
+            [
+              33,
+              17,
+              0,
+              0,
+              8,
+              61
+            ]
+          ],
+          "f1_macro": 0.6181058883666992,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9761285185813904,
+              "roc_auc": 0.9830665588378906
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8886436820030212,
+              "roc_auc": 0.9737416505813599
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6960825324058533,
+              "roc_auc": 0.9601099491119385
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6973704099655151,
+              "roc_auc": 0.9565019607543945
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.722337007522583,
+              "roc_auc": 0.9444916248321533
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6489371061325073,
+              "roc_auc": 0.889870285987854
+            }
+          ],
+          "pr_auc_macro": 0.7715832591056824,
+          "precision_macro": 0.8056929111480713,
+          "recall_macro": 0.5933921337127686,
+          "roc_auc_macro": 0.9512969851493835
+        },
+        "validation_selection_score": 2.496984899044037
+      },
+      "64": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7727272510528564,
+          "pr_auc_macro": 0.7708151936531067,
+          "roc_auc_macro": 0.95353102684021
+        },
+        "branch_seed": 1818902147,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/bass/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "bass"
+          ]
+        },
+        "outer_seed": 64,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/bass",
+        "seed": 1818902147,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7513812184333801,
+          "confusion_matrix": [
+            [
+              313,
+              1,
+              0,
+              0,
+              0,
+              5
+            ],
+            [
+              1,
+              99,
+              0,
+              1,
+              8,
+              6
+            ],
+            [
+              2,
+              0,
+              6,
+              0,
+              12,
+              6
+            ],
+            [
+              0,
+              5,
+              0,
+              14,
+              25,
+              1
+            ],
+            [
+              3,
+              16,
+              0,
+              4,
+              62,
+              15
+            ],
+            [
+              42,
+              18,
+              0,
+              1,
+              8,
+              50
+            ]
+          ],
+          "f1_macro": 0.5962797999382019,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9632865786552429,
+              "roc_auc": 0.974797785282135
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8704519271850586,
+              "roc_auc": 0.9720710515975952
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7446439266204834,
+              "roc_auc": 0.9770773649215698
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6962652206420898,
+              "roc_auc": 0.9693012833595276
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6461477279663086,
+              "roc_auc": 0.9197916984558105
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6186242699623108,
+              "roc_auc": 0.855573296546936
+            }
+          ],
+          "pr_auc_macro": 0.7565699219703674,
+          "precision_macro": 0.7368010878562927,
+          "recall_macro": 0.5706849098205566,
+          "roc_auc_macro": 0.9447687268257141
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7727272510528564,
+          "confusion_matrix": [
+            [
+              309,
+              1,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              1,
+              100,
+              0,
+              0,
+              2,
+              11
+            ],
+            [
+              6,
+              1,
+              6,
+              0,
+              9,
+              4
+            ],
+            [
+              0,
+              6,
+              0,
+              17,
+              22,
+              0
+            ],
+            [
+              0,
+              12,
+              0,
+              3,
+              70,
+              17
+            ],
+            [
+              36,
+              16,
+              0,
+              0,
+              8,
+              59
+            ]
+          ],
+          "f1_macro": 0.6352267265319824,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9761644005775452,
+              "roc_auc": 0.983058750629425
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8897721767425537,
+              "roc_auc": 0.9738562107086182
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7219034433364868,
+              "roc_auc": 0.9720330238342285
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6764099597930908,
+              "roc_auc": 0.9556207656860352
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7156693935394287,
+              "roc_auc": 0.9446015357971191
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6449723243713379,
+              "roc_auc": 0.8920159935951233
+            }
+          ],
+          "pr_auc_macro": 0.7708151936531067,
+          "precision_macro": 0.7796540260314941,
+          "recall_macro": 0.6055729985237122,
+          "roc_auc_macro": 0.95353102684021
+        },
+        "validation_selection_score": 2.497073471546173
+      },
+      "128": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7617079615592957,
+          "pr_auc_macro": 0.7704194188117981,
+          "roc_auc_macro": 0.9516250491142273
+        },
+        "branch_seed": 3023771963,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/bass/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "bass"
+          ]
+        },
+        "outer_seed": 128,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/bass",
+        "seed": 3023771963,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7486187815666199,
+          "confusion_matrix": [
+            [
+              314,
+              0,
+              0,
+              0,
+              0,
+              5
+            ],
+            [
+              1,
+              92,
+              0,
+              1,
+              9,
+              12
+            ],
+            [
+              4,
+              0,
+              5,
+              0,
+              12,
+              5
+            ],
+            [
+              0,
+              5,
+              0,
+              14,
+              25,
+              1
+            ],
+            [
+              3,
+              13,
+              0,
+              2,
+              63,
+              19
+            ],
+            [
+              46,
+              14,
+              0,
+              0,
+              5,
+              54
+            ]
+          ],
+          "f1_macro": 0.5915496349334717,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9623250365257263,
+              "roc_auc": 0.9745965003967285
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8660115003585815,
+              "roc_auc": 0.9711287617683411
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.727816104888916,
+              "roc_auc": 0.9767467975616455
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7115929126739502,
+              "roc_auc": 0.970283031463623
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6602441668510437,
+              "roc_auc": 0.9191666841506958
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5997329950332642,
+              "roc_auc": 0.8423779606819153
+            }
+          ],
+          "pr_auc_macro": 0.754620373249054,
+          "precision_macro": 0.7556428909301758,
+          "recall_macro": 0.5619210600852966,
+          "roc_auc_macro": 0.9423832893371582
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7617079615592957,
+          "confusion_matrix": [
+            [
+              312,
+              0,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              1,
+              92,
+              0,
+              0,
+              3,
+              18
+            ],
+            [
+              8,
+              1,
+              4,
+              0,
+              9,
+              4
+            ],
+            [
+              0,
+              6,
+              0,
+              16,
+              23,
+              0
+            ],
+            [
+              1,
+              10,
+              0,
+              2,
+              70,
+              19
+            ],
+            [
+              39,
+              13,
+              0,
+              0,
+              8,
+              59
+            ]
+          ],
+          "f1_macro": 0.6069250106811523,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9772255420684814,
+              "roc_auc": 0.9835513830184937
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.886719286441803,
+              "roc_auc": 0.972637951374054
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7104974389076233,
+              "roc_auc": 0.9683516621589661
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6905061602592468,
+              "roc_auc": 0.9561428427696228
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7234956622123718,
+              "roc_auc": 0.9426848292350769
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6340726017951965,
+              "roc_auc": 0.8863815069198608
+            }
+          ],
+          "pr_auc_macro": 0.7704194188117981,
+          "precision_macro": 0.7788364887237549,
+          "recall_macro": 0.5789153575897217,
+          "roc_auc_macro": 0.9516250491142273
+        },
+        "validation_selection_score": 2.483752429485321
+      },
+      "256": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.7699724435806274,
+          "pr_auc_macro": 0.7654946446418762,
+          "roc_auc_macro": 0.9503316879272461
+        },
+        "branch_seed": 1023323219,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/bass/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "bass"
+          ]
+        },
+        "outer_seed": 256,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/bass",
+        "seed": 1023323219,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7541436553001404,
+          "confusion_matrix": [
+            [
+              311,
+              0,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              1,
+              95,
+              0,
+              1,
+              8,
+              10
+            ],
+            [
+              3,
+              0,
+              4,
+              0,
+              12,
+              7
+            ],
+            [
+              0,
+              5,
+              0,
+              21,
+              18,
+              1
+            ],
+            [
+              2,
+              14,
+              0,
+              6,
+              58,
+              20
+            ],
+            [
+              41,
+              15,
+              0,
+              1,
+              5,
+              57
+            ]
+          ],
+          "f1_macro": 0.6037183403968811,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.960883378982544,
+              "roc_auc": 0.9732574820518494
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.862758219242096,
+              "roc_auc": 0.9698721766471863
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7016221880912781,
+              "roc_auc": 0.9694181084632874
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7076836228370667,
+              "roc_auc": 0.9696939587593079
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6533957719802856,
+              "roc_auc": 0.9187660217285156
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6043239235877991,
+              "roc_auc": 0.8492534160614014
+            }
+          ],
+          "pr_auc_macro": 0.7484445571899414,
+          "precision_macro": 0.7428237199783325,
+          "recall_macro": 0.5800855159759521,
+          "roc_auc_macro": 0.9417102336883545
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7699724435806274,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              97,
+              0,
+              0,
+              1,
+              16
+            ],
+            [
+              8,
+              1,
+              4,
+              0,
+              9,
+              4
+            ],
+            [
+              0,
+              7,
+              0,
+              21,
+              17,
+              0
+            ],
+            [
+              0,
+              10,
+              0,
+              8,
+              64,
+              20
+            ],
+            [
+              33,
+              14,
+              0,
+              2,
+              6,
+              64
+            ]
+          ],
+          "f1_macro": 0.6217108368873596,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9738070368766785,
+              "roc_auc": 0.981765627861023
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8826411962509155,
+              "roc_auc": 0.9715915322303772
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.694381594657898,
+              "roc_auc": 0.963131844997406
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6880174279212952,
+              "roc_auc": 0.9561102986335754
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7144686579704285,
+              "roc_auc": 0.9429675340652466
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6396521925926208,
+              "roc_auc": 0.8864231109619141
+            }
+          ],
+          "pr_auc_macro": 0.7654946446418762,
+          "precision_macro": 0.7547550201416016,
+          "recall_macro": 0.6003802418708801,
+          "roc_auc_macro": 0.9503316879272461
+        },
+        "validation_selection_score": 2.4857987761497498
+      },
+      "512": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7713498473167419,
+          "pr_auc_macro": 0.7788019776344299,
+          "roc_auc_macro": 0.9539994597434998
+        },
+        "branch_seed": 595436208,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/bass/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "bass"
+          ]
+        },
+        "outer_seed": 512,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/bass",
+        "seed": 595436208,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7569060921669006,
+          "confusion_matrix": [
+            [
+              312,
+              0,
+              0,
+              0,
+              0,
+              7
+            ],
+            [
+              1,
+              98,
+              0,
+              1,
+              6,
+              9
+            ],
+            [
+              3,
+              0,
+              5,
+              0,
+              12,
+              6
+            ],
+            [
+              0,
+              5,
+              0,
+              21,
+              18,
+              1
+            ],
+            [
+              3,
+              16,
+              0,
+              5,
+              56,
+              20
+            ],
+            [
+              42,
+              16,
+              0,
+              0,
+              5,
+              56
+            ]
+          ],
+          "f1_macro": 0.6149750351905823,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9637148976325989,
+              "roc_auc": 0.975208044052124
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.869859516620636,
+              "roc_auc": 0.9718283414840698
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7393240928649902,
+              "roc_auc": 0.978785514831543
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7233136296272278,
+              "roc_auc": 0.971461296081543
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6824830174446106,
+              "roc_auc": 0.9231730699539185
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6110664010047913,
+              "roc_auc": 0.8530453443527222
+            }
+          ],
+          "pr_auc_macro": 0.7649602890014648,
+          "precision_macro": 0.7518242597579956,
+          "recall_macro": 0.5866321921348572,
+          "roc_auc_macro": 0.9455835819244385
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7713498473167419,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              95,
+              0,
+              0,
+              2,
+              17
+            ],
+            [
+              6,
+              1,
+              6,
+              0,
+              9,
+              4
+            ],
+            [
+              0,
+              7,
+              0,
+              20,
+              18,
+              0
+            ],
+            [
+              0,
+              10,
+              0,
+              4,
+              68,
+              20
+            ],
+            [
+              34,
+              16,
+              0,
+              1,
+              6,
+              62
+            ]
+          ],
+          "f1_macro": 0.6412819623947144,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9776065349578857,
+              "roc_auc": 0.9836899638175964
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8843787908554077,
+              "roc_auc": 0.9718925952911377
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7457417845726013,
+              "roc_auc": 0.974065899848938
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6919206380844116,
+              "roc_auc": 0.9577092528343201
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7364883422851562,
+              "roc_auc": 0.9446644186973572
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6366757154464722,
+              "roc_auc": 0.8919745683670044
+            }
+          ],
+          "pr_auc_macro": 0.7788019776344299,
+          "precision_macro": 0.770979106426239,
+          "recall_macro": 0.6103078722953796,
+          "roc_auc_macro": 0.9539994597434998
+        },
+        "validation_selection_score": 2.5041512846946716
+      }
+    },
+    "drums_only": {
+      "32": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.7685950398445129,
+          "pr_auc_macro": 0.7349823117256165,
+          "roc_auc_macro": 0.9491841793060303
+        },
+        "branch_seed": 2560740051,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/drums/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "drums"
+          ]
+        },
+        "outer_seed": 32,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/drums",
+        "seed": 2560740051,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7458563446998596,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              1,
+              99,
+              0,
+              0,
+              9,
+              6
+            ],
+            [
+              11,
+              0,
+              3,
+              2,
+              8,
+              2
+            ],
+            [
+              0,
+              7,
+              0,
+              23,
+              13,
+              2
+            ],
+            [
+              6,
+              19,
+              0,
+              10,
+              48,
+              17
+            ],
+            [
+              46,
+              8,
+              1,
+              0,
+              6,
+              58
+            ]
+          ],
+          "f1_macro": 0.5883743166923523,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9473541975021362,
+              "roc_auc": 0.9662293195724487
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8979813456535339,
+              "roc_auc": 0.9782537221908569
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7912091612815857,
+              "roc_auc": 0.9880427122116089
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6182374358177185,
+              "roc_auc": 0.9523481726646423
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6486325263977051,
+              "roc_auc": 0.9010737538337708
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5805678963661194,
+              "roc_auc": 0.8400306105613708
+            }
+          ],
+          "pr_auc_macro": 0.7473304271697998,
+          "precision_macro": 0.6936461925506592,
+          "recall_macro": 0.5705686807632446,
+          "roc_auc_macro": 0.9376630783081055
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7685950398445129,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              101,
+              1,
+              0,
+              5,
+              7
+            ],
+            [
+              10,
+              0,
+              3,
+              3,
+              8,
+              2
+            ],
+            [
+              0,
+              4,
+              0,
+              25,
+              16,
+              0
+            ],
+            [
+              1,
+              14,
+              0,
+              12,
+              61,
+              14
+            ],
+            [
+              40,
+              9,
+              0,
+              1,
+              9,
+              60
+            ]
+          ],
+          "f1_macro": 0.6150388717651367,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9665310382843018,
+              "roc_auc": 0.9770088791847229
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.91719651222229,
+              "roc_auc": 0.9805928468704224
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5707409977912903,
+              "roc_auc": 0.957747220993042
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.5940194725990295,
+              "roc_auc": 0.9581007957458496
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7258456349372864,
+              "roc_auc": 0.9292515516281128
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6355603337287903,
+              "roc_auc": 0.8924037218093872
+            }
+          ],
+          "pr_auc_macro": 0.7349823117256165,
+          "precision_macro": 0.7091833353042603,
+          "recall_macro": 0.6036076545715332,
+          "roc_auc_macro": 0.9491841793060303
+        },
+        "validation_selection_score": 2.4527615308761597
+      },
+      "64": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.774104654788971,
+          "pr_auc_macro": 0.7456080913543701,
+          "roc_auc_macro": 0.9509294629096985
+        },
+        "branch_seed": 4206010971,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/drums/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "drums"
+          ]
+        },
+        "outer_seed": 64,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/drums",
+        "seed": 4206010971,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7541436553001404,
+          "confusion_matrix": [
+            [
+              308,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              101,
+              0,
+              0,
+              6,
+              7
+            ],
+            [
+              9,
+              1,
+              3,
+              1,
+              9,
+              3
+            ],
+            [
+              0,
+              7,
+              0,
+              25,
+              11,
+              2
+            ],
+            [
+              6,
+              21,
+              0,
+              11,
+              46,
+              16
+            ],
+            [
+              42,
+              9,
+              0,
+              0,
+              5,
+              63
+            ]
+          ],
+          "f1_macro": 0.6001846790313721,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9495130181312561,
+              "roc_auc": 0.967088520526886
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8959681987762451,
+              "roc_auc": 0.9775969982147217
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.8364239931106567,
+              "roc_auc": 0.9911835789680481
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6343289613723755,
+              "roc_auc": 0.9544101357460022
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6358452439308167,
+              "roc_auc": 0.8985256552696228
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5881167650222778,
+              "roc_auc": 0.8443364500999451
+            }
+          ],
+          "pr_auc_macro": 0.7566993236541748,
+          "precision_macro": 0.7431456446647644,
+          "recall_macro": 0.5840216875076294,
+          "roc_auc_macro": 0.9388568997383118
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.774104654788971,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              101,
+              0,
+              0,
+              6,
+              7
+            ],
+            [
+              9,
+              0,
+              3,
+              2,
+              8,
+              4
+            ],
+            [
+              0,
+              4,
+              0,
+              24,
+              17,
+              0
+            ],
+            [
+              1,
+              13,
+              0,
+              12,
+              61,
+              15
+            ],
+            [
+              36,
+              9,
+              0,
+              0,
+              9,
+              65
+            ]
+          ],
+          "f1_macro": 0.6205145716667175,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9672808647155762,
+              "roc_auc": 0.9775168895721436
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9149036407470703,
+              "roc_auc": 0.9805785417556763
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6125217080116272,
+              "roc_auc": 0.9618130922317505
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6195585131645203,
+              "roc_auc": 0.9613640308380127
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7189258933067322,
+              "roc_auc": 0.9276646971702576
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.640457808971405,
+              "roc_auc": 0.8966399431228638
+            }
+          ],
+          "pr_auc_macro": 0.7456080913543701,
+          "precision_macro": 0.7553189396858215,
+          "recall_macro": 0.6069067716598511,
+          "roc_auc_macro": 0.9509294629096985
+        },
+        "validation_selection_score": 2.4706422090530396
+      },
+      "128": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.7713498473167419,
+          "pr_auc_macro": 0.7348926663398743,
+          "roc_auc_macro": 0.9479832053184509
+        },
+        "branch_seed": 1935828994,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/drums/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "drums"
+          ]
+        },
+        "outer_seed": 128,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/drums",
+        "seed": 1935828994,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.75,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              1,
+              104,
+              0,
+              0,
+              3,
+              7
+            ],
+            [
+              9,
+              1,
+              4,
+              1,
+              9,
+              2
+            ],
+            [
+              0,
+              8,
+              0,
+              17,
+              18,
+              2
+            ],
+            [
+              6,
+              21,
+              0,
+              8,
+              49,
+              16
+            ],
+            [
+              44,
+              10,
+              0,
+              0,
+              5,
+              60
+            ]
+          ],
+          "f1_macro": 0.5891748070716858,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9450371861457825,
+              "roc_auc": 0.9649134278297424
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.897229015827179,
+              "roc_auc": 0.9777968525886536
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.8015792369842529,
+              "roc_auc": 0.9884284734725952
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6089659333229065,
+              "roc_auc": 0.9526427984237671
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6322579979896545,
+              "roc_auc": 0.8982852697372437
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5899357795715332,
+              "roc_auc": 0.8384193778038025
+            }
+          ],
+          "pr_auc_macro": 0.7458341717720032,
+          "precision_macro": 0.7358927726745605,
+          "recall_macro": 0.5664708614349365,
+          "roc_auc_macro": 0.9367477297782898
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7713498473167419,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              101,
+              1,
+              0,
+              4,
+              8
+            ],
+            [
+              9,
+              0,
+              4,
+              2,
+              8,
+              3
+            ],
+            [
+              0,
+              4,
+              0,
+              20,
+              21,
+              0
+            ],
+            [
+              1,
+              14,
+              0,
+              10,
+              63,
+              14
+            ],
+            [
+              38,
+              11,
+              0,
+              0,
+              6,
+              64
+            ]
+          ],
+          "f1_macro": 0.619233250617981,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9618421792984009,
+              "roc_auc": 0.9757543206214905
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9125089049339294,
+              "roc_auc": 0.9796181917190552
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5837081074714661,
+              "roc_auc": 0.9547252655029297
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.5916647911071777,
+              "roc_auc": 0.959373414516449
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.720436692237854,
+              "roc_auc": 0.9280731678009033
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6391955018043518,
+              "roc_auc": 0.8903548717498779
+            }
+          ],
+          "pr_auc_macro": 0.7348926663398743,
+          "precision_macro": 0.7198013067245483,
+          "recall_macro": 0.6003696322441101,
+          "roc_auc_macro": 0.9479832053184509
+        },
+        "validation_selection_score": 2.454225718975067
+      },
+      "256": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7727272510528564,
+          "pr_auc_macro": 0.7384230494499207,
+          "roc_auc_macro": 0.9480960369110107
+        },
+        "branch_seed": 1471795766,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/drums/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "drums"
+          ]
+        },
+        "outer_seed": 256,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/drums",
+        "seed": 1471795766,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.738950252532959,
+          "confusion_matrix": [
+            [
+              308,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              89,
+              0,
+              0,
+              16,
+              9
+            ],
+            [
+              8,
+              1,
+              4,
+              1,
+              9,
+              3
+            ],
+            [
+              0,
+              7,
+              0,
+              21,
+              15,
+              2
+            ],
+            [
+              6,
+              13,
+              0,
+              9,
+              58,
+              14
+            ],
+            [
+              47,
+              8,
+              1,
+              0,
+              8,
+              55
+            ]
+          ],
+          "f1_macro": 0.5913720726966858,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9464491009712219,
+              "roc_auc": 0.966268002986908
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8973768353462219,
+              "roc_auc": 0.9781680703163147
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.8019381165504456,
+              "roc_auc": 0.9903571009635925
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6190497875213623,
+              "roc_auc": 0.9517917633056641
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6542453169822693,
+              "roc_auc": 0.9001603126525879
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5632601976394653,
+              "roc_auc": 0.8415029048919678
+            }
+          ],
+          "pr_auc_macro": 0.7470532059669495,
+          "precision_macro": 0.6993942260742188,
+          "recall_macro": 0.5670213103294373,
+          "roc_auc_macro": 0.9380413889884949
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7727272510528564,
+          "confusion_matrix": [
+            [
+              309,
+              1,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              0,
+              95,
+              1,
+              1,
+              10,
+              7
+            ],
+            [
+              9,
+              0,
+              4,
+              2,
+              10,
+              1
+            ],
+            [
+              0,
+              4,
+              0,
+              21,
+              20,
+              0
+            ],
+            [
+              1,
+              7,
+              0,
+              10,
+              70,
+              14
+            ],
+            [
+              37,
+              5,
+              0,
+              1,
+              14,
+              62
+            ]
+          ],
+          "f1_macro": 0.6232670545578003,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.965147852897644,
+              "roc_auc": 0.9765856266021729
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9156078100204468,
+              "roc_auc": 0.9804065227508545
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.57991623878479,
+              "roc_auc": 0.9518681168556213
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.614291250705719,
+              "roc_auc": 0.958622932434082
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7293165922164917,
+              "roc_auc": 0.929879903793335
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6262584328651428,
+              "roc_auc": 0.8912131786346436
+            }
+          ],
+          "pr_auc_macro": 0.7384230494499207,
+          "precision_macro": 0.723380446434021,
+          "recall_macro": 0.6044590473175049,
+          "roc_auc_macro": 0.9480960369110107
+        },
+        "validation_selection_score": 2.459246337413788
+      },
+      "512": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7699724435806274,
+          "pr_auc_macro": 0.7303390502929688,
+          "roc_auc_macro": 0.9480757713317871
+        },
+        "branch_seed": 2335944446,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/drums/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "drums"
+          ]
+        },
+        "outer_seed": 512,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/drums",
+        "seed": 2335944446,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7430939078330994,
+          "confusion_matrix": [
+            [
+              308,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              98,
+              0,
+              0,
+              7,
+              9
+            ],
+            [
+              9,
+              0,
+              3,
+              1,
+              9,
+              4
+            ],
+            [
+              0,
+              7,
+              0,
+              17,
+              19,
+              2
+            ],
+            [
+              6,
+              21,
+              0,
+              9,
+              48,
+              16
+            ],
+            [
+              42,
+              8,
+              1,
+              0,
+              4,
+              64
+            ]
+          ],
+          "f1_macro": 0.5734831094741821,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.949360728263855,
+              "roc_auc": 0.9670265316963196
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8937191367149353,
+              "roc_auc": 0.977011501789093
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.8038557767868042,
+              "roc_auc": 0.989971399307251
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6057383418083191,
+              "roc_auc": 0.9514645338058472
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.6382443308830261,
+              "roc_auc": 0.8965545296669006
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5764254927635193,
+              "roc_auc": 0.8405584096908569
+            }
+          ],
+          "pr_auc_macro": 0.7445573210716248,
+          "precision_macro": 0.6846667528152466,
+          "recall_macro": 0.5547780990600586,
+          "roc_auc_macro": 0.9370978474617004
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7699724435806274,
+          "confusion_matrix": [
+            [
+              307,
+              1,
+              0,
+              0,
+              0,
+              12
+            ],
+            [
+              0,
+              100,
+              1,
+              0,
+              5,
+              8
+            ],
+            [
+              9,
+              0,
+              3,
+              2,
+              8,
+              4
+            ],
+            [
+              0,
+              4,
+              0,
+              20,
+              21,
+              0
+            ],
+            [
+              1,
+              13,
+              0,
+              9,
+              62,
+              17
+            ],
+            [
+              35,
+              9,
+              0,
+              0,
+              8,
+              67
+            ]
+          ],
+          "f1_macro": 0.6103553771972656,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9673361778259277,
+              "roc_auc": 0.9773629903793335
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.908259928226471,
+              "roc_auc": 0.9789301753044128
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5746251344680786,
+              "roc_auc": 0.955274760723114
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.5822353363037109,
+              "roc_auc": 0.9588186740875244
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7194328308105469,
+              "roc_auc": 0.9258579015731812
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6301447749137878,
+              "roc_auc": 0.8922098875045776
+            }
+          ],
+          "pr_auc_macro": 0.7303390502929688,
+          "precision_macro": 0.7118743658065796,
+          "recall_macro": 0.5945442318916321,
+          "roc_auc_macro": 0.9480757713317871
+        },
+        "validation_selection_score": 2.4483872652053833
+      }
+    },
+    "guitar_only": {
+      "32": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.8112947940826416,
+          "pr_auc_macro": 0.8006851077079773,
+          "roc_auc_macro": 0.9570445418357849
+        },
+        "branch_seed": 2682760092,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/guitar/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "guitar"
+          ]
+        },
+        "outer_seed": 32,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/guitar",
+        "seed": 2682760092,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7955800890922546,
+          "confusion_matrix": [
+            [
+              308,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              89,
+              0,
+              0,
+              5,
+              20
+            ],
+            [
+              2,
+              0,
+              14,
+              0,
+              1,
+              9
+            ],
+            [
+              0,
+              1,
+              0,
+              26,
+              18,
+              0
+            ],
+            [
+              2,
+              8,
+              0,
+              6,
+              68,
+              16
+            ],
+            [
+              35,
+              8,
+              0,
+              0,
+              5,
+              71
+            ]
+          ],
+          "f1_macro": 0.7286473512649536,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9801680445671082,
+              "roc_auc": 0.9846356511116028
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9109851121902466,
+              "roc_auc": 0.9825373291969299
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7422804832458496,
+              "roc_auc": 0.9641282558441162
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7922618985176086,
+              "roc_auc": 0.9791851043701172
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7972204685211182,
+              "roc_auc": 0.9447757005691528
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6415435671806335,
+              "roc_auc": 0.8897562623023987
+            }
+          ],
+          "pr_auc_macro": 0.8107433319091797,
+          "precision_macro": 0.7995443940162659,
+          "recall_macro": 0.6887180805206299,
+          "roc_auc_macro": 0.9575030207633972
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.8112947940826416,
+          "confusion_matrix": [
+            [
+              310,
+              0,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              1,
+              94,
+              0,
+              0,
+              3,
+              16
+            ],
+            [
+              5,
+              0,
+              14,
+              0,
+              2,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              25,
+              20,
+              0
+            ],
+            [
+              4,
+              6,
+              0,
+              7,
+              72,
+              13
+            ],
+            [
+              31,
+              8,
+              2,
+              0,
+              4,
+              74
+            ]
+          ],
+          "f1_macro": 0.7367817163467407,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9830214977264404,
+              "roc_auc": 0.9862915277481079
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.92870032787323,
+              "roc_auc": 0.9829721450805664
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6771408319473267,
+              "roc_auc": 0.9436812400817871
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7804142236709595,
+              "roc_auc": 0.9839451909065247
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7627230286598206,
+              "roc_auc": 0.935834527015686
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6721110939979553,
+              "roc_auc": 0.9095426201820374
+            }
+          ],
+          "pr_auc_macro": 0.8006851077079773,
+          "precision_macro": 0.7916334867477417,
+          "recall_macro": 0.7025099396705627,
+          "roc_auc_macro": 0.9570445418357849
+        },
+        "validation_selection_score": 2.569024443626404
+      },
+      "64": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.8030303120613098,
+          "pr_auc_macro": 0.7984881401062012,
+          "roc_auc_macro": 0.9576077461242676
+        },
+        "branch_seed": 1815872291,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/guitar/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "guitar"
+          ]
+        },
+        "outer_seed": 64,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/guitar",
+        "seed": 1815872291,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.8024861812591553,
+          "confusion_matrix": [
+            [
+              310,
+              0,
+              0,
+              0,
+              0,
+              9
+            ],
+            [
+              1,
+              106,
+              0,
+              0,
+              5,
+              3
+            ],
+            [
+              2,
+              0,
+              14,
+              0,
+              1,
+              9
+            ],
+            [
+              0,
+              1,
+              0,
+              32,
+              12,
+              0
+            ],
+            [
+              6,
+              11,
+              0,
+              11,
+              62,
+              10
+            ],
+            [
+              39,
+              19,
+              0,
+              0,
+              4,
+              57
+            ]
+          ],
+          "f1_macro": 0.7348308563232422,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9799764156341553,
+              "roc_auc": 0.9845815300941467
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9178329706192017,
+              "roc_auc": 0.9838365912437439
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7423900961875916,
+              "roc_auc": 0.9637425541877747
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7608466148376465,
+              "roc_auc": 0.9766322374343872
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7882278561592102,
+              "roc_auc": 0.9427564144134521
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6619478464126587,
+              "roc_auc": 0.8975206613540649
+            }
+          ],
+          "pr_auc_macro": 0.808536946773529,
+          "precision_macro": 0.7949421405792236,
+          "recall_macro": 0.7070150375366211,
+          "roc_auc_macro": 0.9581783413887024
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.8030303120613098,
+          "confusion_matrix": [
+            [
+              311,
+              0,
+              0,
+              0,
+              0,
+              9
+            ],
+            [
+              2,
+              106,
+              0,
+              0,
+              1,
+              5
+            ],
+            [
+              5,
+              0,
+              14,
+              0,
+              2,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              29,
+              16,
+              0
+            ],
+            [
+              4,
+              9,
+              0,
+              11,
+              66,
+              12
+            ],
+            [
+              35,
+              21,
+              2,
+              0,
+              4,
+              57
+            ]
+          ],
+          "f1_macro": 0.7262670993804932,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9829823970794678,
+              "roc_auc": 0.9863377809524536
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.930583119392395,
+              "roc_auc": 0.9834595322608948
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6729206442832947,
+              "roc_auc": 0.9386263489723206
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7488220930099487,
+              "roc_auc": 0.9820852279663086
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7568938732147217,
+              "roc_auc": 0.9366515874862671
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6987263560295105,
+              "roc_auc": 0.9184859991073608
+            }
+          ],
+          "pr_auc_macro": 0.7984881401062012,
+          "precision_macro": 0.7733100652694702,
+          "recall_macro": 0.7017759680747986,
+          "roc_auc_macro": 0.9576077461242676
+        },
+        "validation_selection_score": 2.5591261982917786
+      },
+      "128": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.8099173307418823,
+          "pr_auc_macro": 0.7980279326438904,
+          "roc_auc_macro": 0.9589741826057434
+        },
+        "branch_seed": 2331490395,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/guitar/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "guitar"
+          ]
+        },
+        "outer_seed": 128,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/guitar",
+        "seed": 2331490395,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.8149171471595764,
+          "confusion_matrix": [
+            [
+              306,
+              0,
+              0,
+              0,
+              0,
+              13
+            ],
+            [
+              1,
+              104,
+              0,
+              0,
+              3,
+              7
+            ],
+            [
+              1,
+              0,
+              14,
+              0,
+              1,
+              10
+            ],
+            [
+              0,
+              1,
+              0,
+              33,
+              11,
+              0
+            ],
+            [
+              1,
+              11,
+              0,
+              13,
+              60,
+              15
+            ],
+            [
+              28,
+              14,
+              0,
+              0,
+              4,
+              73
+            ]
+          ],
+          "f1_macro": 0.7489343285560608,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9804785251617432,
+              "roc_auc": 0.9847904443740845
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9157301187515259,
+              "roc_auc": 0.9833226203918457
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7289210557937622,
+              "roc_auc": 0.9608221650123596
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7433758974075317,
+              "roc_auc": 0.9763704538345337
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7856820821762085,
+              "roc_auc": 0.9448718428611755
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6635276079177856,
+              "roc_auc": 0.9014238119125366
+            }
+          ],
+          "pr_auc_macro": 0.8029525279998779,
+          "precision_macro": 0.8005901575088501,
+          "recall_macro": 0.724806010723114,
+          "roc_auc_macro": 0.9586002230644226
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.8099173307418823,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              104,
+              0,
+              0,
+              1,
+              8
+            ],
+            [
+              4,
+              0,
+              14,
+              0,
+              1,
+              7
+            ],
+            [
+              0,
+              0,
+              0,
+              31,
+              14,
+              0
+            ],
+            [
+              3,
+              9,
+              0,
+              14,
+              61,
+              15
+            ],
+            [
+              26,
+              20,
+              2,
+              0,
+              2,
+              69
+            ]
+          ],
+          "f1_macro": 0.7344068288803101,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9827060103416443,
+              "roc_auc": 0.9860451817512512
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9304852485656738,
+              "roc_auc": 0.9838464260101318
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.673707127571106,
+              "roc_auc": 0.9435164332389832
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7446660995483398,
+              "roc_auc": 0.9817914962768555
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7576961517333984,
+              "roc_auc": 0.9372800588607788
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6989067196846008,
+              "roc_auc": 0.9213655591011047
+            }
+          ],
+          "pr_auc_macro": 0.7980279326438904,
+          "precision_macro": 0.7743571400642395,
+          "recall_macro": 0.7138545513153076,
+          "roc_auc_macro": 0.9589741826057434
+        },
+        "validation_selection_score": 2.566919445991516
+      },
+      "256": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.8071625232696533,
+          "pr_auc_macro": 0.8017986416816711,
+          "roc_auc_macro": 0.9583954811096191
+        },
+        "branch_seed": 4037990455,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/guitar/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "guitar"
+          ]
+        },
+        "outer_seed": 256,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/guitar",
+        "seed": 4037990455,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7983425259590149,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              1,
+              107,
+              0,
+              0,
+              4,
+              3
+            ],
+            [
+              2,
+              0,
+              13,
+              0,
+              1,
+              10
+            ],
+            [
+              0,
+              1,
+              0,
+              26,
+              18,
+              0
+            ],
+            [
+              3,
+              11,
+              0,
+              5,
+              69,
+              12
+            ],
+            [
+              38,
+              18,
+              1,
+              0,
+              8,
+              54
+            ]
+          ],
+          "f1_macro": 0.7187150716781616,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9801169633865356,
+              "roc_auc": 0.984581470489502
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9141637086868286,
+              "roc_auc": 0.9830656051635742
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7320871353149414,
+              "roc_auc": 0.9634671211242676
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7689909934997559,
+              "roc_auc": 0.9780723452568054
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7858282327651978,
+              "roc_auc": 0.9445832967758179
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6517998576164246,
+              "roc_auc": 0.8957289457321167
+            }
+          ],
+          "pr_auc_macro": 0.8054978251457214,
+          "precision_macro": 0.786733090877533,
+          "recall_macro": 0.6867743134498596,
+          "roc_auc_macro": 0.9582497477531433
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.8071625232696533,
+          "confusion_matrix": [
+            [
+              311,
+              0,
+              0,
+              0,
+              0,
+              9
+            ],
+            [
+              1,
+              106,
+              0,
+              0,
+              1,
+              6
+            ],
+            [
+              5,
+              0,
+              14,
+              0,
+              2,
+              5
+            ],
+            [
+              0,
+              0,
+              0,
+              24,
+              21,
+              0
+            ],
+            [
+              4,
+              9,
+              0,
+              7,
+              72,
+              10
+            ],
+            [
+              33,
+              21,
+              2,
+              0,
+              4,
+              59
+            ]
+          ],
+          "f1_macro": 0.7248789072036743,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9820215702056885,
+              "roc_auc": 0.9856373071670532
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9301084280014038,
+              "roc_auc": 0.983430802822113
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6753979325294495,
+              "roc_auc": 0.9457142949104309
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7749029397964478,
+              "roc_auc": 0.9838472604751587
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7633750438690186,
+              "roc_auc": 0.9361644983291626
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6849862337112427,
+              "roc_auc": 0.9155788421630859
+            }
+          ],
+          "pr_auc_macro": 0.8017986416816711,
+          "precision_macro": 0.7816762924194336,
+          "recall_macro": 0.6958625316619873,
+          "roc_auc_macro": 0.9583954811096191
+        },
+        "validation_selection_score": 2.5673566460609436
+      },
+      "512": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.8044077157974243,
+          "pr_auc_macro": 0.7971041798591614,
+          "roc_auc_macro": 0.9579785466194153
+        },
+        "branch_seed": 1874836738,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/guitar/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "guitar"
+          ]
+        },
+        "outer_seed": 512,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/guitar",
+        "seed": 1874836738,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7983425259590149,
+          "confusion_matrix": [
+            [
+              307,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              108,
+              0,
+              0,
+              3,
+              3
+            ],
+            [
+              1,
+              0,
+              13,
+              0,
+              1,
+              11
+            ],
+            [
+              0,
+              1,
+              0,
+              36,
+              8,
+              0
+            ],
+            [
+              2,
+              13,
+              0,
+              20,
+              52,
+              13
+            ],
+            [
+              32,
+              20,
+              0,
+              0,
+              5,
+              62
+            ]
+          ],
+          "f1_macro": 0.7209724187850952,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9782607555389404,
+              "roc_auc": 0.983195960521698
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9134081602096558,
+              "roc_auc": 0.9831798076629639
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7211354374885559,
+              "roc_auc": 0.9597750902175903
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7471827268600464,
+              "roc_auc": 0.9759122729301453
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7846962213516235,
+              "roc_auc": 0.9433493614196777
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6433116793632507,
+              "roc_auc": 0.8946176767349243
+            }
+          ],
+          "pr_auc_macro": 0.7979992032051086,
+          "precision_macro": 0.7777948379516602,
+          "recall_macro": 0.7070868611335754,
+          "roc_auc_macro": 0.9566717147827148
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.8044077157974243,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              106,
+              0,
+              0,
+              1,
+              6
+            ],
+            [
+              4,
+              0,
+              14,
+              0,
+              2,
+              6
+            ],
+            [
+              0,
+              0,
+              0,
+              33,
+              12,
+              0
+            ],
+            [
+              3,
+              10,
+              0,
+              20,
+              57,
+              12
+            ],
+            [
+              26,
+              22,
+              2,
+              0,
+              4,
+              65
+            ]
+          ],
+          "f1_macro": 0.7245982885360718,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9818564653396606,
+              "roc_auc": 0.9852139949798584
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.9329200387001038,
+              "roc_auc": 0.9838321208953857
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6689544320106506,
+              "roc_auc": 0.9440109729766846
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7595412731170654,
+              "roc_auc": 0.9819545745849609
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7662574052810669,
+              "roc_auc": 0.9379870295524597
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6730954051017761,
+              "roc_auc": 0.9148727059364319
+            }
+          ],
+          "pr_auc_macro": 0.7971041798591614,
+          "precision_macro": 0.7611052989959717,
+          "recall_macro": 0.7120477557182312,
+          "roc_auc_macro": 0.9579785466194153
+        },
+        "validation_selection_score": 2.559490442276001
+      }
+    },
+    "piano_only": {
+      "32": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7699724435806274,
+          "pr_auc_macro": 0.7435413002967834,
+          "roc_auc_macro": 0.9460489153862
+        },
+        "branch_seed": 3596998195,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/piano/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "piano"
+          ]
+        },
+        "outer_seed": 32,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/piano",
+        "seed": 3596998195,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.738950252532959,
+          "confusion_matrix": [
+            [
+              312,
+              1,
+              0,
+              0,
+              1,
+              5
+            ],
+            [
+              1,
+              98,
+              0,
+              0,
+              6,
+              10
+            ],
+            [
+              8,
+              0,
+              5,
+              0,
+              0,
+              13
+            ],
+            [
+              0,
+              10,
+              0,
+              6,
+              28,
+              1
+            ],
+            [
+              5,
+              15,
+              0,
+              0,
+              66,
+              14
+            ],
+            [
+              47,
+              16,
+              0,
+              0,
+              8,
+              48
+            ]
+          ],
+          "f1_macro": 0.5528263449668884,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9610837697982788,
+              "roc_auc": 0.971430778503418
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8537505865097046,
+              "roc_auc": 0.9682016372680664
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.685401976108551,
+              "roc_auc": 0.9456689357757568
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7268880605697632,
+              "roc_auc": 0.9640975594520569
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7313534617424011,
+              "roc_auc": 0.9236859679222107
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5124464631080627,
+              "roc_auc": 0.8114868998527527
+            }
+          ],
+          "pr_auc_macro": 0.745154082775116,
+          "precision_macro": 0.7782397270202637,
+          "recall_macro": 0.5365387797355652,
+          "roc_auc_macro": 0.930761992931366
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7699724435806274,
+          "confusion_matrix": [
+            [
+              316,
+              1,
+              0,
+              0,
+              0,
+              3
+            ],
+            [
+              1,
+              100,
+              0,
+              0,
+              5,
+              8
+            ],
+            [
+              14,
+              0,
+              5,
+              0,
+              2,
+              5
+            ],
+            [
+              0,
+              8,
+              0,
+              7,
+              30,
+              0
+            ],
+            [
+              3,
+              10,
+              0,
+              0,
+              76,
+              13
+            ],
+            [
+              38,
+              15,
+              0,
+              0,
+              11,
+              55
+            ]
+          ],
+          "f1_macro": 0.5876660346984863,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9790023565292358,
+              "roc_auc": 0.9819196462631226
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.876120388507843,
+              "roc_auc": 0.9712905287742615
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5725696682929993,
+              "roc_auc": 0.9581318497657776
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6880521774291992,
+              "roc_auc": 0.9558818936347961
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7437043786048889,
+              "roc_auc": 0.9469425678253174
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6017990112304688,
+              "roc_auc": 0.8621267676353455
+            }
+          ],
+          "pr_auc_macro": 0.7435413002967834,
+          "precision_macro": 0.8105660676956177,
+          "recall_macro": 0.5699731707572937,
+          "roc_auc_macro": 0.9460489153862
+        },
+        "validation_selection_score": 2.459562659263611
+      },
+      "64": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7617079615592957,
+          "pr_auc_macro": 0.745513379573822,
+          "roc_auc_macro": 0.9486449360847473
+        },
+        "branch_seed": 3328647969,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/piano/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "piano"
+          ]
+        },
+        "outer_seed": 64,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/piano",
+        "seed": 3328647969,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7430939078330994,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              2,
+              8
+            ],
+            [
+              1,
+              96,
+              0,
+              0,
+              4,
+              14
+            ],
+            [
+              7,
+              0,
+              5,
+              0,
+              0,
+              14
+            ],
+            [
+              0,
+              9,
+              0,
+              9,
+              26,
+              1
+            ],
+            [
+              3,
+              14,
+              0,
+              0,
+              63,
+              20
+            ],
+            [
+              41,
+              14,
+              0,
+              0,
+              7,
+              57
+            ]
+          ],
+          "f1_macro": 0.5745412707328796,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9616369009017944,
+              "roc_auc": 0.9717481136322021
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8476988077163696,
+              "roc_auc": 0.9672020673751831
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7070847153663635,
+              "roc_auc": 0.945338249206543
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7182146906852722,
+              "roc_auc": 0.9627556800842285
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7299593091011047,
+              "roc_auc": 0.923028826713562
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.517602801322937,
+              "roc_auc": 0.8230849504470825
+            }
+          ],
+          "pr_auc_macro": 0.7470328211784363,
+          "precision_macro": 0.7816034555435181,
+          "recall_macro": 0.5502665042877197,
+          "roc_auc_macro": 0.9321929812431335
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7617079615592957,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              99,
+              0,
+              0,
+              4,
+              10
+            ],
+            [
+              13,
+              0,
+              5,
+              1,
+              2,
+              5
+            ],
+            [
+              0,
+              8,
+              0,
+              8,
+              28,
+              1
+            ],
+            [
+              1,
+              12,
+              0,
+              0,
+              71,
+              18
+            ],
+            [
+              36,
+              11,
+              0,
+              0,
+              10,
+              62
+            ]
+          ],
+          "f1_macro": 0.5895512104034424,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9787847995758057,
+              "roc_auc": 0.9818888306617737
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8701366186141968,
+              "roc_auc": 0.9696422219276428
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6037039756774902,
+              "roc_auc": 0.9662087559700012
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6710253357887268,
+              "roc_auc": 0.9550660848617554
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7436224818229675,
+              "roc_auc": 0.9459999203681946
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6058068871498108,
+              "roc_auc": 0.8730635643005371
+            }
+          ],
+          "pr_auc_macro": 0.745513379573822,
+          "precision_macro": 0.7832305431365967,
+          "recall_macro": 0.569682240486145,
+          "roc_auc_macro": 0.9486449360847473
+        },
+        "validation_selection_score": 2.455866277217865
+      },
+      "128": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.7672176361083984,
+          "pr_auc_macro": 0.7365336418151855,
+          "roc_auc_macro": 0.9461782574653625
+        },
+        "branch_seed": 2068517753,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/piano/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "piano"
+          ]
+        },
+        "outer_seed": 128,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/piano",
+        "seed": 2068517753,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7458563446998596,
+          "confusion_matrix": [
+            [
+              310,
+              1,
+              0,
+              0,
+              1,
+              7
+            ],
+            [
+              1,
+              95,
+              0,
+              0,
+              6,
+              13
+            ],
+            [
+              7,
+              0,
+              5,
+              0,
+              0,
+              14
+            ],
+            [
+              0,
+              10,
+              0,
+              9,
+              26,
+              0
+            ],
+            [
+              4,
+              14,
+              0,
+              0,
+              65,
+              17
+            ],
+            [
+              42,
+              14,
+              0,
+              0,
+              7,
+              56
+            ]
+          ],
+          "f1_macro": 0.5760746598243713,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9605099558830261,
+              "roc_auc": 0.9712141156196594
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8429625034332275,
+              "roc_auc": 0.9658456444740295
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7044509053230286,
+              "roc_auc": 0.945338249206543
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7099534869194031,
+              "roc_auc": 0.9612829089164734
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7099074125289917,
+              "roc_auc": 0.9196714758872986
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.49642521142959595,
+              "roc_auc": 0.8135982751846313
+            }
+          ],
+          "pr_auc_macro": 0.7373681664466858,
+          "precision_macro": 0.7838359475135803,
+          "recall_macro": 0.5517949461936951,
+          "roc_auc_macro": 0.9294917583465576
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7672176361083984,
+          "confusion_matrix": [
+            [
+              312,
+              1,
+              0,
+              0,
+              0,
+              7
+            ],
+            [
+              1,
+              98,
+              0,
+              0,
+              4,
+              11
+            ],
+            [
+              14,
+              0,
+              5,
+              1,
+              2,
+              4
+            ],
+            [
+              0,
+              10,
+              0,
+              12,
+              23,
+              0
+            ],
+            [
+              2,
+              11,
+              0,
+              0,
+              72,
+              17
+            ],
+            [
+              36,
+              14,
+              0,
+              0,
+              11,
+              58
+            ]
+          ],
+          "f1_macro": 0.6079299449920654,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9787787795066833,
+              "roc_auc": 0.9818272590637207
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8676308393478394,
+              "roc_auc": 0.9687966108322144
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5994642376899719,
+              "roc_auc": 0.964011013507843
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6585749387741089,
+              "roc_auc": 0.9539239406585693
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7279817461967468,
+              "roc_auc": 0.9434074759483337
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5867714881896973,
+              "roc_auc": 0.8651032447814941
+            }
+          ],
+          "pr_auc_macro": 0.7365336418151855,
+          "precision_macro": 0.7916682958602905,
+          "recall_macro": 0.5811501145362854,
+          "roc_auc_macro": 0.9461782574653625
+        },
+        "validation_selection_score": 2.4499295353889465
+      },
+      "256": {
+        "best_epoch": 19,
+        "best_validation": {
+          "accuracy": 0.7658402323722839,
+          "pr_auc_macro": 0.7465846538543701,
+          "roc_auc_macro": 0.949521541595459
+        },
+        "branch_seed": 141570064,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/piano/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "piano"
+          ]
+        },
+        "outer_seed": 256,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/piano",
+        "seed": 141570064,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7361878156661987,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              2,
+              8
+            ],
+            [
+              1,
+              86,
+              0,
+              0,
+              15,
+              13
+            ],
+            [
+              6,
+              0,
+              5,
+              0,
+              0,
+              15
+            ],
+            [
+              0,
+              8,
+              0,
+              5,
+              32,
+              0
+            ],
+            [
+              3,
+              11,
+              0,
+              0,
+              68,
+              18
+            ],
+            [
+              38,
+              9,
+              0,
+              0,
+              11,
+              61
+            ]
+          ],
+          "f1_macro": 0.5501430630683899,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9619244933128357,
+              "roc_auc": 0.9719029664993286
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8467849493026733,
+              "roc_auc": 0.9670164585113525
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.683124303817749,
+              "roc_auc": 0.9477075934410095
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.7310270667076111,
+              "roc_auc": 0.9646211862564087
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7122316360473633,
+              "roc_auc": 0.9182051420211792
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5012597441673279,
+              "roc_auc": 0.8268768787384033
+            }
+          ],
+          "pr_auc_macro": 0.7393920421600342,
+          "precision_macro": 0.779113233089447,
+          "recall_macro": 0.5348945260047913,
+          "roc_auc_macro": 0.9327216744422913
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7658402323722839,
+          "confusion_matrix": [
+            [
+              307,
+              1,
+              0,
+              0,
+              0,
+              12
+            ],
+            [
+              1,
+              94,
+              0,
+              0,
+              6,
+              13
+            ],
+            [
+              12,
+              0,
+              5,
+              1,
+              2,
+              6
+            ],
+            [
+              0,
+              7,
+              0,
+              5,
+              33,
+              0
+            ],
+            [
+              1,
+              5,
+              0,
+              0,
+              80,
+              16
+            ],
+            [
+              35,
+              7,
+              0,
+              0,
+              12,
+              65
+            ]
+          ],
+          "f1_macro": 0.5825210213661194,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9794347286224365,
+              "roc_auc": 0.9823814630508423
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8691822290420532,
+              "roc_auc": 0.9699719548225403
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6034616231918335,
+              "roc_auc": 0.9643955826759338
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6794516444206238,
+              "roc_auc": 0.9554250240325928
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7492306232452393,
+              "roc_auc": 0.9445543885231018
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5987473726272583,
+              "roc_auc": 0.8804009556770325
+            }
+          ],
+          "pr_auc_macro": 0.7465846538543701,
+          "precision_macro": 0.7836858630180359,
+          "recall_macro": 0.5696478486061096,
+          "roc_auc_macro": 0.949521541595459
+        },
+        "validation_selection_score": 2.461946427822113
+      },
+      "512": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7575757503509521,
+          "pr_auc_macro": 0.7431229948997498,
+          "roc_auc_macro": 0.9486117362976074
+        },
+        "branch_seed": 66999815,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/piano/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "piano"
+          ]
+        },
+        "outer_seed": 512,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/piano",
+        "seed": 66999815,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7513812184333801,
+          "confusion_matrix": [
+            [
+              309,
+              1,
+              0,
+              0,
+              1,
+              8
+            ],
+            [
+              1,
+              96,
+              0,
+              0,
+              3,
+              15
+            ],
+            [
+              5,
+              0,
+              5,
+              0,
+              0,
+              16
+            ],
+            [
+              0,
+              10,
+              0,
+              15,
+              18,
+              2
+            ],
+            [
+              3,
+              17,
+              0,
+              0,
+              56,
+              24
+            ],
+            [
+              37,
+              15,
+              0,
+              0,
+              4,
+              63
+            ]
+          ],
+          "f1_macro": 0.6034843325614929,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9632433652877808,
+              "roc_auc": 0.9727543592453003
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8476516008377075,
+              "roc_auc": 0.9669736623764038
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.7283284664154053,
+              "roc_auc": 0.947817862033844
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6901359558105469,
+              "roc_auc": 0.9603009819984436
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7082539200782776,
+              "roc_auc": 0.9191346168518066
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5195093750953674,
+              "roc_auc": 0.8257656097412109
+            }
+          ],
+          "pr_auc_macro": 0.7428538203239441,
+          "precision_macro": 0.7893640995025635,
+          "recall_macro": 0.5697479248046875,
+          "roc_auc_macro": 0.9321245551109314
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7575757503509521,
+          "confusion_matrix": [
+            [
+              305,
+              1,
+              0,
+              0,
+              0,
+              14
+            ],
+            [
+              1,
+              100,
+              0,
+              0,
+              1,
+              12
+            ],
+            [
+              12,
+              0,
+              5,
+              0,
+              1,
+              8
+            ],
+            [
+              0,
+              11,
+              0,
+              12,
+              20,
+              2
+            ],
+            [
+              1,
+              18,
+              0,
+              0,
+              62,
+              21
+            ],
+            [
+              35,
+              12,
+              0,
+              0,
+              6,
+              66
+            ]
+          ],
+          "f1_macro": 0.6035358905792236,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9798426628112793,
+              "roc_auc": 0.9825430512428284
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.870648205280304,
+              "roc_auc": 0.9697138667106628
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6195947527885437,
+              "roc_auc": 0.9679121375083923
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6610481142997742,
+              "roc_auc": 0.9532387256622314
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7216675281524658,
+              "roc_auc": 0.9422919750213623
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6059366464614868,
+              "roc_auc": 0.8759707808494568
+            }
+          ],
+          "pr_auc_macro": 0.7431229948997498,
+          "precision_macro": 0.7985469698905945,
+          "recall_macro": 0.5752928853034973,
+          "roc_auc_macro": 0.9486117362976074
+        },
+        "validation_selection_score": 2.4493104815483093
+      }
+    },
+    "vocals_only": {
+      "32": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7796143293380737,
+          "pr_auc_macro": 0.7410979270935059,
+          "roc_auc_macro": 0.9459241032600403
+        },
+        "branch_seed": 2361236136,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/vocals/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "vocals"
+          ]
+        },
+        "outer_seed": 32,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_32/vocals",
+        "seed": 2361236136,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.769336998462677,
+          "confusion_matrix": [
+            [
+              310,
+              1,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              1,
+              92,
+              1,
+              0,
+              7,
+              14
+            ],
+            [
+              12,
+              0,
+              4,
+              0,
+              1,
+              9
+            ],
+            [
+              0,
+              12,
+              0,
+              9,
+              24,
+              0
+            ],
+            [
+              0,
+              10,
+              0,
+              0,
+              80,
+              10
+            ],
+            [
+              34,
+              14,
+              0,
+              0,
+              9,
+              62
+            ]
+          ],
+          "f1_macro": 0.5908660888671875,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9676485657691956,
+              "roc_auc": 0.9757808446884155
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.830954372882843,
+              "roc_auc": 0.9593346118927002
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5813235640525818,
+              "roc_auc": 0.9386708736419678
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6551305055618286,
+              "roc_auc": 0.9409589767456055
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7957817912101746,
+              "roc_auc": 0.9532051086425781
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5988519191741943,
+              "roc_auc": 0.8726161122322083
+            }
+          ],
+          "pr_auc_macro": 0.738281786441803,
+          "precision_macro": 0.7741040587425232,
+          "recall_macro": 0.5744402408599854,
+          "roc_auc_macro": 0.9400944709777832
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7796143293380737,
+          "confusion_matrix": [
+            [
+              307,
+              0,
+              0,
+              0,
+              0,
+              13
+            ],
+            [
+              0,
+              95,
+              0,
+              0,
+              4,
+              15
+            ],
+            [
+              15,
+              0,
+              6,
+              0,
+              0,
+              5
+            ],
+            [
+              0,
+              11,
+              0,
+              5,
+              28,
+              1
+            ],
+            [
+              0,
+              9,
+              0,
+              0,
+              85,
+              8
+            ],
+            [
+              32,
+              10,
+              0,
+              0,
+              9,
+              68
+            ]
+          ],
+          "f1_macro": 0.6034098267555237,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9777766466140747,
+              "roc_auc": 0.9819426536560059
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.834402859210968,
+              "roc_auc": 0.9673059582710266
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.571829080581665,
+              "roc_auc": 0.9414286017417908
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6462223529815674,
+              "roc_auc": 0.941817581653595
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8013935089111328,
+              "roc_auc": 0.947586715221405
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6149629950523376,
+              "roc_auc": 0.8954632878303528
+            }
+          ],
+          "pr_auc_macro": 0.7410979270935059,
+          "precision_macro": 0.8200027942657471,
+          "recall_macro": 0.589891791343689,
+          "roc_auc_macro": 0.9459241032600403
+        },
+        "validation_selection_score": 2.46663635969162
+      },
+      "64": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.774104654788971,
+          "pr_auc_macro": 0.7435937523841858,
+          "roc_auc_macro": 0.945701539516449
+        },
+        "branch_seed": 3302750700,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/vocals/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "vocals"
+          ]
+        },
+        "outer_seed": 64,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_64/vocals",
+        "seed": 3302750700,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.769336998462677,
+          "confusion_matrix": [
+            [
+              311,
+              0,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              2,
+              91,
+              0,
+              0,
+              8,
+              14
+            ],
+            [
+              13,
+              0,
+              5,
+              0,
+              1,
+              7
+            ],
+            [
+              0,
+              11,
+              0,
+              8,
+              26,
+              0
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              82,
+              10
+            ],
+            [
+              36,
+              12,
+              0,
+              0,
+              11,
+              60
+            ]
+          ],
+          "f1_macro": 0.5959199666976929,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9676941633224487,
+              "roc_auc": 0.9757266044616699
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8421728610992432,
+              "roc_auc": 0.9620475769042969
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6041365265846252,
+              "roc_auc": 0.9353647232055664
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.691990852355957,
+              "roc_auc": 0.9433481097221375
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8120641112327576,
+              "roc_auc": 0.9539583325386047
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.5965676307678223,
+              "roc_auc": 0.8743940591812134
+            }
+          ],
+          "pr_auc_macro": 0.7524376511573792,
+          "precision_macro": 0.8086172342300415,
+          "recall_macro": 0.5767521858215332,
+          "roc_auc_macro": 0.9408065676689148
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.774104654788971,
+          "confusion_matrix": [
+            [
+              309,
+              0,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              0,
+              93,
+              0,
+              0,
+              5,
+              16
+            ],
+            [
+              15,
+              0,
+              6,
+              0,
+              0,
+              5
+            ],
+            [
+              0,
+              9,
+              0,
+              6,
+              29,
+              1
+            ],
+            [
+              0,
+              9,
+              0,
+              0,
+              85,
+              8
+            ],
+            [
+              34,
+              11,
+              0,
+              0,
+              11,
+              63
+            ]
+          ],
+          "f1_macro": 0.6012858748435974,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9772071838378906,
+              "roc_auc": 0.9816579818725586
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8447096347808838,
+              "roc_auc": 0.9692695736885071
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5555641651153564,
+              "roc_auc": 0.939505398273468
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6541915535926819,
+              "roc_auc": 0.9394354820251465
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8078762292861938,
+              "roc_auc": 0.9479637145996094
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6220139861106873,
+              "roc_auc": 0.8963770270347595
+            }
+          ],
+          "pr_auc_macro": 0.7435937523841858,
+          "precision_macro": 0.81417316198349,
+          "recall_macro": 0.5847103595733643,
+          "roc_auc_macro": 0.945701539516449
+        },
+        "validation_selection_score": 2.4633999466896057
+      },
+      "128": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7865013480186462,
+          "pr_auc_macro": 0.7535889148712158,
+          "roc_auc_macro": 0.9476494193077087
+        },
+        "branch_seed": 2022638949,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/vocals/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "vocals"
+          ]
+        },
+        "outer_seed": 128,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_128/vocals",
+        "seed": 2022638949,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7748618721961975,
+          "confusion_matrix": [
+            [
+              310,
+              1,
+              0,
+              0,
+              0,
+              8
+            ],
+            [
+              2,
+              92,
+              1,
+              0,
+              7,
+              13
+            ],
+            [
+              13,
+              0,
+              4,
+              0,
+              1,
+              8
+            ],
+            [
+              0,
+              11,
+              0,
+              9,
+              25,
+              0
+            ],
+            [
+              0,
+              9,
+              0,
+              0,
+              80,
+              11
+            ],
+            [
+              33,
+              13,
+              0,
+              0,
+              7,
+              66
+            ]
+          ],
+          "f1_macro": 0.5974380373954773,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9679886698722839,
+              "roc_auc": 0.9761136770248413
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8466805219650269,
+              "roc_auc": 0.9631041288375854
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5982633829116821,
+              "roc_auc": 0.9408749938011169
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6853195428848267,
+              "roc_auc": 0.9425953030586243
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8001145124435425,
+              "roc_auc": 0.9543429613113403
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6136021614074707,
+              "roc_auc": 0.8770192265510559
+            }
+          ],
+          "pr_auc_macro": 0.751994788646698,
+          "precision_macro": 0.7808981537818909,
+          "recall_macro": 0.5800424814224243,
+          "roc_auc_macro": 0.9423417448997498
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7865013480186462,
+          "confusion_matrix": [
+            [
+              308,
+              0,
+              0,
+              0,
+              0,
+              12
+            ],
+            [
+              1,
+              97,
+              0,
+              0,
+              2,
+              14
+            ],
+            [
+              15,
+              0,
+              6,
+              0,
+              0,
+              5
+            ],
+            [
+              0,
+              10,
+              0,
+              5,
+              28,
+              2
+            ],
+            [
+              0,
+              8,
+              0,
+              0,
+              84,
+              10
+            ],
+            [
+              30,
+              11,
+              0,
+              0,
+              7,
+              71
+            ]
+          ],
+          "f1_macro": 0.6100142002105713,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9784830808639526,
+              "roc_auc": 0.9826585650444031
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8502005338668823,
+              "roc_auc": 0.9696995615959167
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5705272555351257,
+              "roc_auc": 0.9437911510467529
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6736165881156921,
+              "roc_auc": 0.9412301778793335
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8114591836929321,
+              "roc_auc": 0.9489692449569702
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6372465491294861,
+              "roc_auc": 0.899547278881073
+            }
+          ],
+          "pr_auc_macro": 0.7535889148712158,
+          "precision_macro": 0.8261533379554749,
+          "recall_macro": 0.5959042906761169,
+          "roc_auc_macro": 0.9476494193077087
+        },
+        "validation_selection_score": 2.487739682197571
+      },
+      "256": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7851239442825317,
+          "pr_auc_macro": 0.7483881115913391,
+          "roc_auc_macro": 0.9475072026252747
+        },
+        "branch_seed": 3600088722,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/vocals/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "vocals"
+          ]
+        },
+        "outer_seed": 256,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_256/vocals",
+        "seed": 3600088722,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.7651933431625366,
+          "confusion_matrix": [
+            [
+              307,
+              1,
+              0,
+              0,
+              0,
+              11
+            ],
+            [
+              1,
+              95,
+              2,
+              0,
+              6,
+              11
+            ],
+            [
+              11,
+              0,
+              4,
+              0,
+              1,
+              10
+            ],
+            [
+              0,
+              13,
+              0,
+              8,
+              24,
+              0
+            ],
+            [
+              0,
+              11,
+              0,
+              0,
+              79,
+              10
+            ],
+            [
+              33,
+              17,
+              0,
+              0,
+              8,
+              61
+            ]
+          ],
+          "f1_macro": 0.5825379490852356,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9684658050537109,
+              "roc_auc": 0.9760671854019165
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8322577476501465,
+              "roc_auc": 0.961733341217041
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.6039882898330688,
+              "roc_auc": 0.9461097121238708
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6780602335929871,
+              "roc_auc": 0.9379479289054871
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.7993470430374146,
+              "roc_auc": 0.953701913356781
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6187906861305237,
+              "roc_auc": 0.8799500465393066
+            }
+          ],
+          "pr_auc_macro": 0.7501516342163086,
+          "precision_macro": 0.7489968538284302,
+          "recall_macro": 0.570449709892273,
+          "roc_auc_macro": 0.9425849914550781
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7851239442825317,
+          "confusion_matrix": [
+            [
+              305,
+              0,
+              0,
+              0,
+              0,
+              15
+            ],
+            [
+              0,
+              100,
+              0,
+              0,
+              1,
+              13
+            ],
+            [
+              13,
+              0,
+              7,
+              0,
+              0,
+              6
+            ],
+            [
+              0,
+              11,
+              0,
+              5,
+              28,
+              1
+            ],
+            [
+              0,
+              10,
+              0,
+              0,
+              83,
+              9
+            ],
+            [
+              28,
+              13,
+              0,
+              0,
+              8,
+              70
+            ]
+          ],
+          "f1_macro": 0.615869402885437,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9772337079048157,
+              "roc_auc": 0.9818349480628967
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.83878093957901,
+              "roc_auc": 0.9692122340202332
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.587780237197876,
+              "roc_auc": 0.9448901414871216
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6461644172668457,
+              "roc_auc": 0.9361396431922913
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8065705299377441,
+              "roc_auc": 0.9490164518356323
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6337987184524536,
+              "roc_auc": 0.9039496779441833
+            }
+          ],
+          "pr_auc_macro": 0.7483881115913391,
+          "precision_macro": 0.8222455978393555,
+          "recall_macro": 0.6021034121513367,
+          "roc_auc_macro": 0.9475072026252747
+        },
+        "validation_selection_score": 2.4810192584991455
+      },
+      "512": {
+        "best_epoch": 20,
+        "best_validation": {
+          "accuracy": 0.7809917330741882,
+          "pr_auc_macro": 0.7469033598899841,
+          "roc_auc_macro": 0.9461829662322998
+        },
+        "branch_seed": 966143285,
+        "checkpoint_path": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/vocals/checkpoint.pt",
+        "data_fingerprint": "dbda5c67a547f40506a01281f318961869e764349a26bbb543870e37eb14abcc",
+        "label_mapping": {
+          "classical": 0,
+          "electronic": 1,
+          "jazz_blues": 2,
+          "metal_punk": 3,
+          "rock_pop": 4,
+          "world": 5
+        },
+        "model": {
+          "architecture": "deep_mlp",
+          "hidden_dimensions": [
+            1024,
+            512
+          ],
+          "input_dimension": 1024,
+          "number_of_classes": 6,
+          "sources": [
+            "vocals"
+          ]
+        },
+        "outer_seed": 512,
+        "output_directory": "/home/osiris181/stem-fusion-music-classification/outputs/ismir04/runs/branches/seed_512/vocals",
+        "seed": 966143285,
+        "split_examples": {
+          "test": 724,
+          "train": 729,
+          "validation": 726
+        },
+        "test": {
+          "accuracy": 0.761049747467041,
+          "confusion_matrix": [
+            [
+              308,
+              1,
+              0,
+              0,
+              0,
+              10
+            ],
+            [
+              2,
+              98,
+              1,
+              0,
+              6,
+              8
+            ],
+            [
+              12,
+              0,
+              4,
+              0,
+              1,
+              9
+            ],
+            [
+              0,
+              14,
+              0,
+              8,
+              23,
+              0
+            ],
+            [
+              0,
+              13,
+              0,
+              0,
+              78,
+              9
+            ],
+            [
+              34,
+              21,
+              0,
+              0,
+              9,
+              55
+            ]
+          ],
+          "f1_macro": 0.5772231817245483,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9668287634849548,
+              "roc_auc": 0.974759042263031
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8412894010543823,
+              "roc_auc": 0.9627472162246704
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.5946394205093384,
+              "roc_auc": 0.9379545450210571
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6915246844291687,
+              "roc_auc": 0.9402061700820923
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8003538250923157,
+              "roc_auc": 0.9521154165267944
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6108207106590271,
+              "roc_auc": 0.8761025071144104
+            }
+          ],
+          "pr_auc_macro": 0.7509093880653381,
+          "precision_macro": 0.7671495676040649,
+          "recall_macro": 0.565250039100647,
+          "roc_auc_macro": 0.9406474232673645
+        },
+        "trainable_parameters": 1577478,
+        "validation": {
+          "accuracy": 0.7809917330741882,
+          "confusion_matrix": [
+            [
+              305,
+              0,
+              0,
+              0,
+              0,
+              15
+            ],
+            [
+              0,
+              103,
+              0,
+              0,
+              1,
+              10
+            ],
+            [
+              15,
+              0,
+              6,
+              0,
+              0,
+              5
+            ],
+            [
+              0,
+              14,
+              0,
+              6,
+              25,
+              0
+            ],
+            [
+              0,
+              12,
+              0,
+              0,
+              83,
+              7
+            ],
+            [
+              31,
+              16,
+              0,
+              0,
+              8,
+              64
+            ]
+          ],
+          "f1_macro": 0.6090934872627258,
+          "per_class": [
+            {
+              "label": 0,
+              "pr_auc": 0.9763687252998352,
+              "roc_auc": 0.9809959530830383
+            },
+            {
+              "label": 1,
+              "pr_auc": 0.8443564772605896,
+              "roc_auc": 0.969255268573761
+            },
+            {
+              "label": 2,
+              "pr_auc": 0.560767412185669,
+              "roc_auc": 0.9396702647209167
+            },
+            {
+              "label": 3,
+              "pr_auc": 0.6685508489608765,
+              "roc_auc": 0.9388481378555298
+            },
+            {
+              "label": 4,
+              "pr_auc": 0.8026561737060547,
+              "roc_auc": 0.9470368027687073
+            },
+            {
+              "label": 5,
+              "pr_auc": 0.6287204623222351,
+              "roc_auc": 0.9012916088104248
+            }
+          ],
+          "pr_auc_macro": 0.7469033598899841,
+          "precision_macro": 0.8203926682472229,
+          "recall_macro": 0.5953795313835144,
+          "roc_auc_macro": 0.9461829662322998
+        },
+        "validation_selection_score": 2.474078059196472
+      }
+    }
+  },
+  "sd_ddof": 1,
+  "seeds": [
+    32,
+    64,
+    128,
+    256,
+    512
+  ],
+  "selection_rule": "validation accuracy_micro + roc_auc_macro + average_precision_macro",
+  "significance_tests_performed": false,
+  "split_counts": {
+    "test": 724,
+    "train": 729,
+    "validation": 726
+  },
+  "training_settings": {
+    "batch_size": 128,
+    "device": "auto",
+    "dropout": 0.2,
+    "epochs": 20,
+    "hidden_dimensions": [
+      1024,
+      512
+    ],
+    "learning_rate": 0.0001,
+    "num_workers": 0
+  }
+}

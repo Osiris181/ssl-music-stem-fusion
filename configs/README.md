@@ -5,10 +5,11 @@ These YAML files now supply settings to the public CLI tasks.
 | Directory | Usage |
 | --- | --- |
 | `separators/` | HT-Demucs inference defaults, loaded by `separate htdemucs`. |
-| `features/` | Shared MusicFM defaults, loaded by FMA-Medium and GTZAN extraction. |
+| `features/` | Shared MusicFM defaults, loaded by all three genre datasets. |
 | `training/` | Common genre settings inherited by dataset and mid-/late-fusion profiles. |
 | `experiments/fma_medium/` | Profile references, named source conditions, and optional task paths. |
 | `experiments/gtzan/` | Provided split/audio paths for manifest generation, extraction settings, and the same condition matrices. |
+| `experiments/ismir04/` | Fixed-partition preparation, duplicate checks, separation, chunked extraction, and the same training matrices. |
 
 Each task automatically loads its standard preset. Use `--config PATH`
 for another YAML file; explicit CLI values override YAML. A training

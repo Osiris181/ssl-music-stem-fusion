@@ -25,6 +25,13 @@ runtime and pooling functions, with GTZAN track IDs and filenames
 `gtzan_musicfm_{source}_{split}.pkl` (`mix` for the mixture). The shared runtime
 saves CPU float32 tensors; the GTZAN loader also accepts original NumPy caches.
 
+[ISMIR04 extraction](../experiments/ismir04/extraction.py) uses this same
+implementation with its audited six-class manifest and unique IDs. Its YAML
+selects a 30 s encoder chunk cap for long tracks. Balanced chunks cover all
+samples; pooling weights chunks by their latent-frame counts. Chunking resets
+encoder context and is recorded in reports. The shared default leaves
+chunking disabled for the existing FMA/GTZAN workflows.
+
 Defaults remain MusicFM-MSD, layer 7, mean pooling, 1024 dimensions, mono
 24 kHz audio, and full duration, loaded from the feature YAML preset.
 Explicit CLI settings override YAML. The revised FMA matrix uses mixture, guitar,

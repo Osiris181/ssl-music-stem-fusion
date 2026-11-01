@@ -14,6 +14,7 @@ audio:
   sample_rate_hz: 24000
   channels: mono
   max_seconds: null
+  chunk_seconds: null  # Single forward pass by default; long-track tasks can override.
 
 features:
   conformer_layer_index: 7

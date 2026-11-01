@@ -45,6 +45,7 @@ _EXTRACTION = {
     "extractor.statistics": ("statistics_filename", "str"),
     "audio.sample_rate_hz": ("sample_rate", "int"),
     "audio.max_seconds": ("max_seconds", "optional_float"),
+    "audio.chunk_seconds": ("chunk_seconds", "optional_float"),
     "features.conformer_layer_index": ("layer_index", "int"),
     "features.temporal_pooling": ("temporal_pooling", "str"),
     "features.dimension": ("expected_dimension", "int"),
@@ -130,11 +131,12 @@ _METADATA = {
     "suggested_output_directory",
 }
 _PATHS = {
+    "ismir04_manifest": {"metadata_root", "audio_root", "htdemucs_root", "repair_root", "output", "audit_path"},
     "gtzan_manifest": {"train_split", "validation_split", "test_split", "mixture_root", "htdemucs_root", "output"},
     "extraction": {"manifest", "output_dir", "musicfm_root", "stats_path", "checkpoint_path", "report"},
     "mid_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
     "late_fusion": {"manifest", "feature_dir", "output_dir", "summary_dir"},
-    "separation": {"input_root", "output_root", "existing_output_root", "report"},
+    "separation": {"input_root", "output_root", "existing_output_root", "manifest", "report"},
 }
 _EXECUTION = {
     "extraction": {
@@ -291,6 +293,31 @@ def load_configuration(
 
     data = load(path, ())
     yaml_snapshot = json.loads(json.dumps(data, default=str))
+    if role == "ismir04_manifest":
+        defaults = dict(data.pop("paths", {}))
+        overrides = data.pop("filename_overrides", {})
+        if not isinstance(overrides, dict) or any(not isinstance(value, str) or not value for value in overrides.values()):
+            raise ConfigurationError("filename_overrides must map source paths to corrected relative paths.")
+        defaults["filename_overrides"] = overrides
+        flat = _flatten(data)
+        fixed = {"dataset": "ismir04", "sources": _SOURCE_ORDER,
+                 "duplicate_policy": "keep_training_then_validation_then_test"}
+        settings = {"execution.audit_workers": ("audit_workers", "int"),
+                    "execution.overwrite": ("overwrite", "bool"),
+                    "execution.audit_only": ("audit_only", "bool")}
+        if set(defaults) - {"filename_overrides"} != _PATHS[role] or set(flat) != set(fixed) | set(settings) | {"verified_legacy_stems"}:
+            raise ConfigurationError("Unknown or missing ISMIR04 manifest configuration settings.")
+        for name, expected in fixed.items():
+            if flat.get(name) != expected:
+                raise ConfigurationError(f"{name} must be {expected!r}.")
+        verified = flat["verified_legacy_stems"]
+        if not isinstance(verified, list) or any(not isinstance(item, str) or not item for item in verified):
+            raise ConfigurationError("verified_legacy_stems must be a list of relative audio paths.")
+        defaults["verified_legacy_stem"] = verified
+        for name, (destination, kind) in settings.items():
+            defaults[destination] = _coerce(flat[name], kind, name)
+        return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
+                          "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
     if role == "gtzan_manifest":
         defaults = dict(data.pop("paths", {}))
         flat = _flatten(data)
@@ -332,7 +359,7 @@ def load_configuration(
         if key in data and not (key == "separator" and isinstance(data[key], dict)):
             metadata[key] = data.pop(key)
     dataset = metadata.get("dataset", "fma_medium")
-    classes = {"fma_medium": 16, "gtzan": 10}
+    classes = {"fma_medium": 16, "gtzan": 10, "ismir04": 6}
     if dataset not in classes:
         raise ConfigurationError(f"Unsupported dataset configuration: {dataset}")
     command_dataset = dataset.replace("_", "-")
@@ -397,6 +424,9 @@ def load_configuration(
     for name in set(flat) - set(mappings) - set(fixed):
         raise ConfigurationError(f"Unknown/unsupported YAML setting: {name}")
     for name, (destination, kind) in mappings.items():
+        if role == "extraction" and name == "audio.chunk_seconds" and name not in flat:
+            defaults[destination] = None
+            continue
         if name not in flat:
             raise ConfigurationError(f"Missing required YAML setting: {name}")
         defaults[destination] = _coerce(flat[name], kind, name)

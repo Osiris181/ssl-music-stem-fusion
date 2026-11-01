@@ -8,6 +8,7 @@ and cache filenames.
 | File | Purpose |
 | --- | --- |
 | `prepare_manifest.py` | Read provided split lists and bind retained tracks to local audio paths. |
+| `separation.py` | Run the shared HT-Demucs backend with GTZAN paths and WAV input discovery. |
 | `extraction.py` | Extract MusicFM embeddings with the shared encoder and audio policy. |
 | `train_mid.py` | Run the standard mixture baseline, three capacity controls, and three stem-fusion conditions. |
 | `train_late.py` | Run three mixture ensembles, three stem ensembles, and supporting standalone-stem reports. |
@@ -17,9 +18,10 @@ and cache filenames.
 | YAML | Purpose |
 | --- | --- |
 | `configs/experiments/gtzan/manifest.yaml` | Split files, local audio roots/extensions, unavailable track exclusions, and manifest output. |
+| `configs/experiments/gtzan/separation.yaml` | Original audio and separated-output roots; inherits shared HT-Demucs inference settings. |
 | `configs/experiments/gtzan/extraction.yaml` | Shared MusicFM profile, selected sources, manifest and cache paths. |
 | `configs/features/musicfm_msd_layer7.yaml` | MusicFM checkout, MSD checkpoint, layer 7, and shared extraction settings. |
-| `configs/training/genre.yaml` | Common genre architecture, optimization, metrics, checkpoint selection, and five seeds for both datasets. |
+| `configs/training/genre.yaml` | Common genre architecture, optimization, metrics, checkpoint selection, and five seeds for all genre datasets. |
 | `configs/training/gtzan_genre.yaml` | Ten classes and GTZAN manifest/cache/run/summary paths. |
 | `configs/experiments/gtzan/mid_fusion.yaml`, `late_fusion.yaml` | The same condition matrices as FMA-Medium. |
 
@@ -50,6 +52,18 @@ as outputs of the cleaned script.
 ## Commands
 
 From `src/stemfusion/experiments/gtzan/`:
+
+When separated audio needs to be generated:
+
+```bash
+python separation.py --dry-run
+python separation.py
+```
+
+Complete existing stem folders are skipped. The YAML defaults to WAV inputs
+under the original `genres/` directory. Inference settings come from the same
+`configs/separators/htdemucs_6s.yaml` used by FMA-Medium and ISMIR04. Dataset
+path options can be overridden on the command line.
 
 ```bash
 # Configure your split/audio paths in manifest.yaml first.
@@ -96,7 +110,7 @@ stemfusion train gtzan late-fusion
 
 ## Training and outputs
 
-Both datasets inherit the same 1024/512 hidden widths, ReLU, dropout 0.2,
+All genre datasets inherit the same 1024/512 hidden widths, ReLU, dropout 0.2,
 cross-entropy, Adam at 1e-4, batch size 128, and 20 epochs without early
 stopping. Checkpoint selection maximizes validation micro accuracy + macro
 ROC-AUC + macro average precision, retaining the earliest checkpoint on ties.

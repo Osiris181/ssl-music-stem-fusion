@@ -1,0 +1,7 @@
+dataset: gtzan
+separator_profile: ../../separators/htdemucs_6s.yaml
+inputs:
+  default_extensions: [.wav]
+paths:
+  input_root: /mnt/HDD/GTZAN/genres
+  output_root: /home/osiris181/GTZAN_separated_htdemucs

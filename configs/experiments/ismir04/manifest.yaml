@@ -1,0 +1,23 @@
+# Preserve CSV assignments and six-class labels; never create a random split.
+dataset: ismir04
+sources: [mixture, guitar, drums, piano, bass, vocals]
+duplicate_policy: keep_training_then_validation_then_test
+# Correspondence established by the four-record waveform verification report.
+verified_legacy_stems:
+  - evaluation/classical/jacob_heringman_and_catherine/luis_milan_el_maestro/6-fantasia_6.mp3
+# Resolve CSV filename discrepancies without editing the original CSV or audio.
+filename_overrides:
+  evaluation/electronic/strojovna_07/dirnix/5-kruhov�_objazd.mp3: electronic/strojovna_07/dirnix/05-kruhovy_objazd.mp3
+  training/classical/paul_beier/michelagnolo_galilei_sonate_from_il_primo_libro_d'intavolatura_di_liuto_(1620)/4-passemezzo_and_saltarello.mp3: classical/paul_beier/michelagnolo_galilei_sonate_from_il_primo_libro_d_intavolatura_di_liuto_(1620)/4-passemezzo_and_saltarello.mp3
+  training/classical/paul_beier/michelagnolo_galilei_sonate_from_il_primo_libro_d'intavolatura_di_liuto_(1620)/6-sonate_in_c_minor_toccata_corrente_corrente_corrente.mp3: classical/paul_beier/michelagnolo_galilei_sonate_from_il_primo_libro_d_intavolatura_di_liuto_(1620)/6-sonate_in_c_minor_toccata_corrente_corrente_corrente.mp3
+paths:
+  metadata_root: /mnt/HDD/ismir04_genre/metadata
+  audio_root: /mnt/HDD/ismir04_genre/audio
+  htdemucs_root: /home/osiris181/ismir04_separated_htdemucs/htdemucs_6s
+  repair_root: /home/osiris181/ismir04_separated_htdemucs/repairs/htdemucs_6s
+  output: ../../../data/manifests/ismir04/ismir04_htdemucs.jsonl
+  audit_path: ../../../data/manifests/ismir04/audio_duplicate_audit.json
+execution:
+  audit_workers: 2  # Read only files listed by metadata; avoid excessive HDD concurrency.
+  overwrite: false
+  audit_only: false

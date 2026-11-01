@@ -7,8 +7,10 @@ Store extracted embeddings in `features/` and dataset split/label metadata in
 data/
 ├── features/
 │   ├── fma_medium/musicfm_msd_layer7/
+│   ├── ismir04/musicfm_msd_layer7/
 │   └── gtzan/musicfm_msd_layer7/
 └── manifests/
+    ├── ismir04/                       # Fixed partitions, duplicate audit, and exclusions
     ├── fma_medium/
     │   ├── fma_medium_htdemucs.jsonl
     │   └── fma_medium_htdemucs.report.json
@@ -98,3 +100,21 @@ classes, and either NumPy or PyTorch vectors. It validates all 18 caches
 against the manifest and their import audit or shared-extractor reports.
 The original metadata pickle is not used by the code. Run the dataset scripts
 as described in the [GTZAN guide](../src/stemfusion/experiments/gtzan/README.md).
+
+## ISMIR04 fixed partitions
+
+`manifests/ismir04/ismir04_htdemucs.jsonl` preserves the provided CSV partition
+assignments and uses their six-class labels. A complete exact file/decoded-audio
+hash audit of all 2,187 records excluded eight duplicate records, leaving
+729 train, 726 validation, and 724 test tracks. No tracks were reassigned.
+The manifest report records exclusions, three verified CSV filename
+corrections, and one required separate stem set for the Edward Martin
+`6-fantasia_6` performance. The other recording with that filename retains its
+verified existing stems. See the
+[ISMIR04 preparation guide](../src/stemfusion/experiments/ismir04/README.md).
+
+Fresh MSD/layer-7 caches are written by ISMIR04's `extraction.py` into
+`features/ismir04/musicfm_msd_layer7/`. They use unique manifest IDs and the
+canonical train/validation/test names, with `mix` as the mixture filename
+alias. Long-track chunking is explicit in the task YAML and saved reports.
+Legacy feature caches remain outside this folder.

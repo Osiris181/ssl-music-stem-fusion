@@ -13,11 +13,15 @@ datasets or model checkpoints.
 | `test_yaml_configuration.py` | YAML precedence, relative paths, run selection, strict validation, safe loading, and saved resolved settings. |
 | `test_multi_source_extraction.py` | YAML source lists, CLI subsets, one-time encoder loading, cache skipping, partial failures, and aggregate reports. |
 | `test_htdemucs.py` | Multi-root discovery, six-stem completion, commands, storage resume, and rescue behavior. |
+| `test_dataset_separation.py` | Direct scripts for all three datasets, shared inference settings, manifest aliases, exact destination reuse, collision/root validation, and staging cleanup on failure. |
 | `test_fma_manifest.py` | FMA splits, distributed HT-Demucs roots, and aligned missing-file handling. |
 | `test_musicfm_features.py` | HT-Demucs MusicFM cache keys, reports, dry runs, and partial failures. |
 | `test_feature_entry_points.py` | MusicFM routing and rejection of archived RMS commands. |
 | `test_training_protocol.py` | Complete synthetic five-seed matrix, matched parameter counts, exact cache alignment, independent branch reuse, deterministic fits, validation-only selection, artifact checksums, paired summaries, standalone stem reporting without training, and direct training scripts. |
 | `test_gtzan_pipeline.py` | Provided split preservation, unavailable-track exclusion, mixed NumPy/PyTorch vectors, provenance checks, shared FMA/GTZAN settings, five-seed 85-fit smoke test, checkpoint reuse, and direct GTZAN commands. |
+| `test_ismir04_preparation.py` | CSV-authoritative labels, collision-safe IDs, fixed split preservation, duplicate priority, conflict rejection, stem-repair routing, PCM hashes, and audit reuse. |
+| `test_ismir04_extraction.py` | Complete chunk coverage, latent-frame-weighted pooling, unchanged single-pass mean, explicit layer selection, YAML overrides, unique cache keys, reports, and direct dry runs. |
+| `test_ismir04_training.py` | Shared three-dataset settings, NumPy/PyTorch alignment, chunk-policy provenance, strict cache validation, synthetic five-seed 85-fit matrices, checkpoint reuse, direct commands, and standalone-stem reporting. |
 
 ## How to run them
 

@@ -108,7 +108,7 @@ stem-fusion-music-classification/
 │   ├── separators/                  # HT-Demucs settings
 │   ├── features/                    # MusicFM settings and checkout location
 │   ├── training/                    # Shared classifier settings and paths
-│   └── experiments/                 # FMA-Medium and GTZAN task configurations
+│   └── experiments/                 # FMA-Medium, GTZAN, and ISMIR04 task configurations
 ├── context/                         # Research motivation and experimental design notes
 ├── data/                            # Local manifests and cached features
 ├── docs/                            # Detailed configuration and usage guides
@@ -147,7 +147,7 @@ checkpoint/statistics files. Configure the paths in:
 - [MusicFM settings](configs/features/musicfm_msd_layer7.yaml).
 - [FMA extraction settings](configs/experiments/fma_medium/extraction.yaml).
 - [Common genre training settings](configs/training/genre.yaml).
-- Dataset paths: [FMA-Medium](configs/training/fma_medium_genre.yaml) and [GTZAN](configs/training/gtzan_genre.yaml).
+- Dataset paths: [FMA-Medium](configs/training/fma_medium_genre.yaml), [GTZAN](configs/training/gtzan_genre.yaml), and [ISMIR04](configs/training/ismir04_genre.yaml).
 
 Prepare the aligned manifest and features using the
 [extraction guide](docs/fma_medium_extraction.md). Then run:
@@ -172,6 +172,13 @@ command-line options override YAML. Use `--help` to inspect options,
 features without training. Complete, compatible runs are verified and reused
 automatically.
 
+FMA-Medium, GTZAN, and ISMIR04 each provide `separation.py` in their experiment
+folder, using the shared HT-Demucs backend. Dataset paths are configured in
+`configs/experiments/<dataset>/separation.yaml`; inference settings inherit
+`configs/separators/htdemucs_6s.yaml`. Start with `python separation.py --dry-run`
+when separation is needed. ISMIR04 uses its audited manifest to preserve
+distinct recordings whose original filenames collide.
+
 GTZAN uses the same workflow from `src/stemfusion/experiments/gtzan/`:
 
 ```bash
@@ -188,8 +195,16 @@ explicit exclusion of `jazz.00054`. Validated existing features can be reused;
 and PyTorch cached vectors are supported. See the
 [GTZAN guide](src/stemfusion/experiments/gtzan/README.md).
 
+ISMIR04 uses the same training commands from
+`src/stemfusion/experiments/ismir04/`, with paths configured in
+`configs/training/ismir04_genre.yaml`. Its audited CSV partitions retain
+729/726/724 tracks across six genres. All selected sources use the same
+full-duration, balanced 30 s MusicFM chunk policy. See the
+[ISMIR04 guide](src/stemfusion/experiments/ismir04/README.md) for preparation,
+extraction, and training.
+
 Training includes test evaluation and prints a results table when finished.
-The complete reports are saved in `outputs/fma_medium/` or `outputs/gtzan/`:
+The complete reports are saved in `outputs/{fma_medium,gtzan,ismir04}/`:
 
 ```text
 summary_mid_fusion.txt

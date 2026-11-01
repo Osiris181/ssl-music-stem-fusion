@@ -1,0 +1,6 @@
+# Dataset paths; model/inference settings come from the shared profile.
+dataset: fma_medium
+separator_profile: ../../separators/htdemucs_6s.yaml
+paths:
+  input_root: /mnt/HDD/osiris181/fma_medium
+  output_root: /mnt/HDD/osiris181/fma_separated_htdemucs/fma_separated_htdemucs

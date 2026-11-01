@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import json
 import logging
+import math
 import pickle
 import sys
 from collections.abc import Callable, Sequence
@@ -58,6 +59,7 @@ class MusicFMExtractionConfig:
     report_path: Path | None = None
     config_provenance: dict[str, Any] = field(default_factory=dict)
     dataset: str = "fma_medium"
+    chunk_seconds: float | None = None
 
     @property
     def effective_stats_path(self) -> Path:
@@ -103,6 +105,9 @@ class MusicFMExtractionSummary:
     temporal_pooling: str
     expected_dimension: int
     max_seconds: float | None
+    chunk_seconds: float | None = None
+    chunk_pooling: str | None = None
+    chunk_partition: str | None = None
     planned: int = 0
     succeeded: int = 0
     failed: int = 0
@@ -122,7 +127,7 @@ class MusicFMExtractionSummary:
 
 
 def _validate_config(config: MusicFMExtractionConfig) -> None:
-    if config.dataset not in {"fma_medium", "gtzan"}:
+    if config.dataset not in {"fma_medium", "gtzan", "ismir04"}:
         raise MusicFMExtractionError(f"Unsupported extraction dataset: {config.dataset}")
     if not config.manifest_path.is_file():
         raise MusicFMExtractionError(
@@ -149,6 +154,9 @@ def _validate_config(config: MusicFMExtractionConfig) -> None:
         )
     if config.sample_rate <= 0:
         raise MusicFMExtractionError("Sample rate must be positive.")
+    if config.chunk_seconds is not None and (not math.isfinite(config.chunk_seconds)
+            or config.chunk_seconds * config.sample_rate < 1):
+        raise MusicFMExtractionError("Chunk duration must be finite and cover at least one sample.")
     if not 0 <= config.layer_index <= 12:
         raise MusicFMExtractionError(
             "MusicFM layer index must be between 0 and 12."
@@ -267,13 +275,26 @@ class _MusicFMRuntime:
         if waveform.numel() == 0:
             raise MusicFMExtractionError(f"Audio is empty: {path}")
 
-        batched = waveform.unsqueeze(0).to(self.config.device)
+        ranges = _chunk_ranges(waveform.numel(), self.config.sample_rate, self.config.chunk_seconds)
         with self.torch.inference_mode():
-            embedding = self.model.get_latent(
-                batched,
-                layer_ix=self.config.layer_index,
-            )
-            feature = embedding.mean(dim=1).squeeze(0)
+            if len(ranges) == 1:
+                # Preserve the existing FMA/GTZAN numerical path exactly.
+                batched = waveform.unsqueeze(0).to(self.config.device)
+                embedding = self.model.get_latent(batched, layer_ix=self.config.layer_index)
+                feature = embedding.mean(dim=1).squeeze(0)
+            else:
+                total = None
+                frames = 0
+                for start, end in ranges:
+                    batched = waveform[start:end].unsqueeze(0).to(self.config.device)
+                    embedding = self.model.get_latent(batched, layer_ix=self.config.layer_index)
+                    if embedding.shape[1] == 0:
+                        raise MusicFMExtractionError(f"Encoder returned no frames for {path}")
+                    chunk_sum = embedding.sum(dim=1).squeeze(0).detach().to(dtype=self.torch.float64).cpu()
+                    total = chunk_sum if total is None else total + chunk_sum
+                    frames += embedding.shape[1]
+                    del batched, embedding
+                feature = total / frames
         feature = feature.detach().to(dtype=self.torch.float32).cpu()
         shape = tuple(int(size) for size in feature.shape)
         if shape != (self.config.expected_dimension,):
@@ -281,7 +302,27 @@ class _MusicFMRuntime:
                 f"Expected a ({self.config.expected_dimension},) feature for "
                 f"{path}, received {shape}."
             )
+        if not self.torch.isfinite(feature).all():
+            raise MusicFMExtractionError(f"Feature contains non-finite values: {path}")
         return feature
+
+
+def _chunk_ranges(samples: int, sample_rate: int, chunk_seconds: float | None) -> list[tuple[int, int]]:
+    """Cover every sample once with balanced chunks no longer than the cap.
+
+    Balancing avoids creating a tiny final chunk. Encoder contexts reset at
+    boundaries, so chunked inference is an explicit extraction policy and is
+    not asserted to be numerically equivalent to a full-track forward pass.
+    """
+    if samples <= 0:
+        raise MusicFMExtractionError("Audio is empty.")
+    if chunk_seconds is None:
+        return [(0, samples)]
+    if not math.isfinite(chunk_seconds) or chunk_seconds * sample_rate < 1:
+        raise MusicFMExtractionError("Chunk duration must be finite and cover at least one sample.")
+    cap = int(chunk_seconds * sample_rate)
+    count = (samples + cap - 1) // cap
+    return [(index * samples // count, (index + 1) * samples // count) for index in range(count)]
 
 
 def _feature_dimension(feature: Any) -> int | None:
@@ -297,8 +338,8 @@ def _feature_dimension(feature: Any) -> int | None:
 
 
 def _cache_path(config: MusicFMExtractionConfig, split: str) -> Path:
-    prefix = "fma" if config.dataset == "fma_medium" else "gtzan"
-    source = "mix" if config.dataset == "gtzan" and config.source == "mixture" else config.source
+    prefix = {"fma_medium": "fma", "gtzan": "gtzan", "ismir04": "ismir04"}[config.dataset]
+    source = "mix" if config.dataset != "fma_medium" and config.source == "mixture" else config.source
     return config.output_dir / f"{prefix}_musicfm_{source}_{split}.pkl"
 
 
@@ -357,7 +398,10 @@ def extract_musicfm(
     _validate_config(config)
     try:
         records = read_manifest(config.manifest_path)
-    except FMAManifestError as error:
+        if config.dataset == "ismir04":
+            from stemfusion.data.ismir04 import inspect_manifest
+            records, _ = inspect_manifest(config.manifest_path)
+    except ValueError as error:
         raise MusicFMExtractionError(str(error)) from error
 
     grouped = _records_by_split(records, config)
@@ -373,6 +417,9 @@ def extract_musicfm(
         temporal_pooling=config.temporal_pooling,
         expected_dimension=config.expected_dimension,
         max_seconds=config.max_seconds,
+        chunk_seconds=config.chunk_seconds,
+        chunk_pooling="latent_frame_mean" if config.chunk_seconds is not None else None,
+        chunk_partition="balanced_non_overlapping" if config.chunk_seconds is not None else None,
         dry_run=config.dry_run,
         resolved_config=configuration_dict(config),
     )
@@ -500,7 +547,7 @@ def extract_musicfm_sources(
             config.device, config.sample_rate, config.layer_index,
             config.expected_dimension, config.temporal_pooling, config.is_flash,
             config.max_seconds, config.splits, config.limit_per_split,
-            config.output_dir, config.dry_run,
+            config.output_dir, config.dry_run, config.dataset, config.chunk_seconds,
         )
 
     expected = shared_settings(configs[0])

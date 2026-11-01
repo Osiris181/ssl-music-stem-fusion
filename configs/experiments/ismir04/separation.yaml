@@ -1,0 +1,11 @@
+# Use retained manifest records and exact per-record destinations.
+dataset: ismir04
+separator_profile: ../../separators/htdemucs_6s.yaml
+batching:
+  default_tracks_per_process: 32
+inputs:
+  default_extensions: [.mp3, .wav, .au]
+paths:
+  manifest: ../../../data/manifests/ismir04/ismir04_htdemucs.jsonl
+  output_root: /home/osiris181/ismir04_separated_htdemucs
+  report: ../../../outputs/ismir04/separation_report_htdemucs.json

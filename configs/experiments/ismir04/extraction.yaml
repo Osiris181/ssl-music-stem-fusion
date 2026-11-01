@@ -1,0 +1,13 @@
+# Shared MSD/layer-7 runtime; long tracks are processed in bounded chunks.
+dataset: ismir04
+task: genre_classification
+command: extract ismir04
+feature_profile: ../../features/musicfm_msd_layer7.yaml
+separator_profile: ../../separators/htdemucs_6s.yaml
+sources: [mixture, guitar, drums, piano, bass, vocals]
+audio:
+  max_seconds: null  # Retain the complete recording.
+  chunk_seconds: 30  # Balanced non-overlapping chunks; pool all latent frames.
+paths:
+  manifest: ../../../data/manifests/ismir04/ismir04_htdemucs.jsonl
+  output_dir: ../../../data/features/ismir04/musicfm_msd_layer7

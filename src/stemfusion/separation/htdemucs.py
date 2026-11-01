@@ -7,14 +7,17 @@ import json
 import logging
 import subprocess
 import sys
+import tempfile
 import time
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
 from stemfusion.configuration import configuration_dict
+from stemfusion.data.fma import read_manifest
+from stemfusion.training.reporting import file_checksum
 
 LOGGER = logging.getLogger(__name__)
 
@@ -77,6 +80,9 @@ class HTDemucsSeparationSummary:
     failed_batches: int = 0
     failures: list[HTDemucsSeparationFailure] = field(default_factory=list)
     resolved_config: dict[str, Any] = field(default_factory=dict)
+    manifest_path: str | None = None
+    manifest_sha256: str | None = None
+    manifest_jobs: list[dict[str, str]] = field(default_factory=list)
 
     @property
     def failed(self) -> int:
@@ -103,8 +109,8 @@ def _normalize_extensions(extensions: Sequence[str]) -> tuple[str, ...]:
     return tuple(sorted(normalized))
 
 
-def validate_config(config: HTDemucsSeparationConfig) -> None:
-    if not config.input_roots:
+def validate_config(config: HTDemucsSeparationConfig, *, require_input_roots: bool = True) -> None:
+    if require_input_roots and not config.input_roots:
         raise HTDemucsConfigurationError(
             "At least one input root must be provided."
         )
@@ -471,6 +477,90 @@ def separate_dataset(
     return summary
 
 
+def separate_manifest(
+    config: HTDemucsSeparationConfig,
+    manifest_path: Path,
+    runner: Callable[..., Any] = subprocess.run,
+) -> HTDemucsSeparationSummary:
+    """Separate missing manifest targets through the same batching backend.
+
+    Manifest stem paths determine exact destinations under output_root.
+    Temporary input symlinks give Demucs the intended destination folder
+    names, preventing collisions without copying or renaming source audio.
+    Dry runs do not create staging directories, reports, or output files.
+    """
+    config = replace(config, input_roots=())
+    validate_config(config, require_input_roots=False)
+    if config.existing_output_roots:
+        raise HTDemucsConfigurationError("Manifest mode uses its exact stem paths; omit --existing-output-root.")
+    records = read_manifest(manifest_path)
+    selected = records[:config.limit] if config.limit else records
+    selected_ids = {record.track_id for record in selected}
+    summary = HTDemucsSeparationSummary(discovered=len(records), selected=len(selected),
+        manifest_path=str(manifest_path), manifest_sha256=file_checksum(manifest_path))
+    groups: dict[Path, list[tuple[Path, Path]]] = defaultdict(list)
+    seen_targets = set()
+    allowed_root = config.output_root.resolve()
+    selected_sources = {"guitar", "drums", "piano", "bass", "vocals"}
+    for record in records:
+        if "mixture" not in record.paths or not selected_sources <= record.paths.keys():
+            raise HTDemucsConfigurationError(f"Manifest needs mixture and five selected stem paths: {record.track_id}")
+        destinations = set()
+        for stem in config.expected_stems:
+            if stem not in record.paths:
+                continue
+            path = Path(record.paths[stem]).resolve()
+            if path.name != f"{stem}.mp3":
+                raise HTDemucsConfigurationError(f"Expected MP3 stem filename: {path}")
+            destinations.add(path.parent)
+        if len(destinations) != 1:
+            raise HTDemucsConfigurationError(f"All stems must share one destination: {record.track_id}")
+        destination = destinations.pop()
+        if destination.parent.name != config.model_name or not destination.is_relative_to(allowed_root):
+            raise HTDemucsConfigurationError(f"Manifest stem destination must be under --output-root/<...>/{config.model_name}: {destination}")
+        if destination in seen_targets:
+            raise HTDemucsConfigurationError(f"Distinct manifest records share a stem destination: {destination}")
+        seen_targets.add(destination)
+        if record.track_id not in selected_ids:
+            continue
+        if not config.overwrite and all((destination / f"{stem}.mp3").is_file()
+                and (destination / f"{stem}.mp3").stat().st_size > 0 for stem in config.expected_stems):
+            summary.skipped_existing += 1
+            continue
+        source = Path(record.paths["mixture"]).resolve()
+        if not source.is_file() or not source.stat().st_size:
+            raise HTDemucsConfigurationError(f"Missing or empty mixture audio: {source}")
+        if source.is_relative_to(destination):
+            raise HTDemucsConfigurationError(f"Mixture audio must be outside its stem destination: {source}")
+        if source.suffix.lower() not in _normalize_extensions(config.extensions):
+            raise HTDemucsConfigurationError(f"Mixture audio has an unsupported extension: {source}")
+        groups[destination.parent.parent].append((source, destination))
+        summary.manifest_jobs.append({"track_id": record.track_id, "input_path": str(source),
+                                      "output_directory": str(destination)})
+    summary.planned = len(summary.manifest_jobs)
+    if config.dry_run:
+        return summary
+    for output_root, jobs in groups.items():
+        with tempfile.TemporaryDirectory(prefix="stemfusion-demucs-") as temporary:
+            staging = Path(temporary)
+            originals = {}
+            for source, destination in jobs:
+                alias = staging / f"{destination.name}{source.suffix.lower()}"
+                alias.symlink_to(source)
+                originals[str(alias)] = str(source)
+            part = separate_dataset(replace(config, input_roots=(staging,), output_root=output_root,
+                existing_output_roots=(), recursive=False, limit=None), runner=runner)
+            summary.succeeded += part.succeeded
+            summary.skipped_existing += part.skipped_existing
+            summary.failed_batches += part.failed_batches
+            summary.rescue_attempts += part.rescue_attempts
+            summary.failures.extend(replace(failure, input_path=originals.get(failure.input_path, failure.input_path))
+                                    for failure in part.failures)
+            if part.failed and not config.continue_on_error:
+                break
+    return summary
+
+
 def write_report(
     summary: HTDemucsSeparationSummary,
     report_path: Path,
@@ -490,9 +580,9 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
         "--input-root",
         type=Path,
         action="append",
-        required=True,
-        help="Input root; may be specified more than once.",
+        help="Input root; may be repeated. Omit when using --manifest.",
     )
+    parser.add_argument("--manifest", type=Path, help="Separate missing targets from an audio manifest using its exact stem paths.")
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument(
         "--existing-output-root",
@@ -528,7 +618,7 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
 def config_from_args(args: argparse.Namespace) -> HTDemucsSeparationConfig:
     return HTDemucsSeparationConfig(
         input_roots=tuple(
-            path.expanduser().resolve() for path in args.input_root
+            path.expanduser().resolve() for path in (args.input_root or ())
         ),
         output_root=args.output_root.expanduser().resolve(),
         existing_output_roots=tuple(
@@ -557,9 +647,12 @@ def config_from_args(args: argparse.Namespace) -> HTDemucsSeparationConfig:
 def run_from_args(args: argparse.Namespace) -> int:
     try:
         config = config_from_args(args)
-        summary = separate_dataset(config)
+        if args.manifest is not None:
+            summary = separate_manifest(config, args.manifest.expanduser().resolve())
+        else:
+            summary = separate_dataset(config)
         summary.resolved_config = configuration_dict(config)
-    except HTDemucsConfigurationError as error:
+    except (ValueError, OSError) as error:
         LOGGER.error("%s", error)
         return 2
 

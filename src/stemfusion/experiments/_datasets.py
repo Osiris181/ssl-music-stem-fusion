@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 SOURCES = ("mixture", "guitar", "drums", "piano", "bass", "vocals")
+DATASET_NAMES = {"fma_medium": "FMA-Medium", "gtzan": "GTZAN", "ismir04": "ISMIR04"}
 
 
 @dataclass(frozen=True)
@@ -26,4 +27,8 @@ def get_dataset(dataset: str) -> GenreDataset:
         from stemfusion.data.gtzan_features import inspect_manifest, cache_paths, load_gtzan_features
 
         return GenreDataset("GTZAN", 10, inspect_manifest, cache_paths, load_gtzan_features)
+    if dataset == "ismir04":
+        from stemfusion.data.ismir04_features import inspect_manifest, cache_paths, load_ismir04_features
+
+        return GenreDataset("ISMIR04", 6, inspect_manifest, cache_paths, load_ismir04_features)
     raise ValueError(f"Unsupported genre dataset: {dataset}")

@@ -7,6 +7,7 @@ class mapping are preserved; `other` is excluded.
 | File | Purpose |
 | --- | --- |
 | `prepare_manifest.py` | Runnable manifest builder from official metadata and aligned audio paths. |
+| `separation.py` | Runnable HT-Demucs separation using the shared backend and dataset paths. |
 | `extraction.py` | Runnable MusicFM extraction interface. |
 | `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
@@ -20,6 +21,7 @@ Each public file supports direct execution without PYTHONPATH.
 ## Configuration
 
 - MusicFM settings and checkout location: `configs/features/musicfm_msd_layer7.yaml`.
+- HT-Demucs paths: `configs/experiments/fma_medium/separation.yaml`; inference settings inherit `configs/separators/htdemucs_6s.yaml`.
 - Extraction manifest/output/source list: `configs/experiments/fma_medium/extraction.yaml`.
 - Shared classifier settings and manifest/feature/output paths: `configs/training/fma_medium_genre.yaml`.
 - Common genre hyperparameters inherited by FMA-Medium and GTZAN: `configs/training/genre.yaml`.
@@ -27,6 +29,22 @@ Each public file supports direct execution without PYTHONPATH.
 
 CLI paths override YAML paths. Relative YAML paths resolve against the YAML
 file; relative CLI paths resolve against the current working directory.
+
+## Source separation
+
+From this directory, inspect or run separation with:
+
+```bash
+python separation.py --dry-run
+python separation.py
+```
+
+The script loads `configs/experiments/fma_medium/separation.yaml` and calls
+the shared HT-Demucs implementation. Existing complete six-stem folders are
+reused automatically. `--input-root`, `--output-root`, and repeated
+`--existing-output-root` arguments select different storage locations.
+Directory discovery reads filenames under the input roots; use these
+commands only when separation is needed.
 
 ## Manifest preparation
 

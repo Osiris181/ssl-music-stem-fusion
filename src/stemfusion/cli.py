@@ -25,6 +25,10 @@ from stemfusion.experiments.gtzan import extraction as gtzan_extraction
 from stemfusion.experiments.gtzan import prepare_manifest as gtzan_manifest
 from stemfusion.experiments.gtzan import train_mid as gtzan_mid
 from stemfusion.experiments.gtzan import train_late as gtzan_late
+from stemfusion.experiments.ismir04 import prepare_manifest as ismir04_manifest
+from stemfusion.experiments.ismir04 import extraction as ismir04_extraction
+from stemfusion.experiments.ismir04 import train_mid as ismir04_mid
+from stemfusion.experiments.ismir04 import train_late as ismir04_late
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -60,6 +64,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     configure_fma_parser(data_commands.add_parser("fma-manifest"))
     gtzan_manifest.configure_parser(data_commands.add_parser("gtzan-manifest"))
+    ismir04_manifest.configure_parser(data_commands.add_parser("ismir04-manifest"))
 
     extract_parser = commands.add_parser(
         "extract",
@@ -77,6 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
         )
     )
     gtzan_extraction.configure_parser(extractors.add_parser("gtzan"))
+    ismir04_extraction.configure_parser(extractors.add_parser("ismir04"))
 
     train_parser = commands.add_parser(
         "train",
@@ -101,6 +107,10 @@ def build_parser() -> argparse.ArgumentParser:
     gtzan_methods = gtzan_parser.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
     gtzan_mid.configure_parser(gtzan_methods.add_parser("mid-fusion"))
     gtzan_late.configure_parser(gtzan_methods.add_parser("late-fusion"))
+    ismir04_parser = datasets.add_parser("ismir04", help="ISMIR04 genre-classification experiments.")
+    ismir04_methods = ismir04_parser.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
+    ismir04_mid.configure_parser(ismir04_methods.add_parser("mid-fusion"))
+    ismir04_late.configure_parser(ismir04_methods.add_parser("late-fusion"))
     return parser
 
 

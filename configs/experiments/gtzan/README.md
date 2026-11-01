@@ -4,6 +4,7 @@
 | --- | --- |
 | `manifest.yaml` | Provided stratified split files, local audio roots/extensions, explicit unavailable track exclusion, and output manifest. |
 | `extraction.yaml` | Shared MusicFM profile, manifest/cache paths, and six selected sources. |
+| `separation.yaml` | Original WAV and separated-output roots, with shared HT-Demucs inference settings. |
 | `mid_fusion.yaml` | Standard mixture baseline, three capacity controls, and three source combinations. |
 | `late_fusion.yaml` | Three matched mixture ensembles and three source ensembles. |
 

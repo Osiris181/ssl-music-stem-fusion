@@ -10,7 +10,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from stemfusion.configuration import YAMLArgumentParser, configure_yaml
-from stemfusion.experiments._datasets import get_dataset
+from stemfusion.experiments._datasets import DATASET_NAMES
 from stemfusion.data.fma import HTDEMUCS_SOURCES
 from stemfusion.features._musicfm import (
     MusicFMExtractionConfig,
@@ -46,7 +46,7 @@ def configure_parser(parser: argparse.ArgumentParser, *, dataset: str = "fma_med
     """
 
     parser.description = (
-        f"Extract MusicFM features for {get_dataset(dataset).name} mixture audio or HT-Demucs "
+        f"Extract MusicFM features for {DATASET_NAMES[dataset]} mixture audio or HT-Demucs "
         "stems using the dataset's YAML configuration."
     )
     parser.add_argument("--manifest", type=Path, required=True)
@@ -66,6 +66,9 @@ def configure_parser(parser: argparse.ArgumentParser, *, dataset: str = "fma_med
     parser.add_argument("--temporal-pooling", choices=("mean",))
     parser.add_argument("--is-flash", action=argparse.BooleanOptionalAction)
     parser.add_argument("--max-seconds", type=float)
+    parser.add_argument("--chunk-seconds", type=float, help="Maximum encoder chunk duration; all audio is retained and latent frames are mean pooled.")
+    parser.add_argument("--no-chunking", dest="chunk_seconds", action="store_const", const=None,
+                        help="Encode the full track in a single forward pass.")
     parser.add_argument(
         "--split", action="append", choices=SPLITS, dest="splits",
     )
@@ -131,6 +134,7 @@ def musicfm_config_from_args(
         ),
         config_provenance=getattr(args, "yaml_provenance", {}),
         dataset=getattr(args, "genre_dataset", "fma_medium"),
+        chunk_seconds=args.chunk_seconds,
     )
 
 
@@ -159,6 +163,9 @@ def run_musicfm_from_args(args: argparse.Namespace) -> int:
                 "unprocessed_sources": sources[len(summaries):],
                 "dry_run": first.dry_run,
                 "layer_index": first.layer_index,
+                "chunk_seconds": first.chunk_seconds,
+                "chunk_pooling": "latent_frame_mean" if first.chunk_seconds is not None else None,
+                "chunk_partition": "balanced_non_overlapping" if first.chunk_seconds is not None else None,
                 "checkpoint_path": str(first.effective_checkpoint_path),
                 "stats_path": str(first.effective_stats_path),
                 "output_directory": str(first.output_dir),

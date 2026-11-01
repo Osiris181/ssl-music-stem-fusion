@@ -12,9 +12,13 @@ separation, and selecting a run does not launch a batch of experiments.
 | `train fma-medium mid-fusion` | `configs/experiments/fma_medium/mid_fusion.yaml`, inheriting the shared genre profile |
 | `train fma-medium late-fusion` | `configs/experiments/fma_medium/late_fusion.yaml`, inheriting the shared genre profile |
 | `data gtzan-manifest` | `configs/experiments/gtzan/manifest.yaml` |
+| `data ismir04-manifest` | `configs/experiments/ismir04/manifest.yaml` |
 | `extract gtzan` | `configs/experiments/gtzan/extraction.yaml`, referencing the same MusicFM preset |
+| `extract ismir04` | `configs/experiments/ismir04/extraction.yaml`, with explicit long-track chunking |
 | `train gtzan mid-fusion` | `configs/experiments/gtzan/mid_fusion.yaml`, inheriting the shared genre profile |
 | `train gtzan late-fusion` | `configs/experiments/gtzan/late_fusion.yaml`, inheriting the shared genre profile |
+| `train ismir04 mid-fusion` | `configs/experiments/ismir04/mid_fusion.yaml`, inheriting the shared genre profile |
+| `train ismir04 late-fusion` | `configs/experiments/ismir04/late_fusion.yaml`, inheriting the shared genre profile |
 | `separate htdemucs` | `configs/separators/htdemucs_6s.yaml` |
 
 Use `--config PATH` to load another preset or an experiment file. Experiment
@@ -54,6 +58,12 @@ pending sources. Use `--source guitar` for one source, or repeat it for a
 subset, for example `--source guitar --source piano`. Explicit sources replace
 the YAML list. Use `--output-dir` to override the destination.
 
+ISMIR04 uses this same runtime and explicitly sets `audio.chunk_seconds: 30`
+while retaining `audio.max_seconds: null`. This covers the full recording
+with balanced chunks and pools by latent-frame count. Encoder context resets
+between chunks; reports record the policy. The shared default remains null
+for FMA/GTZAN. Use `--chunk-seconds N` or `--no-chunking` for explicit overrides.
+
 Complete split caches are skipped when rerunning without `--overwrite`.
 Each source retains its own cache/report files. Multi-source runs also write
 `extraction_report_musicfm_batch.json`; a custom `--report` names that aggregate
@@ -82,7 +92,8 @@ file. Both methods inherit `configs/training/fma_medium_genre.yaml` for common
 paths, hyperparameters, metric definitions, and outer seeds
 `[32, 64, 128, 256, 512]`. Repeated `--seed` selects a subset and replaces
 the YAML seed list. GTZAN uses `configs/training/gtzan_genre.yaml` for its
-ten-class target and paths. Both dataset profiles inherit architecture,
+ten-class target and paths. ISMIR04 uses `configs/training/ismir04_genre.yaml`
+for six classes and its local paths. All three dataset profiles inherit architecture,
 optimization, evaluation, and seed settings from `configs/training/genre.yaml`.
 Training uses the agreed named conditions rather than
 arbitrary `--source` lists. Source-subset arguments remain available for extraction.
@@ -115,6 +126,13 @@ listed explicitly in `excluded_track_ids`. Audio scanning is disabled unless
 and its sidecars remain ignored by Git. See the
 [GTZAN guide](../src/stemfusion/experiments/gtzan/README.md).
 
+ISMIR04 preparation uses `configs/experiments/ismir04/manifest.yaml` for its
+metadata/audio roots, audit path, duplicate priority, verified filename
+corrections, and stem-repair locations. It retains the provided partition
+assignments and records exact-duplicate exclusions instead of generating a
+new split. See the
+[ISMIR04 preparation guide](../src/stemfusion/experiments/ismir04/README.md).
+
 A legacy `source: guitar` field still selects one source; prefer
 `sources: [guitar, piano]` for a subset.
 
@@ -130,7 +148,12 @@ The summary directory can be separate from checkpoints and prediction arrays.
 An explicit `--output-dir` redirects summaries as well unless an explicit
 `--summary-dir` is given.
 Separation paths: `input_root`, `existing_output_root`, `output_root`,
-`report`; input roots can be lists.
+`manifest`, `report`; input roots can be lists. Each experiment folder's
+`separation.py` loads `configs/experiments/<dataset>/separation.yaml`, inheriting
+the common HT-Demucs inference profile. When `manifest` is supplied, its exact
+stem destinations beneath `output_root` are used and directory discovery is
+skipped. Omit `existing_output_root` in manifest mode; the manifest already
+identifies each retained track's stem location.
 
 The nested feature, model, optimization, reproducibility, and runtime fields
 in the standard presets are active settings. Use the supported CLI options
