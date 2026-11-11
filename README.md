@@ -139,11 +139,39 @@ files and their responsibilities.
 
 ## Usage
 
-Python 3.10 or newer is required. From the repository root:
+### Environment setup with uv
+
+Python 3.10 or newer is required; the setup example uses Python 3.12.
+We recommend [uv](https://docs.astral.sh/uv/getting-started/installation/)
+for creating the environment and installing dependencies. For a new setup,
+run the following from the repository root (Linux/macOS, Bash or Zsh):
 
 ```bash
-python -m pip install -e ".[htdemucs,musicfm,training]"
+uv venv --python 3.12
+source .venv/bin/activate
+uv pip install -e ".[htdemucs,musicfm,training]"
 ```
+
+This installs the project in editable mode with the separation, MusicFM, and
+genre-training dependencies defined in [pyproject.toml](pyproject.toml).
+For the MERT + chord/key workflows, install these extras instead or additionally
+from the repository root, with the same environment active:
+
+```bash
+uv pip install -e ".[htdemucs,mert,chords-keys,music2emo]"
+```
+
+The `mert` extra includes `nnAudio`. These commands install Python packages,
+not datasets or pretrained model checkpoints. GPU use also requires compatible
+PyTorch/torchaudio builds and an appropriate GPU driver; follow the
+[uv PyTorch guide](https://docs.astral.sh/uv/guides/integration/pytorch/)
+when selecting those builds.
+
+For later terminal sessions, activate the existing environment from the
+repository root with `source .venv/bin/activate`; do not recreate it each time.
+The `python` and `stemfusion` commands below then use that environment.
+
+### Running experiments
 
 Feature extraction also requires a local MusicFM checkout and the MSD
 checkpoint/statistics files. Configure the paths in:
