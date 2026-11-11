@@ -6,13 +6,13 @@ separator: htdemucs_6s
 feature_profile: ../../features/musicfm_msd_layer7.yaml
 training_profile: ../../training/ismir04_mid_fusion.yaml
 command: train ismir04 mid-fusion
-implementation_status: phase2_capacity_controls
+implementation_status: phase2_repeated_mixture_controls
 
 runs:
   mixture_only: {kind: reference, sources: [mixture]}
-  matched_mixture_4: {kind: capacity_matched, sources: [mixture], matched_sources: 4}
-  matched_mixture_5: {kind: capacity_matched, sources: [mixture], matched_sources: 5}
-  matched_mixture_6: {kind: capacity_matched, sources: [mixture], matched_sources: 6}
+  repeated_mixture_4: {kind: repeated_mixture, sources: [mixture], matched_sources: 4}
+  repeated_mixture_5: {kind: repeated_mixture, sources: [mixture], matched_sources: 5}
+  repeated_mixture_6: {kind: repeated_mixture, sources: [mixture], matched_sources: 6}
   mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
   mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
   mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}

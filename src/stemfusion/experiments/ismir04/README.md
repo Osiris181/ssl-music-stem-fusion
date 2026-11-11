@@ -223,7 +223,9 @@ Outer seeds are **32, 64, 128, 256, 512**; branch positions and derived seeds
 use the existing shared SHA256 convention.
 
 Mid fusion compares M+G+D+P, M+G+D+P+B, and M+G+D+P+B+V against the standard
-mixture baseline and three capacity-matched mixture MLPs. Late fusion sums
+mixture baseline and three repeated-mixture MLPs (4/5/6 identical mixture
+vectors, unchanged 1024/512 hidden widths, exact fusion parameter counts).
+Late fusion sums
 independently selected branch logits equally, then applies softmax, and
 compares the stem ensembles against 4/5/6-member mixture ensembles.
 The mixture baseline is shared between workflows. Both full matrices need

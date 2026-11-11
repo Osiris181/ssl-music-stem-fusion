@@ -1,0 +1,12 @@
+dataset: emomusic
+paths:
+  train_split: ../../../data/manifests/emomusic/split/train.txt
+  validation_split: ../../../data/manifests/emomusic/split/validation.txt
+  test_split: ../../../data/manifests/emomusic/split/test.txt
+  annotations: ../../../data/manifests/emomusic/static_annotations.csv
+  mixture_root: /mnt/HDD/emoMusic/clips_45sec
+  htdemucs_root: /mnt/HDD/osiris181/DEAM_separated/htdemucs_6s
+  output: ../../../data/manifests/emomusic/emomusic_features.jsonl
+execution:
+  overwrite: false
+  dry_run: false

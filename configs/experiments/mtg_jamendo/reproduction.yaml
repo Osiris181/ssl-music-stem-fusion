@@ -1,0 +1,13 @@
+# Original-mixture baseline; effective settings and artifact paths are unchanged.
+dataset: mtg_jamendo
+training_profile: ../../training/mood_theme_tagging.yaml
+paths:
+  manifest: ../../../data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl
+  mert_dir: ../../../data/features/mtg_jamendo/mert_chord_key/mert_v1_95m
+  harmony_dir: ../../../data/features/mtg_jamendo/harmony
+  tag_list: ../../../data/manifests/mtg_jamendo/tag_list.npy
+  author_metadata: ../../../data/manifests/mtg_jamendo/music2emotion
+  output_dir: ../../../outputs/mtg_jamendo/mert_chord_key/author_reproduction_early_stopping
+  summary_dir: ../../../outputs/mtg_jamendo
+features:
+  source: mixture

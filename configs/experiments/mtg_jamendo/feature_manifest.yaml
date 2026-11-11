@@ -1,0 +1,12 @@
+dataset: mtg_jamendo
+paths:
+  train_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-train.tsv
+  validation_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-validation.tsv
+  test_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-test.tsv
+  mixture_root: /mnt/HDD/MTG-Jamendo_Master_Dataset_Original_Quality
+  htdemucs_root: /mnt/HDD/osiris181/MTG-Jamendo_Mood_Original_separated_dataset/htdemucs_6s
+  audio_overrides: ../../../data/manifests/mtg_jamendo/mtg_jamendo_repaired_audio.jsonl
+  output: ../../../data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl
+execution:
+  overwrite: false
+  dry_run: false

@@ -17,7 +17,7 @@ and cache filenames.
 
 | YAML | Purpose |
 | --- | --- |
-| `configs/experiments/gtzan/manifest.yaml` | Split files, local audio roots/extensions, unavailable track exclusions, and manifest output. |
+| `configs/experiments/gtzan/manifest.yaml` | Split files, local audio roots/extensions, availability handling, and manifest output. |
 | `configs/experiments/gtzan/separation.yaml` | Original audio and separated-output roots; inherits shared HT-Demucs inference settings. |
 | `configs/experiments/gtzan/extraction.yaml` | Shared MusicFM profile, selected sources, manifest and cache paths. |
 | `configs/features/musicfm_msd_layer7.yaml` | MusicFM checkout, MSD checkpoint, layer 7, and shared extraction settings. |
@@ -29,9 +29,9 @@ Each script automatically loads its YAML. Paths in YAML resolve relative to
 the file declaring them; CLI paths resolve relative to the current directory.
 Explicit arguments override YAML. Use `--config PATH` to supply another preset.
 
-The provided stratified files contain 500/250/250 track IDs. Unavailable
-training track `jazz.00054` is explicitly excluded, leaving **499/250/250**
-tracks. The same IDs, labels, and ordering are used across every condition
+The provided stratified files define the split assignments. Manifest
+preparation uses file availability to construct a common source-aligned
+track set. The same IDs, labels, and ordering are used across every condition
 and seed. The metadata pickle is a reference copy; code obtains splits from
 the text files and labels from the fixed genre mapping in `data/gtzan.py`.
 Generated manifests contain machine-specific paths and remain Git-ignored.
@@ -82,8 +82,10 @@ python train_late.py
 
 The local manifest is already prepared for the imported features. Do not
 regenerate it just to train. Use `--overwrite` explicitly if rebuilding a
-manifest. Preparation binds audio paths without scanning audio by default;
-`--check-audio` opts into validating all configured files.
+manifest. Preparation checks that configured audio files exist and are
+non-empty; it does not decode waveforms. Dry runs perform these checks too.
+Use `--no-allow-missing` to require every listed record. To bind paths without
+availability checks, supply both `--no-check-audio` and `--no-allow-missing`.
 
 Feature extraction is available for users who need new caches:
 
@@ -118,7 +120,9 @@ Test scores never select checkpoints. Outer seeds are 32, 64, 128, 256, 512;
 branch seeds use the existing SHA256 convention and shared branch positions.
 
 Mid fusion compares M+G+D+P, M+G+D+P+B, and M+G+D+P+B+V against the standard
-mixture baseline and three capacity-matched mixture MLPs. Late fusion sums
+mixture baseline and three repeated-mixture MLPs (4/5/6 identical mixture
+vectors, unchanged 1024/512 hidden widths, exact fusion parameter counts).
+Late fusion sums
 independently selected logits equally, then applies softmax, with matching
 4/5/6-member mixture ensembles. There are 85 distinct fits across five seeds,
 including the mixture baseline shared between workflows.

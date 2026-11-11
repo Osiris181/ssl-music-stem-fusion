@@ -10,6 +10,7 @@ systems. It does not vendor their model implementations or checkpoints.
 | File | Command | Purpose |
 | --- | --- | --- |
 | `htdemucs.py` | `stemfusion separate htdemucs` | Extract all six `htdemucs_6s` sources and resume across storage locations. |
+| `manifest.py` | Used by manifest-mode separation | Validate IDs, splits, and source paths independently of single- or multi-label targets. |
 
 The wrapper makes effective inference settings explicit, validates outputs,
 supports dry runs, and writes machine-readable reports. Original research
@@ -24,7 +25,7 @@ Inspect the required model and path arguments, then begin with a dry run:
 Full commands and output layouts are documented in
 `docs/htdemucs_separation.md`.
 
-FMA-Medium, GTZAN, and ISMIR04 also expose `python separation.py` from their
+FMA-Medium, GTZAN, ISMIR04, and MTG-Jamendo also expose `python separation.py` from their
 experiment directories. These thin entry scripts load dataset-specific YAML
 and call this same backend. Run `python separation.py --dry-run` first.
 

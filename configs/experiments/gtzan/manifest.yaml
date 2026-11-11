@@ -1,8 +1,6 @@
 # Preserve the provided split assignments and fixed genre-to-index mapping.
 dataset: gtzan
 sources: [mixture, guitar, drums, piano, bass, vocals]
-# Unavailable in the dataset; exclude from every condition.
-excluded_track_ids: [jazz.00054]
 audio:
   mixture_extension: .wav
   stem_extension: .mp3
@@ -14,6 +12,7 @@ paths:
   htdemucs_root: /home/osiris181/GTZAN_separated_htdemucs/htdemucs_6s
   output: ../../../data/manifests/gtzan/gtzan_htdemucs.jsonl
 execution:
-  check_audio: false  # Bind paths without scanning HDD audio; extraction checks each file.
+  check_audio: true
+  allow_missing: true
   overwrite: false
   dry_run: false

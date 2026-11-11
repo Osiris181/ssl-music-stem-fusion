@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from stemfusion.configuration import configuration_dict
-from stemfusion.data.fma import read_manifest
+from stemfusion.separation.manifest import read_manifest
 from stemfusion.training.reporting import file_checksum
 
 LOGGER = logging.getLogger(__name__)

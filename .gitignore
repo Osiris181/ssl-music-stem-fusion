@@ -2,12 +2,16 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.venv-skey/
+.venv-chordformer/
+.venv-sheetsage2/
 
 .DS_Store
 .idea/
 .vscode/
 
 configs/paths.local.yaml
+/local_notes/
 data/*
 !data/README.md
 outputs/**
@@ -20,4 +24,3 @@ outputs/**
 *.pkl
 *.pth
 *.pt
-

@@ -1,0 +1,66 @@
+# Shared Music2Emo classifier and optimization recipe.
+# Task presets inherit this file; dataset experiments supply paths and inputs.
+# Preserve the completed Jamendo reproduction protocol across comparable models.
+# Frequency weights must come from each dataset's own training-label distribution.
+author_commit: c5f7984f78d9928b841f25bd05a47377c12c58ca
+features:
+  saved_layer_indices: [5, 6]  # Saved-array indices, matching the released loader.
+  audio_dimension: 1536
+  training_pooling: random_consecutive_segment_mean
+  evaluation_pooling: all_segment_mean
+  normalization: none
+  unavailable_key_mode: major  # Released loader fallback; not a new key estimate.
+model:
+  architecture: music2emo_single_task
+  chord_sequence_length: 100
+  root_vocabulary_size: 14
+  quality_vocabulary_size: 14
+  root_embedding_dimension: 4
+  quality_embedding_dimension: 4
+  transformer_layers: 2
+  transformer_heads: 8
+  transformer_feedforward_dimension: 64
+  transformer_dropout: 0.1
+  cls_token: zeros
+  padding_mask: none
+  hidden_dimensions: [512, 256]
+  activation: relu
+  multitask: false
+  knowledge_distillation: false
+optimization:
+  optimizer: adam
+  loss: author_frequency_weighted_bce
+  learning_rate: 1e-4
+  betas: [0.9, 0.999]
+  epsilon: 1.0e-8
+  weight_decay: 0.0
+  batch_size: 8
+  epochs: 200  # Paper epoch cap; released YAML instead caps training at 500.
+  early_stopping:
+    monitor: val_loss
+    mode: min
+    patience: 10
+    min_delta: 0.0001
+  scheduler: none
+checkpoint:
+  split: validation
+  minimize: weighted_bce_loss  # Released-code rule; paper does not specify selection.
+  ties: earliest_epoch
+  save_top_k: 5
+  save_last: true
+evaluation:
+  output_transform: sigmoid
+reproducibility:
+  seeds: [32, 64, 128, 256, 512]
+  deterministic_algorithms: true
+  sampling_seed: sha256_per_seed_per_epoch
+runtime:
+  device: cuda
+  num_workers: 4
+  matmul_precision: medium
+  attention_backend: math
+execution:
+  resume: true
+  overwrite: false
+  validate_only: false
+  dry_run: false

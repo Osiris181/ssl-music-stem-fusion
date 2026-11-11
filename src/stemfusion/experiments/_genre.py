@@ -11,10 +11,11 @@ from typing import Any
 
 from stemfusion.configuration import YAMLArgumentParser, configure_yaml
 from stemfusion.experiments._datasets import SOURCES, get_dataset
+from stemfusion.experiments._mid_controls import repeated_mixture_spec, train_repeated_mixture_control
 from stemfusion.experiments._stem_results import collect_stem_results, stem_report_config
 from stemfusion.training.late_fusion import assemble_ensemble, branch_seed, train_branch
 from stemfusion.training.metrics import GenreMetrics
-from stemfusion.training.mid_fusion import match_capacity, model_parameter_count, train_mid_condition
+from stemfusion.training.mid_fusion import model_parameter_count, train_mid_condition
 from stemfusion.training.reporting import fingerprint, summarize_results, write_json
 from stemfusion.training.trainer import TrainingSettings
 
@@ -115,7 +116,7 @@ def selected_conditions(config: GenreExperimentConfig) -> dict:
             continue
         if kind == "fusion" and sources in (SOURCES[:4], SOURCES[:5], SOURCES) and count is None:
             continue
-        expected_kind = "capacity_matched" if config.family == "mid_fusion" else "mixture_ensemble"
+        expected_kind = "repeated_mixture" if config.family == "mid_fusion" else "mixture_ensemble"
         if kind == expected_kind and sources == ("mixture",) and type(count) is int and count in (4, 5, 6):
             continue
         raise ValueError(f"Condition {name!r} does not match the agreed genre protocol.")
@@ -134,9 +135,9 @@ def plan_experiment(config: GenreExperimentConfig) -> dict:
     for name, condition in conditions.items():
         count = len(condition["sources"])
         detail = dict(condition)
-        if condition["kind"] == "capacity_matched":
-            detail["capacity_matching"] = match_capacity(config.dimension, len(mapping), condition["matched_sources"], config.settings.hidden_dimensions)
-            detail["trainable_parameters"] = detail["capacity_matching"]["matched_parameters"]
+        if condition["kind"] == "repeated_mixture":
+            detail["input_matching"] = repeated_mixture_spec(config.dimension, len(mapping), condition["matched_sources"], config.settings.hidden_dimensions)
+            detail["trainable_parameters"] = detail["input_matching"]["matched_parameters"]
         elif config.family == "mid_fusion":
             detail["trainable_parameters"] = model_parameter_count(config.dimension * count, len(mapping), config.settings.hidden_dimensions)
         else:
@@ -186,10 +187,14 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
             directory = config.output_directory / config.family / name / f"seed_{seed}"
             if condition["kind"] == "reference":
                 result = branch("mixture", 0)
+            elif condition["kind"] == "repeated_mixture":
+                result = train_repeated_mixture_control(data=data, copies=condition["matched_sources"], settings=config.settings,
+                    seed=seed, output_directory=directory, provenance=config.provenance, task=task,
+                    resume=config.resume, overwrite=config.overwrite)
             elif config.family == "mid_fusion":
                 result = train_mid_condition(data=data, sources=tuple(condition["sources"]), settings=config.settings,
                     seed=seed, output_directory=directory, provenance=config.provenance, task=task,
-                    matched_sources=condition.get("matched_sources"), resume=config.resume, overwrite=config.overwrite)
+                    resume=config.resume, overwrite=config.overwrite)
             else:
                 if condition["kind"] == "mixture_ensemble":
                     members = [branch("mixture", index) for index in range(condition["matched_sources"])]
@@ -203,7 +208,7 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
     for name, condition in conditions.items():
         if condition["kind"] != "fusion":
             continue
-        target_kind = "capacity_matched" if config.family == "mid_fusion" else "mixture_ensemble"
+        target_kind = "repeated_mixture" if config.family == "mid_fusion" else "mixture_ensemble"
         for control, candidate in conditions.items():
             if candidate["kind"] == target_kind and candidate["matched_sources"] == len(condition["sources"]):
                 comparisons[name] = control
@@ -214,6 +219,8 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
                     "dataset": get_dataset(config.dataset).name, "number_of_classes": data.number_of_classes,
                     "feature_dimension": data.dimension, "split_counts": data.audit["split_counts"],
                     "training_settings": vars(config.settings)})
+    if config.family == "mid_fusion":
+        summary["mixture_control"] = "repeat_identical_mixture_embedding"
     note = get_dataset(config.dataset).historical_selection_note
     if note is not None:
         summary["historical_selection_note"] = note
@@ -266,6 +273,9 @@ def format_results(summary: dict) -> str:
         "matched_mixture_4": "Matched mixture (4)",
         "matched_mixture_5": "Matched mixture (5)",
         "matched_mixture_6": "Matched mixture (6)",
+        "repeated_mixture_4": "M+M+M+M",
+        "repeated_mixture_5": "M+M+M+M+M",
+        "repeated_mixture_6": "M+M+M+M+M+M",
         "mixture_ensemble_4": "Mixture ensemble (4)",
         "mixture_ensemble_5": "Mixture ensemble (5)",
         "mixture_ensemble_6": "Mixture ensemble (6)",
@@ -314,6 +324,8 @@ def format_results(summary: dict) -> str:
         lines.append("Mean +/- sample SD (ddof=1); metrics on the 0-1 scale.")
     else:
         lines.append("Single-seed metrics on the 0-1 scale; sample SD is unavailable.")
+    if summary.get("mixture_control") == "repeat_identical_mixture_embedding":
+        lines.append("Mid-fusion controls concatenate identical mixture embeddings; hidden widths and parameter counts match the corresponding fusion MLPs.")
     metrics = dict(summary["conditions"])
     if "mixture_only_reference" in summary and "mixture_only" not in metrics:
         metrics = {"mixture_only": summary["mixture_only_reference"], **metrics}

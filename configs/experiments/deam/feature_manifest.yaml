@@ -1,0 +1,12 @@
+dataset: deam
+paths:
+  train_split: ../../../data/manifests/deam/split/train.txt
+  validation_split: ../../../data/manifests/deam/split/validation.txt
+  test_split: ../../../data/manifests/deam/split/test.txt
+  annotations: ../../../data/manifests/deam/static_annotations.csv
+  mixture_root: /mnt/HDD/DEAM/MEMD_audio
+  htdemucs_root: /mnt/HDD/osiris181/DEAM_separated/htdemucs_6s
+  output: ../../../data/manifests/deam/deam_features.jsonl
+execution:
+  overwrite: false
+  dry_run: false

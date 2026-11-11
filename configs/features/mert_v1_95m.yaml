@@ -1,0 +1,21 @@
+# Frozen author-compatible MERT representation; all transformer layers are saved.
+extractor:
+  model_name: m-a-p/MERT-v1-95M
+  revision: 12af15fef9d0ac838c3f475bfbbf26d2060dd4f5
+  frozen: true
+  trust_remote_code: true
+features:
+  transformer_layers: 12
+  dimension_per_layer: 768
+  exclude_embedding_state: true
+  temporal_pooling: mean
+  dtype: float32
+audio:
+  sample_rate_hz: 24000
+  channels: mono
+runtime:
+  device: cuda
+  local_files_only: true
+# Optional local snapshot directory. Otherwise use the pinned Hugging Face model.
+paths:
+  model_path: null

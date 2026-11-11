@@ -43,13 +43,15 @@ The study covers the following dataset and representation settings:
 | FMA-Medium | Genre, 16 classes | MusicFM |
 | GTZAN | Genre, 10 classes | MusicFM |
 | ISMIR04 | Genre, 6 classes | MusicFM |
-| MTG-Jamendo mood/theme | Multi-label tagging, 56 tags | MusicFM and MERT + chord/key, evaluated separately |
+| MTG-Jamendo mood/theme | Multi-label tagging, 56 tags | MERT + chord/key |
 | PMEmo | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
 | EmoMusic | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
 | DEAM | Binary valence and binary arousal, evaluated separately | MERT + chord/key |
 
 The MERT setting combines pretrained audio embeddings with estimated chord
-and global-key descriptors. Dataset-specific labels, partitions, and
+and global-key descriptors. MusicFM is used for genre classification; MERT +
+chord/key is used for mood/theme and binary emotion classification.
+Dataset-specific labels, partitions, and
 representation settings are described in the
 [experimental design](context/PHASE2_EXPERIMENTAL_DESIGN.md).
 Comparisons are made within each dataset, representation, and target.
@@ -66,7 +68,7 @@ extraction, model training, evaluation, and reporting.
 | --- | --- |
 | Source separation | Frozen HT-Demucs `htdemucs_6s`; retain the original mixture and five selected stems. |
 | Genre feature extraction | Shared frozen MusicFM-MSD, layer 7, temporal mean pooling, 1,024-dimensional embeddings; full-duration mono audio at 24 kHz. |
-| Mid-fusion | Concatenate selected embeddings and train one MLP. Compare against the standard mixture-only MLP and capacity-matched mixture-only MLPs. |
+| Mid-fusion | Concatenate selected embeddings and train one MLP. Compare against the standard mixture-only MLP and repeated-mixture controls with identical input widths and parameter counts. |
 | Late-fusion | Train and select source MLPs independently, then sum their logits equally. Compare against independently trained mixture-only ensembles with the same branch counts. |
 | Evaluation | Select checkpoints using validation data, evaluate the selected models on the test split, and save per-track predictions and aggregate metrics. |
 
@@ -84,9 +86,11 @@ instrument/vocal stems; the separator's native `other` output is excluded.
 
 For FMA-Medium and GTZAN, the standard MLP has two hidden layers of 1,024 and 512 units,
 with ReLU and dropout `0.2`. Training uses cross-entropy, Adam at `1e-4`,
-batch size `128`, and `20` epochs. Capacity-matched mixture controls widen
-the first hidden layer to approximately match their corresponding fusion
-model's trainable parameter count.
+batch size `128`, and `20` epochs. Matched mixture controls concatenate four,
+five, or six identical copies of the existing mixture embedding, keeping the
+same hidden widths as the corresponding fusion model. This exactly matches
+input width and trainable parameter count, but duplicated inputs do not add
+information or establish equal effective representational capacity.
 
 All compared models use the same retained tracks, labels, splits, and
 evaluation functions. Checkpoint selection maximizes validation accuracy +
@@ -106,9 +110,9 @@ shared across nested ensembles.
 stem-fusion-music-classification/
 ├── configs/                         # YAML settings and experiment conditions
 │   ├── separators/                  # HT-Demucs settings
-│   ├── features/                    # MusicFM settings and checkout location
+│   ├── features/                    # Genre MusicFM and frozen MERT settings
 │   ├── training/                    # Shared classifier settings and paths
-│   └── experiments/                 # FMA-Medium, GTZAN, and ISMIR04 task configurations
+│   └── experiments/                 # Genre datasets and MTG-Jamendo task configurations
 ├── context/                         # Research motivation and experimental design notes
 ├── data/                            # Local manifests and cached features
 ├── docs/                            # Detailed configuration and usage guides
@@ -145,6 +149,7 @@ Feature extraction also requires a local MusicFM checkout and the MSD
 checkpoint/statistics files. Configure the paths in:
 
 - [MusicFM settings](configs/features/musicfm_msd_layer7.yaml).
+- [FMA manifest CSV and audio paths](configs/experiments/fma_medium/manifest.yaml).
 - [FMA extraction settings](configs/experiments/fma_medium/extraction.yaml).
 - [Common genre training settings](configs/training/genre.yaml).
 - Dataset paths: [FMA-Medium](configs/training/fma_medium_genre.yaml), [GTZAN](configs/training/gtzan_genre.yaml), and [ISMIR04](configs/training/ismir04_genre.yaml).
@@ -172,12 +177,32 @@ command-line options override YAML. Use `--help` to inspect options,
 features without training. Complete, compatible runs are verified and reused
 automatically.
 
-FMA-Medium, GTZAN, and ISMIR04 each provide `separation.py` in their experiment
+FMA-Medium, GTZAN, ISMIR04, and MTG-Jamendo provide `separation.py` in their experiment
 folder, using the shared HT-Demucs backend. Dataset paths are configured in
 `configs/experiments/<dataset>/separation.yaml`; inference settings inherit
 `configs/separators/htdemucs_6s.yaml`. Start with `python separation.py --dry-run`
 when separation is needed. ISMIR04 uses its audited manifest to preserve
 distinct recordings whose original filenames collide.
+
+[MTG-Jamendo audio preparation](src/stemfusion/experiments/mtg_jamendo/README.md)
+uses the provided mood/theme split files and selected-track manifests. The
+separated audio serves the MERT plus chord/key pipeline.
+Shared harmonic preprocessing lives at
+`src/stemfusion/experiments/mtg_jamendo/extract_chords_keys.py`, outside the
+encoder directory. Its chord/key outputs are paired with the MERT embeddings;
+see the [shared guide](src/stemfusion/experiments/mtg_jamendo/README.md#chordkey-extraction).
+
+For Jamendo's controlled mid-fusion comparison, run `python train_mid.py` from
+its experiment directory, or `stemfusion train mtg-jamendo mid-fusion`.
+This uses the retained reproduction protocol, exact repeated-mixture controls,
+and the five fixed seeds. See the
+[training guide](src/stemfusion/experiments/mtg_jamendo/README.md#mid-fusion-training)
+for validation, checkpoint reuse, and saved summaries.
+Jamendo's `python train_late.py` (or `stemfusion train mtg-jamendo late-fusion`)
+adds matched independent mixture ensembles and stem-fusion ensembles. Its
+late-fusion summary also includes all five standalone stem results from those
+same trained branches; see the
+[late-fusion guide](src/stemfusion/experiments/mtg_jamendo/README.md#late-fusion-training).
 
 GTZAN uses the same workflow from `src/stemfusion/experiments/gtzan/`:
 
@@ -189,8 +214,7 @@ python train_late.py
 ```
 
 Set local split/audio paths in `configs/experiments/gtzan/manifest.yaml` first.
-Its provided stratified splits retain 499/250/250 available tracks after the
-explicit exclusion of `jazz.00054`. Validated existing features can be reused;
+Its provided stratified files define the split assignments. Validated existing features can be reused;
 `python extraction.py` is available when new extraction is needed. Both NumPy
 and PyTorch cached vectors are supported. See the
 [GTZAN guide](src/stemfusion/experiments/gtzan/README.md).

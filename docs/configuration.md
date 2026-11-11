@@ -8,11 +8,19 @@ separation, and selecting a run does not launch a batch of experiments.
 
 | Command | Automatically loaded preset |
 | --- | --- |
+| `data fma-manifest` | `configs/experiments/fma_medium/manifest.yaml` |
 | `extract fma-medium` | `configs/experiments/fma_medium/extraction.yaml`, referencing the shared MusicFM preset |
 | `train fma-medium mid-fusion` | `configs/experiments/fma_medium/mid_fusion.yaml`, inheriting the shared genre profile |
 | `train fma-medium late-fusion` | `configs/experiments/fma_medium/late_fusion.yaml`, inheriting the shared genre profile |
 | `data gtzan-manifest` | `configs/experiments/gtzan/manifest.yaml` |
 | `data ismir04-manifest` | `configs/experiments/ismir04/manifest.yaml` |
+| `data mtg-jamendo-manifest` (default `--purpose features`) | `configs/experiments/mtg_jamendo/feature_manifest.yaml` |
+| `data mtg-jamendo-manifest --purpose separation` | `configs/experiments/mtg_jamendo/separation_manifest.yaml` |
+| `extract mtg-jamendo chords-keys` | `configs/experiments/mtg_jamendo/chords_keys.yaml`, paired with MERT |
+| `extract mtg-jamendo mert` | `configs/experiments/mtg_jamendo/mert.yaml`, inheriting the pinned MERT profile |
+| `train mtg-jamendo author-reproduction` | `configs/experiments/mtg_jamendo/reproduction.yaml`, isolated five-seed mixture-only baseline with a 200-epoch cap |
+| `train mtg-jamendo mid-fusion` | `configs/experiments/mtg_jamendo/mid_fusion.yaml`, seven controlled conditions inheriting the same retained Music2Emo recipe |
+| `train mtg-jamendo late-fusion` | `configs/experiments/mtg_jamendo/late_fusion.yaml`, twelve report conditions from independently selected mixture/stem branches, inheriting the same retained recipe |
 | `extract gtzan` | `configs/experiments/gtzan/extraction.yaml`, referencing the same MusicFM preset |
 | `extract ismir04` | `configs/experiments/ismir04/extraction.yaml`, with explicit long-track chunking |
 | `train gtzan mid-fusion` | `configs/experiments/gtzan/mid_fusion.yaml`, inheriting the shared genre profile |
@@ -25,6 +33,13 @@ Use `--config PATH` to load another preset or an experiment file. Experiment
 files can refer to `feature_profile` or `training_profile`; the current
 task's referenced preset is loaded first, then experiment settings override
 it. Explicit CLI arguments override those YAML values.
+
+Jamendo uses one `prepare_manifest.py` entry point for both purposes. The
+purpose is selected before YAML loading, so it determines the default preset
+and its validation rules. The older installed commands
+`data mtg-jamendo-feature-manifest` and `data mtg-jamendo-separation-manifest`
+remain compatibility aliases with their original default purposes. Existing
+manifest paths and extraction settings are unchanged.
 
 Each extraction entry point selects its dataset's default task YAML and uses
 the shared parser in `experiments/_extraction.py`. The shared
@@ -41,6 +56,16 @@ available for programmatic use; the public CLI resolves YAML before creating
 those dataclasses.
 
 ## Extraction
+
+Jamendo's shared BTC chord/key command loads
+`configs/experiments/mtg_jamendo/chords_keys.yaml`.
+`execution.retry_failures: true` enables one post-extraction retry pass for
+recognized tiny CQT tails; `--retry-failures` / `--no-retry-failures` override
+it. The switch changes scheduling, not cache identity. The CQT adaptation is
+recorded in output provenance, and verified successful pre-retry caches remain
+reusable without being rewritten. It does not retry unavailable key estimates
+or unrelated failures. See the
+[shared guide](../src/stemfusion/experiments/mtg_jamendo/README.md#chordkey-extraction).
 
 Set `paths.musicfm_root` in `configs/features/musicfm_msd_layer7.yaml` and
 `paths.manifest`/`paths.output_dir` in
@@ -98,12 +123,24 @@ optimization, evaluation, and seed settings from `configs/training/genre.yaml`.
 Training uses the agreed named conditions rather than
 arbitrary `--source` lists. Source-subset arguments remain available for extraction.
 
-The FMA implementation includes capacity-matched mixture controls,
+The FMA implementation includes repeated-mixture input/parameter-count controls,
 independently selected late-fusion branches, matched mixture ensembles,
 and paired five-seed summaries. Use `--validate-only` to check all cached
 features without training. See [the training guide](fma_htdemucs_training.md).
 
 ## Local paths and overrides
+
+Jamendo mid and late fusion support `runtime.verify_checksums: true`
+in their respective dataset YAMLs. `--no-verify-checksums` trusts declared feature completion
+markers instead of hashing feature payloads; `--verify-checksums` restores the
+default. Both override YAML. Structural/alignment checks and trained-artifact
+integrity checks remain mandatory. This option does not affect the retained
+reproduction. The reviewed loading-only transition preserves completed
+checkpoint compatibility; actual execution-source identity is recorded
+separately in new fusion summaries. Both Jamendo fusion commands now use this
+shared YAML loader and the task-level `_mood_theme_tagging.py` controller, with the
+same thin-entry-point flow as genre experiments. See the
+[Jamendo commands and integrity tradeoff](../src/stemfusion/experiments/mtg_jamendo/README.md#commands-and-checkpoint-reuse).
 
 The shared MusicFM preset contains the checkout path:
 
@@ -118,11 +155,20 @@ future datasets can reuse the MusicFM profile. A separate `paths.local.yaml`
 is no longer needed. Explicit `--musicfm-root`, `--manifest`, and `--output-dir`
 arguments still override the corresponding configured paths.
 
+FMA's `configs/experiments/fma_medium/manifest.yaml` defines `tracks_csv`,
+`mixture_root`, a list of `htdemucs_root` directories, and `output`.
+The default CSV is the official local copy in
+`data/manifests/fma_medium/metadata/tracks.csv`. The preset checks configured
+audio-file availability to build a common track set. Use `--no-allow-missing`
+for strict availability checks. Both FMA manifest entry points load this YAML;
+CLI arguments override it. Existing manifests require `--overwrite`.
+
 GTZAN's `configs/experiments/gtzan/manifest.yaml` defines `train_split`,
 `validation_split`, `test_split`, `mixture_root`, `htdemucs_root`, and `output`.
-It binds the provided split IDs to local paths, with unavailable track IDs
-listed explicitly in `excluded_track_ids`. Audio scanning is disabled unless
-`execution.check_audio` or `--check-audio` is enabled. The generated manifest
+It binds the provided split IDs to local paths and checks configured file
+availability by default, retaining a common track set across all sources.
+Use `--no-allow-missing` for strict checks, or combine `--no-check-audio` and
+`--no-allow-missing` to bind paths without file checks. The generated manifest
 and its sidecars remain ignored by Git. See the
 [GTZAN guide](../src/stemfusion/experiments/gtzan/README.md).
 

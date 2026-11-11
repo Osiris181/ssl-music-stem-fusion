@@ -49,11 +49,11 @@ class GTZANPipelineTests(unittest.TestCase):
             path = self.root / f"{split}.txt"
             lines = [f"{genre}/{genre}.{index:05d}.wav" for genre in LABEL_MAPPING]
             if split == "train":
-                lines.append("jazz/jazz.00054.wav")
+                lines.append("jazz/jazz.99999.wav")
             path.write_text("\n".join(lines) + "\n")
             split_files[split] = path
         self.manifest_config = GTZANManifestConfig(split_files, self.root / "audio", self.root / "stems",
-                                                  self.manifest, excluded_track_ids=("jazz.00054",))
+                                                  self.manifest, excluded_track_ids=("jazz.99999",))
         build_gtzan_manifest(self.manifest_config)
         self.records, _ = inspect_manifest(self.manifest)
         for source_index, source in enumerate(SOURCES):
@@ -80,7 +80,7 @@ class GTZANPipelineTests(unittest.TestCase):
         audit = {
             "retained_split_counts": {split: 10 for split in SPLITS}, "label_mapping": LABEL_MAPPING,
             "source_mapping": {source: "mix" if source == "mixture" else source for source in SOURCES},
-            "excluded_track_ids": {"train": ["jazz.00054"], "validation": [], "test": []},
+            "excluded_track_ids": {"train": ["jazz.99999"], "validation": [], "test": []},
             "extraction_source": {"declared_settings": {
                 "checkpoint": "pretrained_msd.pt", "statistics": "msd_stats.json", "layer_index": 7,
                 "sample_rate": 24000, "channels": "mono", "max_seconds": None,
@@ -92,7 +92,7 @@ class GTZANPipelineTests(unittest.TestCase):
 
     def test_manifest_preserves_splits_labels_and_explicit_exclusion(self):
         self.assertEqual(len(self.records), 30)
-        self.assertNotIn("jazz.00054", [record.track_id for record in self.records])
+        self.assertNotIn("jazz.99999", [record.track_id for record in self.records])
         self.assertEqual(self.records[0].track_id, "blues.00000")
         report = json.loads(self.manifest.with_suffix(".report.json").read_text())
         self.assertFalse(report["audio_files_revalidated"])
@@ -120,6 +120,51 @@ class GTZANPipelineTests(unittest.TestCase):
         data = load_gtzan_features(self.manifest, self.features, dimension=4)
         self.assertEqual(data.audit["caches"]["guitar/train"]["zero_vectors"], 1)
         self.assertEqual(len(data.splits["train"].track_ids), 10)
+
+    def test_default_preset_uses_generic_audio_availability_without_fixed_ids(self):
+        args = build_parser().parse_args(["data", "gtzan-manifest"])
+        self.assertEqual(args.exclude_track_id, [])
+        self.assertTrue(args.check_audio)
+        self.assertTrue(args.allow_missing)
+        strict = build_parser().parse_args(["data", "gtzan-manifest", "--no-allow-missing"])
+        self.assertFalse(strict.allow_missing)
+
+    def test_availability_filtering_preserves_common_ids_and_reports_missing_sources(self):
+        for record in self.records:
+            for value in record.paths.values():
+                path = Path(value)
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(b"synthetic audio")
+        config = replace(self.manifest_config, excluded_track_ids=(), check_audio=True,
+                         allow_missing=True, dry_run=True)
+        before = self.manifest.read_bytes()
+        report = build_gtzan_manifest(config)
+        self.assertEqual(report["split_counts"], dict.fromkeys(SPLITS, 10))
+        self.assertEqual(report["excluded_track_ids"], [])
+        self.assertEqual(report["dropped_tracks"], 1)
+        self.assertEqual(report["missing_by_source"], dict.fromkeys(SOURCES, 1))
+        self.assertEqual(report["missing_audio"], [{"track_id": "jazz.99999", "split": "train", "sources": list(SOURCES)}])
+        self.assertTrue(report["audio_files_revalidated"])
+        self.assertEqual(self.manifest.read_bytes(), before)
+        with self.assertRaisesRegex(ValueError, "Missing or empty configured audio"):
+            build_gtzan_manifest(replace(config, allow_missing=False))
+        with self.assertRaisesRegex(ValueError, "requires check_audio"):
+            build_gtzan_manifest(replace(config, check_audio=False))
+
+    def test_older_manifest_yaml_remains_compatible_with_optional_availability_flag(self):
+        import yaml
+
+        path = default_config_path("experiments/gtzan/manifest.yaml")
+        config = yaml.safe_load(path.read_text())
+        config["execution"].pop("allow_missing")
+        config["execution"]["check_audio"] = False
+        temporary = self.root / "manifest.yaml"
+        for name in config["paths"]:
+            config["paths"][name] = str(self.root / name)
+        temporary.write_text(yaml.safe_dump(config))
+        defaults, _ = load_configuration(temporary, "gtzan_manifest")
+        self.assertFalse(defaults["allow_missing"])
+        self.assertEqual(defaults["exclude_track_id"], [])
 
     def test_cache_ids_dtype_dimension_and_finiteness_are_strict(self):
         path = self.cache("piano", "train")

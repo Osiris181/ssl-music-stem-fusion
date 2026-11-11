@@ -1,0 +1,32 @@
+MTG-Jamendo: MERT + source-specific chord/key unweighted late fusion
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Each branch: minimum validation weighted BCE checkpoint; ensembles sum raw logits, then sigmoid.
+Accuracy is label-wise. A global validation-macro-F1 threshold is frozen for each reported model.
+PR-AUC denotes macro average precision. Stem-only rows reuse the selected stem branches.
+
+Mixture reference and late-fusion ensembles
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 90.8901 +/- 0.6351 | 0.1690 +/- 0.0032 | 0.7752 +/- 0.0019 | 0.1430 +/- 0.0031
+mixture_ensemble_4 | 90.5649 +/- 0.7863 | 0.1724 +/- 0.0023 | 0.7765 +/- 0.0024 | 0.1417 +/- 0.0037
+mixture_ensemble_5 | 90.3723 +/- 0.8594 | 0.1732 +/- 0.0018 | 0.7770 +/- 0.0015 | 0.1411 +/- 0.0022
+mixture_ensemble_6 | 88.7453 +/- 0.2657 | 0.1726 +/- 0.0013 | 0.7770 +/- 0.0015 | 0.1403 +/- 0.0021
+mixture_guitar_drums_piano | 91.0786 +/- 1.0670 | 0.1768 +/- 0.0013 | 0.7781 +/- 0.0017 | 0.1447 +/- 0.0027
+mixture_guitar_drums_piano_bass | 90.4546 +/- 1.0327 | 0.1764 +/- 0.0020 | 0.7772 +/- 0.0018 | 0.1450 +/- 0.0026
+mixture_all_five_stems | 90.8333 +/- 1.1636 | 0.1758 +/- 0.0024 | 0.7769 +/- 0.0018 | 0.1442 +/- 0.0024
+
+Supporting stem-only results
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+guitar_only | 87.5429 +/- 1.2462 | 0.1394 +/- 0.0051 | 0.7316 +/- 0.0035 | 0.1064 +/- 0.0023
+drums_only | 87.2274 +/- 2.1779 | 0.1402 +/- 0.0048 | 0.7359 +/- 0.0059 | 0.1166 +/- 0.0063
+piano_only | 88.7790 +/- 0.5094 | 0.1465 +/- 0.0030 | 0.7402 +/- 0.0054 | 0.1110 +/- 0.0052
+bass_only | 86.7801 +/- 1.2046 | 0.1330 +/- 0.0035 | 0.7290 +/- 0.0029 | 0.1053 +/- 0.0041
+vocals_only | 86.2051 +/- 1.4587 | 0.1343 +/- 0.0049 | 0.7258 +/- 0.0038 | 0.1049 +/- 0.0043
+
+Paired differences: stem fusion minus its matched mixture ensemble.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - mixture_ensemble_4 | 0.5137 +/- 1.7700 | 0.0043 +/- 0.0028 | 0.0015 +/- 0.0022 | 0.0030 +/- 0.0035
+mixture_guitar_drums_piano_bass - mixture_ensemble_5 | 0.0823 +/- 0.8092 | 0.0033 +/- 0.0025 | 0.0003 +/- 0.0023 | 0.0039 +/- 0.0028
+mixture_all_five_stems - mixture_ensemble_6 | 2.0880 +/- 0.9870 | 0.0032 +/- 0.0027 | -0.0001 +/- 0.0022 | 0.0039 +/- 0.0030

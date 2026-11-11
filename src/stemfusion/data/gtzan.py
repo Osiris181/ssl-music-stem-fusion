@@ -29,6 +29,7 @@ class GTZANManifestConfig:
     check_audio: bool = False
     overwrite: bool = False
     dry_run: bool = False
+    allow_missing: bool = False
 
 
 def read_split_files(split_files: dict[str, Path]) -> dict[str, list[tuple[str, str]]]:
@@ -77,7 +78,9 @@ def inspect_manifest(manifest: Path, number_of_classes: int = 10) -> tuple[list,
 
 
 def build_gtzan_manifest(config: GTZANManifestConfig) -> dict:
-    """Bind the fixed split IDs to local audio paths without scanning audio."""
+    """Bind fixed split IDs to audio paths with optional availability checks."""
+    if config.allow_missing and not config.check_audio:
+        raise ValueError("allow_missing requires check_audio; use both flags together for availability filtering.")
     grouped = read_split_files(config.split_files)
     excluded = set(config.excluded_track_ids)
     known = {track for rows in grouped.values() for track, _ in rows}
@@ -87,6 +90,8 @@ def build_gtzan_manifest(config: GTZANManifestConfig) -> dict:
         if not re.fullmatch(r"\.[a-zA-Z0-9]+", extension):
             raise ValueError(f"Invalid audio extension: {extension}")
     records = []
+    missing_audio = []
+    missing_counts = Counter()
     for split in SPLITS:
         for track_id, genre in grouped[split]:
             if track_id in excluded:
@@ -95,18 +100,25 @@ def build_gtzan_manifest(config: GTZANManifestConfig) -> dict:
             paths.update({source: str(config.htdemucs_root / track_id / f"{source}{config.stem_extension}")
                           for source in SOURCES[1:]})
             if config.check_audio:
-                for path in paths.values():
-                    if not Path(path).is_file() or not Path(path).stat().st_size:
-                        raise ValueError(f"Missing or empty configured audio: {path}")
+                missing = [source for source, path in paths.items()
+                           if not Path(path).is_file() or not Path(path).stat().st_size]
+                if missing:
+                    if not config.allow_missing:
+                        raise ValueError(f"Missing or empty configured audio: {track_id}, {', '.join(missing)}")
+                    missing_audio.append({"track_id": track_id, "split": split, "sources": missing})
+                    missing_counts.update(missing)
+                    continue
             records.append(ManifestRecord(track_id, split, genre, LABEL_MAPPING[genre], paths))
     for split in SPLITS:
         if {record.label for record in records if record.split == split} != set(LABEL_MAPPING.values()):
-            raise ValueError(f"Every genre must remain in GTZAN {split} after exclusions.")
+            raise ValueError(f"Every genre must remain in the GTZAN {split} track set.")
     report = {
         "dataset": "GTZAN", "split_description": "provided stratified splits",
         "input_split_counts": {split: len(rows) for split, rows in grouped.items()},
         "split_counts": dict(Counter(record.split for record in records)),
-        "excluded_track_ids": sorted(excluded), "exclusion_reason": "Unavailable tracks explicitly listed in the configuration.",
+        "excluded_track_ids": sorted(excluded), "missing_audio": missing_audio,
+        "missing_by_source": dict(missing_counts), "allow_missing": config.allow_missing,
+        "dropped_tracks": sum(len(rows) for rows in grouped.values()) - len(records),
         "label_mapping": LABEL_MAPPING, "records": len(records), "split_ids_disjoint": True,
         "audio_files_revalidated": config.check_audio, "dry_run": config.dry_run,
         "split_files": {split: {"path": str(path), "sha256": file_checksum(path)} for split, path in config.split_files.items()},

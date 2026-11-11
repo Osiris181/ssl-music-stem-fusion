@@ -8,7 +8,8 @@ document remains the historical planning record.
 ## Files and configuration
 
 Public scripts are `src/stemfusion/experiments/fma_medium/train_mid.py`
-and `train_late.py`. FMA scheduling is in the adjacent `training.py`.
+and `train_late.py`. Both call `experiments/_genre.py` directly, sharing
+the same controller as GTZAN and ISMIR04.
 Shared modules are `training/trainer.py`, `mid_fusion.py`, `late_fusion.py`,
 `metrics.py`, and `reporting.py`. FMA feature loading is in
 `data/fma_features.py`.
@@ -51,7 +52,7 @@ Validation-only runs check all cached vectors and extraction reports without
 training or writing outputs. Neither workflow accesses HDD audio.
 
 Without `--run`, training executes its complete matrix over five seeds.
-For one condition/seed, use `--run matched_mixture_4 --seed 32`.
+For one condition/seed, use `--run repeated_mixture_4 --seed 32`.
 Repeated `--seed` replaces the YAML seed list. Use a different output root
 for experiments with different settings.
 
@@ -68,15 +69,17 @@ PYTHONPATH=src python -m stemfusion train fma-medium late-fusion
 | --- | --- | ---: |
 | Mixture reference | 1024 → 1024 → 512 → 16 | 1,582,608 |
 | Four-source fusion | 4096 → 1024 → 512 → 16 | 4,728,336 |
-| Matched mixture (4) | 1024 → 3071 → 512 → 16 | 4,728,847 |
+| M+M+M+M | 4096 → 1024 → 512 → 16 | 4,728,336 |
 | Five-source fusion | 5120 → 1024 → 512 → 16 | 5,776,912 |
-| Matched mixture (5) | 1024 → 3753 → 512 → 16 | 5,777,081 |
+| M+M+M+M+M | 5120 → 1024 → 512 → 16 | 5,776,912 |
 | Six-source fusion | 6144 → 1024 → 512 → 16 | 6,825,488 |
-| Matched mixture (6) | 1024 → 4435 → 512 → 16 | 6,825,315 |
+| M+M+M+M+M+M | 6144 → 1024 → 512 → 16 | 6,825,488 |
 
-Counts come from the actual three-biased-linear-layer model. Width matching
-minimizes the absolute count difference over neighboring integer widths.
-Controls receive one mixture vector, rather than repeated copies.
+Counts come from the actual three-biased-linear-layer model. Controls repeat
+the identical existing mixture vector four, five, or six times, keeping the
+same hidden widths. Matching input width makes parameter counts exactly equal.
+Copies do not add information or prove equal effective capacity. The earlier
+widened controls are historical and are no longer the active comparison.
 Sources are ordered mixture, guitar, drums, piano, bass, vocals; `other`
 is excluded.
 

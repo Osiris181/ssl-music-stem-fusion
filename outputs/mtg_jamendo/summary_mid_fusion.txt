@@ -1,0 +1,22 @@
+MTG-Jamendo: MERT + source-specific chord/key mid-fusion
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Checkpoint: minimum validation weighted BCE; PR-AUC = macro average precision.
+Accuracy is label-wise, not exact-match/subset accuracy. One global threshold maximizes validation macro F1.
+Shared chord Transformer; repeated controls duplicate the same complete encoded mixture vector.
+
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 90.8901 +/- 0.6351 | 0.1690 +/- 0.0032 | 0.7752 +/- 0.0019 | 0.1430 +/- 0.0031
+repeated_mixture_4 | 90.3250 +/- 0.7144 | 0.1692 +/- 0.0076 | 0.7742 +/- 0.0033 | 0.1411 +/- 0.0049
+repeated_mixture_5 | 91.0835 +/- 0.6561 | 0.1664 +/- 0.0047 | 0.7717 +/- 0.0050 | 0.1372 +/- 0.0045
+repeated_mixture_6 | 89.9556 +/- 1.1544 | 0.1673 +/- 0.0049 | 0.7747 +/- 0.0016 | 0.1414 +/- 0.0034
+mixture_guitar_drums_piano | 91.2952 +/- 1.5547 | 0.1651 +/- 0.0052 | 0.7757 +/- 0.0049 | 0.1401 +/- 0.0044
+mixture_guitar_drums_piano_bass | 91.7029 +/- 0.8157 | 0.1649 +/- 0.0049 | 0.7746 +/- 0.0014 | 0.1404 +/- 0.0022
+mixture_all_five_stems | 91.6027 +/- 1.3497 | 0.1643 +/- 0.0042 | 0.7753 +/- 0.0020 | 0.1386 +/- 0.0019
+
+Paired differences: fusion minus its matched repeated-mixture control.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - repeated_mixture_4 | 0.9702 +/- 1.4648 | -0.0041 +/- 0.0049 | 0.0015 +/- 0.0053 | -0.0010 +/- 0.0059
+mixture_guitar_drums_piano_bass - repeated_mixture_5 | 0.6194 +/- 0.9008 | -0.0016 +/- 0.0061 | 0.0029 +/- 0.0060 | 0.0032 +/- 0.0058
+mixture_all_five_stems - repeated_mixture_6 | 1.6471 +/- 2.3483 | -0.0030 +/- 0.0019 | 0.0006 +/- 0.0023 | -0.0028 +/- 0.0038

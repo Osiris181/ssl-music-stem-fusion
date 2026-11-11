@@ -1,0 +1,14 @@
+# Select provided mood/theme records for HT-Demucs separation.
+dataset: mtg_jamendo
+paths:
+  train_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-train.tsv
+  validation_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-validation.tsv
+  test_split: ../../../data/manifests/mtg_jamendo/split-0/autotagging_moodtheme-test.tsv
+  track_list: ../../../data/manifests/mtg_jamendo/repair_tracks.txt
+  mixture_root: /mnt/HDD/MTG-Jamendo_Master_Dataset_Original_Quality
+  output_root: /home/osiris181/mtg_jamendo_separated_htdemucs/repairs
+  output: ../../../data/manifests/mtg_jamendo/mtg_jamendo_separation.jsonl
+execution:
+  all_tracks: false
+  overwrite: false
+  dry_run: false

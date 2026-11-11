@@ -21,7 +21,8 @@ from stemfusion.cli import build_parser
 from stemfusion.configuration import default_config_path, load_configuration
 from stemfusion.data.features import FeatureDataError
 from stemfusion.data.fma_features import SOURCES, load_fma_features
-from stemfusion.experiments.fma_medium.training import FMAExperimentConfig, config_from_args, run_experiment, save_stem_results
+from stemfusion.experiments._genre import GenreExperimentConfig as FMAExperimentConfig, config_from_args, run_experiment, save_stem_results
+from stemfusion.experiments._mid_controls import repeated_mixture_spec, train_repeated_mixture_control
 from stemfusion.training.late_fusion import assemble_ensemble, branch_seed
 from stemfusion.training.metrics import GenreMetrics
 from stemfusion.training.mid_fusion import match_capacity, model_parameter_count, train_mid_condition
@@ -90,6 +91,72 @@ class TrainingProtocolTests(unittest.TestCase):
             difference = abs(result["parameter_difference"])
             for neighbor in (width - 1, width + 1):
                 self.assertLessEqual(difference, abs(model_parameter_count(1024, 16, (neighbor, 512)) - parameters))
+
+    def test_repeated_mixture_controls_match_fusion_exactly_and_preserve_hidden_widths(self):
+        for classes in (2, 6, 10, 16):
+            for copies in (4, 5, 6):
+                spec = repeated_mixture_spec(1024, classes, copies, (1024, 512))
+                self.assertEqual(spec["input_dimension"], 1024 * copies)
+                self.assertEqual(spec["hidden_dimensions"], [1024, 512])
+                self.assertEqual(spec["parameter_difference"], 0)
+                self.assertEqual(spec["matched_parameters"], model_parameter_count(1024 * copies, classes, (1024, 512)))
+        for copies in (0, 3, 7, True):
+            with self.assertRaises(ValueError):
+                repeated_mixture_spec(1024, 16, copies, (1024, 512))
+
+    def test_repeated_arrays_use_identical_existing_mixture_vectors_without_modifying_inputs(self):
+        before = {split: values.features["mixture"].copy() for split, values in self.data.splits.items()}
+        for copies in (4, 5, 6):
+            with patch("stemfusion.experiments._mid_controls.fit_classifier", return_value={}) as fit:
+                train_repeated_mixture_control(data=self.data, copies=copies, settings=self.settings, seed=32,
+                    output_directory=self.root / "repeated", task=GenreMetrics(2), provenance={})
+            kwargs = fit.call_args.kwargs
+            self.assertIs(kwargs["settings"], self.settings)
+            self.assertEqual(kwargs["seed"], 32)
+            self.assertEqual(kwargs["model_description"]["sources"], ["mixture"] * copies)
+            self.assertIn("implementation_sha256", kwargs["model_description"]["input_transform"])
+            for split, original in before.items():
+                np.testing.assert_array_equal(kwargs["arrays"][split], np.concatenate([original] * copies, axis=1))
+                np.testing.assert_array_equal(self.data.splits[split].features["mixture"], original)
+
+    def test_repeated_control_reuses_only_matching_transform_and_never_a_legacy_widened_fit(self):
+        arguments = dict(data=self.data, copies=4, settings=self.settings, seed=32,
+                         output_directory=self.root / "repeated", task=GenreMetrics(2), provenance={})
+        first = train_repeated_mixture_control(**arguments)
+        with patch("torch.optim.Adam", side_effect=AssertionError("Verified runs must be reused")):
+            reused = train_repeated_mixture_control(**arguments, resume=True)
+        self.assertEqual(first, reused)
+        with patch("stemfusion.experiments._mid_controls.file_checksum", return_value="changed-transform"):
+            with self.assertRaisesRegex(ValueError, "incompatible settings"):
+                train_repeated_mixture_control(**arguments, resume=True)
+        legacy = self.root / "legacy"
+        self.train(legacy, matched_sources=4)
+        checkpoint = (legacy / "checkpoint.pt").read_bytes()
+        with self.assertRaisesRegex(ValueError, "incompatible settings"):
+            train_repeated_mixture_control(**{**arguments, "output_directory": legacy}, resume=True)
+        self.assertEqual((legacy / "checkpoint.pt").read_bytes(), checkpoint)
+
+    def test_unchanged_fusion_fit_is_reused_after_control_replacement(self):
+        name = "mixture_guitar_drums_piano"
+        config = self.config(selected_run=name, seeds=(32,))
+        directory = self.output / "mid_fusion" / name / "seed_32"
+        self.train(directory, sources=SOURCES[:4])
+        before = {path.name: path.read_bytes() for path in directory.iterdir()}
+        with patch("torch.optim.Adam", side_effect=AssertionError("Unchanged fusion must not retrain")):
+            result = run_experiment(config, data=self.data)
+        self.assertIn(name, result["conditions"])
+        self.assertEqual(before, {path.name: path.read_bytes() for path in directory.iterdir()})
+
+    def test_historical_genre_identity_reuses_completed_fit_without_writes(self):
+        directory = self.root / "historical"
+        with patch("stemfusion.training.trainer.implementation_fingerprint",
+                   return_value="7b39adcd615291b602a399342bf3d9f0d12d377eaff631a26772f7fe4aee6f7b"):
+            first = self.train(directory)
+        before = {path.name: path.read_bytes() for path in directory.iterdir()}
+        with patch("torch.optim.Adam", side_effect=AssertionError("Historical compatible fits must not retrain")):
+            reused = self.train(directory, resume=True)
+        self.assertEqual(first, reused)
+        self.assertEqual(before, {path.name: path.read_bytes() for path in directory.iterdir()})
 
     def test_zero_vectors_retained_for_every_condition(self) -> None:
         self.write_cache("guitar", "train", {"000001": np.zeros(4, dtype=np.float32), "000002": np.ones(4, dtype=np.float32)})
@@ -180,10 +247,11 @@ class TrainingProtocolTests(unittest.TestCase):
             branches = list((self.output / "branches" / f"seed_{seed}").glob("*/checkpoint.pt"))
             self.assertEqual(len(branches), 11)
         self.assertEqual(len(list(self.output.rglob("checkpoint.pt"))), 85)
-        example = mid["runs"]["matched_mixture_4"][32]
-        self.assertEqual(example["model"]["input_dimension"], 4)
-        self.assertEqual(example["model"]["sources"], ["mixture"])
-        self.assertEqual(example["trainable_parameters"], example["capacity_matching"]["matched_parameters"])
+        example = mid["runs"]["repeated_mixture_4"][32]
+        self.assertEqual(example["model"]["input_dimension"], 16)
+        self.assertEqual(example["model"]["sources"], ["mixture"] * 4)
+        self.assertEqual(example["model"]["hidden_dimensions"], [8, 4])
+        self.assertEqual(example["trainable_parameters"], example["input_matching"]["matched_parameters"])
         ensemble = late["runs"]["mixture_guitar_drums_piano"][32]
         self.assertEqual(len({member["seed"] for member in ensemble["members"]}), 4)
         self.assertEqual(ensemble["aggregation"], "sum_logits_then_softmax")
@@ -192,7 +260,7 @@ class TrainingProtocolTests(unittest.TestCase):
             np.testing.assert_array_equal(saved["logits"], expected)
             np.testing.assert_allclose(saved["probabilities"].sum(axis=1), 1)
         pair = mid["paired_differences"]["mixture_guitar_drums_piano"]
-        values = [mid["runs"]["mixture_guitar_drums_piano"][seed]["test"]["accuracy"] - mid["runs"]["matched_mixture_4"][seed]["test"]["accuracy"] for seed in SEEDS]
+        values = [mid["runs"]["mixture_guitar_drums_piano"][seed]["test"]["accuracy"] - mid["runs"]["repeated_mixture_4"][seed]["test"]["accuracy"] for seed in SEEDS]
         self.assertEqual(pair["metrics"]["accuracy"]["mean"], statistics.mean(values))
         self.assertEqual(pair["metrics"]["accuracy"]["sample_sd"], statistics.stdev(values))
         checkpoint_paths = list(self.output.rglob("checkpoint.pt"))
@@ -283,7 +351,7 @@ class TrainingProtocolTests(unittest.TestCase):
         config = self.config("late_fusion", seeds=(32,))
         run_experiment(config, data=self.data)
         with patch("torch.optim.Adam", side_effect=AssertionError("Reporting must not train.")), patch(
-            "stemfusion.experiments.fma_medium.training.load_fma_features", side_effect=AssertionError("Reporting must not load features.")
+            "stemfusion.data.fma_features.load_fma_features", side_effect=AssertionError("Reporting must not load features.")
         ):
             summary = save_stem_results(config)
             self.assertEqual(len(summary["conditions"]), 5)
@@ -329,9 +397,9 @@ class TrainingProtocolTests(unittest.TestCase):
         self.assertEqual(redirected.summary_directory, self.output)
         separate = config_from_args(parser.parse_args(["train", "fma-medium", "mid-fusion", "--output-dir", str(self.output), "--summary-dir", str(self.root / "reports")]))
         self.assertEqual(separate.summary_directory, self.root / "reports")
-        subset = config_from_args(parser.parse_args(["train", "fma-medium", "mid-fusion", "--seed", "32", "--run", "matched_mixture_4"]))
+        subset = config_from_args(parser.parse_args(["train", "fma-medium", "mid-fusion", "--seed", "32", "--run", "repeated_mixture_4"]))
         self.assertEqual(subset.seeds, (32,))
-        self.assertEqual(subset.selected_run, "matched_mixture_4")
+        self.assertEqual(subset.selected_run, "repeated_mixture_4")
 
     def test_direct_scripts_work_outside_checkout(self) -> None:
         project = Path(__file__).resolve().parents[2]

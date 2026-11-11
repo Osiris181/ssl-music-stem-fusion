@@ -19,6 +19,15 @@ M+G+D+P              | 0.6905 +/- 0.0035 | 0.4624 +/- 0.0076 | 0.8933 +/- 0.0015
 M+G+D+P+B            | 0.6898 +/- 0.0022 | 0.4694 +/- 0.0086 | 0.8939 +/- 0.0012 | 0.5424 +/- 0.0062
 M+G+D+P+B+V          | 0.6891 +/- 0.0015 | 0.4485 +/- 0.0029 | 0.8981 +/- 0.0008 | 0.5391 +/- 0.0073
 
+Supporting analysis: individual stem classifiers
+Condition   | Accuracy          | Macro F1          | Macro ROC-AUC     | Macro AP (PR-AUC)
+------------+-------------------+-------------------+-------------------+------------------
+Guitar only | 0.6348 +/- 0.0041 | 0.3842 +/- 0.0043 | 0.8700 +/- 0.0027 | 0.4510 +/- 0.0036
+Drums only  | 0.6423 +/- 0.0053 | 0.3961 +/- 0.0054 | 0.8578 +/- 0.0021 | 0.4774 +/- 0.0042
+Piano only  | 0.6340 +/- 0.0046 | 0.3945 +/- 0.0093 | 0.8722 +/- 0.0026 | 0.4627 +/- 0.0022
+Bass only   | 0.6285 +/- 0.0041 | 0.4016 +/- 0.0073 | 0.8694 +/- 0.0023 | 0.4652 +/- 0.0028
+Vocals only | 0.6379 +/- 0.0031 | 0.3944 +/- 0.0037 | 0.8859 +/- 0.0026 | 0.4492 +/- 0.0026
+
 Paired differences (fusion minus matched control):
 Comparison                          | Accuracy           | Macro F1           | Macro ROC-AUC      | Macro AP (PR-AUC) 
 ------------------------------------+--------------------+--------------------+--------------------+-------------------
@@ -28,12 +37,16 @@ M+G+D+P+B+V vs Mixture ensemble (6) | -0.0201 +/- 0.0009 | -0.0527 +/- 0.0044 | 
 
 Reading the results:
 M = original mixture; G = guitar; D = drums; P = piano; B = bass; V = vocals.
-The native 'other' stem is excluded. M+G+D+P+B+V uses all five selected stems.
+The native 'other' stem is excluded.
+Each stem-only row evaluates one existing, independently trained late-fusion branch on its own.
+The mixture-only row is the shared single-MLP reference.
+Standalone scores are supporting analysis, not evidence of incremental benefit beyond the mixture.
+M+G+D+P+B+V uses all five selected stems.
 Matched mixture (k): one mixture-only MLP with approximately the parameter count of k-source mid-fusion.
 Mixture ensemble (k): k independently trained mixture-only classifiers.
 Late fusion sums selected branch logits equally, then applies softmax.
-PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.
 Paired differences use the same outer seed; positive values favor stem fusion.
+PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.
 Sample SD describes training-run variability. No significance tests were performed.
 
 Detailed JSON: summary_late_fusion.json

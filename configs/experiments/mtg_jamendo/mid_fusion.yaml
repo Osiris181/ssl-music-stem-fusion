@@ -1,0 +1,30 @@
+dataset: mtg_jamendo
+training_profile: ../../training/mood_theme_tagging.yaml
+paths:
+  manifest: ../../../data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl
+  mert_dir: ../../../data/features/mtg_jamendo/mert_chord_key/mert_v1_95m
+  harmony_dir: ../../../data/features/mtg_jamendo/harmony
+  tag_list: ../../../data/manifests/mtg_jamendo/tag_list.npy
+  author_metadata: ../../../data/manifests/mtg_jamendo/music2emotion
+  output_dir: ../../../outputs/mtg_jamendo/mid_fusion
+  summary_dir: ../../../outputs/mtg_jamendo
+  reference_output_dir: ../../../outputs/mtg_jamendo/mert_chord_key/author_reproduction_early_stopping
+features:
+  fusion: concatenate
+  harmony_encoder: shared
+  training_alignment: shared_segment_range
+runtime:
+  verify_checksums: true
+evaluation:
+  accuracy: labelwise
+  f1: macro
+  threshold_policy: validation_macro_f1_global_grid
+  threshold_grid: {start: 0.0, stop: 1.0, steps: 101}
+runs:
+  mixture_only: {kind: reference, sources: [mixture]}
+  repeated_mixture_4: {kind: repeated_mixture, sources: [mixture], matched_sources: 4}
+  repeated_mixture_5: {kind: repeated_mixture, sources: [mixture], matched_sources: 5}
+  repeated_mixture_6: {kind: repeated_mixture, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}

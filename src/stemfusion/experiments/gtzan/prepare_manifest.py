@@ -21,6 +21,7 @@ def configure_parser(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--stem-extension")
     parser.add_argument("--exclude-track-id", action="append", help="Replace the YAML exclusion list; repeat for multiple unavailable tracks.")
     parser.add_argument("--check-audio", action=argparse.BooleanOptionalAction)
+    parser.add_argument("--allow-missing", action=argparse.BooleanOptionalAction)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     configure_yaml(parser, "gtzan_manifest", "experiments/gtzan/manifest.yaml")
@@ -38,6 +39,7 @@ def run_from_args(args: argparse.Namespace) -> int:
             excluded_track_ids=tuple(args.exclude_track_id or ()),
             mixture_extension=args.mixture_extension, stem_extension=args.stem_extension,
             check_audio=args.check_audio, overwrite=args.overwrite, dry_run=args.dry_run,
+            allow_missing=args.allow_missing,
         )
         print(json.dumps(build_gtzan_manifest(config), indent=2, sort_keys=True))
     except (ValueError, OSError) as error:

@@ -1,4 +1,4 @@
-"""Run FMA-Medium mid-fusion and capacity-matched mixture controls."""
+"""Run FMA-Medium mid-fusion and repeated-mixture input controls."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 if __name__ == "__main__" and __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-from stemfusion.experiments.fma_medium.training import configure_parser as _configure_parser, direct_main
+from stemfusion.experiments._genre import configure_parser as _configure_parser, direct_main
 
 
 def configure_parser(parser) -> None:

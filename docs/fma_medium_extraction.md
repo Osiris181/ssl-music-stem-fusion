@@ -74,6 +74,15 @@ track across disks.
 
 ## Step 1: build one aligned manifest
 
+Both `python prepare_manifest.py` in the FMA experiment directory and
+`stemfusion data fma-manifest` automatically load
+`configs/experiments/fma_medium/manifest.yaml`. Set its CSV/audio locations
+first. The CSV defaults to the local official copy at
+`data/manifests/fma_medium/metadata/tracks.csv`; `genres.csv` is not required.
+The preset builds a common track set from available audio. Use
+`--no-allow-missing` for strict availability checks. CLI arguments override
+YAML; repeated `--htdemucs-root` flags replace the configured root list.
+
 From the repository root:
 
     python src/stemfusion/experiments/fma_medium/prepare_manifest.py \
@@ -85,11 +94,13 @@ From the repository root:
       --allow-missing \
       --output data/manifests/fma_medium/fma_medium_htdemucs.jsonl
 
-From the experiment directory, use `python prepare_manifest.py` with the same
-input arguments. `--output` may be omitted: the script defaults to the path
-above regardless of the working directory. `stemfusion data fma-manifest`
-remains available with an explicit `--output`. The existing manifest does not
-need rebuilding merely because it was moved into the dataset folder.
+From the experiment directory, use `python prepare_manifest.py` after setting
+the YAML paths, or supply the same input arguments. `--output` may be omitted
+for both interfaces: the preset defaults to the path above regardless of the
+working directory. Existing manifests require explicit `--overwrite` before
+replacement. This configuration change does not require rebuilding the current
+manifest or rerunning completed experiments. A real `--dry-run` still checks
+audio-file availability and can take time on HDD storage.
 
 For a bounded smoke test, add one or more IDs without changing the official
 split or label mapping:

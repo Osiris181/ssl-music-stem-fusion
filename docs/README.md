@@ -14,6 +14,7 @@ by their resolved configurations and validation-selection metadata.
 | File | Contents |
 | --- | --- |
 | `configuration.md` | Active YAML loading, defaults/overrides, named runs, local paths, validation, and provenance. |
+| `music2emotion_reproduction.md` | Mixture-only MERT/chord/key baseline, paper/released-code choices, five-seed training, and saved results. |
 | `htdemucs_separation.md` | Consolidated HT-Demucs configuration, storage handling, and command. |
 | `fma_medium_extraction.md` | Multi-disk FMA HT-Demucs manifest and MusicFM extraction. |
 | `fma_htdemucs_training.md` | Revised FMA training commands, matched controls, independent branches, five-seed reporting, artifacts, and verified reuse. |

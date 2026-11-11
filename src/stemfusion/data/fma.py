@@ -40,6 +40,7 @@ class FMAManifestConfig:
     allow_missing: bool = False
     overwrite: bool = False
     dry_run: bool = False
+    excluded_track_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,7 @@ class FMAManifestSummary:
     missing_by_source: dict[str, int] = field(default_factory=dict)
     missing_examples: list[dict[str, Any]] = field(default_factory=list)
     dry_run: bool = False
+    excluded_track_ids: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -193,6 +195,12 @@ def _validate_config(config: FMAManifestConfig) -> None:
         raise FMAManifestError(
             "Each selected FMA track ID may be provided only once."
         )
+    if any(len(track_id) != 6 or not track_id.isdigit() for track_id in config.excluded_track_ids):
+        raise FMAManifestError("Excluded FMA track IDs must be zero-padded six-digit strings.")
+    if len(config.excluded_track_ids) != len(set(config.excluded_track_ids)):
+        raise FMAManifestError("Each excluded FMA track ID may be provided only once.")
+    if set(config.track_ids) & set(config.excluded_track_ids):
+        raise FMAManifestError("A track cannot be both explicitly selected and excluded.")
     if (
         config.mixture_root is None
         and not config.htdemucs_roots
@@ -276,6 +284,9 @@ def build_fma_manifest(
     metadata = read_fma_medium_metadata(config.tracks_csv)
     genres = sorted({track.genre for track in metadata})
     label_mapping = {genre: index for index, genre in enumerate(genres)}
+    unknown_exclusions = set(config.excluded_track_ids) - {track.track_id for track in metadata}
+    if unknown_exclusions:
+        raise FMAManifestError(f"Excluded IDs are not labeled FMA-Medium tracks: {', '.join(sorted(unknown_exclusions))}.")
     if config.track_ids:
         metadata_by_id = {track.track_id: track for track in metadata}
         unknown_ids = set(config.track_ids) - set(metadata_by_id)
@@ -287,6 +298,10 @@ def build_fma_manifest(
         metadata = [
             metadata_by_id[track_id] for track_id in config.track_ids
         ]
+
+    selected_metadata_count = len(metadata)
+    excluded = set(config.excluded_track_ids) & {track.track_id for track in metadata}
+    metadata = [track for track in metadata if track.track_id not in excluded]
 
     records: list[FMAManifestRecord] = []
     missing_counts: Counter[str] = Counter()
@@ -335,9 +350,9 @@ def build_fma_manifest(
 
     split_counts = Counter(record.split for record in records)
     summary = FMAManifestSummary(
-        metadata_tracks=len(metadata),
+        metadata_tracks=selected_metadata_count,
         written_tracks=len(records),
-        dropped_tracks=len(metadata) - len(records),
+        dropped_tracks=selected_metadata_count - len(records),
         split_counts={
             split: split_counts.get(split, 0)
             for split in ("train", "validation", "test")
@@ -346,6 +361,7 @@ def build_fma_manifest(
         missing_by_source=dict(sorted(missing_counts.items())),
         missing_examples=missing_examples,
         dry_run=config.dry_run,
+        excluded_track_ids=sorted(excluded),
     )
     if config.dry_run:
         return records, summary
@@ -468,7 +484,9 @@ def configure_parser(
         metavar="TRACK_ID",
         help="Restrict the manifest to this track; may be repeated.",
     )
-    parser.add_argument("--allow-missing", action="store_true")
+    parser.add_argument("--exclude-track-id", action="append", default=[], type=_parse_track_id,
+                        help="Exclude an audited track ID; repeat for multiple IDs. Explicit IDs replace YAML exclusions.")
+    parser.add_argument("--allow-missing", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--overwrite", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.set_defaults(command_handler=run_from_args)
@@ -492,6 +510,7 @@ def config_from_args(args: argparse.Namespace) -> FMAManifestConfig:
         allow_missing=args.allow_missing,
         overwrite=args.overwrite,
         dry_run=args.dry_run,
+        excluded_track_ids=tuple(args.exclude_track_id or ()),
     )
 
 

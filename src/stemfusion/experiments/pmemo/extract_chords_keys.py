@@ -1,0 +1,23 @@
+"""Extract PMEmo BTC chords and MIDI-derived music21 keys for all six views."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+if __name__ == "__main__" and __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from stemfusion.experiments.pmemo import _extraction
+
+
+def configure_parser(parser):
+    _extraction.configure_parser(parser, "chords_keys")
+
+
+def main(argv=None):
+    return _extraction.main("chords_keys", argv)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

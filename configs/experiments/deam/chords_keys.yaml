@@ -1,0 +1,28 @@
+dataset: deam
+author:
+  commit: c5f7984f78d9928b841f25bd05a47377c12c58ca
+sources: [mixture, guitar, drums, piano, bass, vocals]
+splits: [train, validation, test]
+paths:
+  manifest: ../../../data/manifests/deam/deam_features.jsonl
+  output_dir: ../../../data/features/deam/harmony
+  author_root: /home/osiris181/Music2Emotion
+  btc_config: /home/osiris181/Music2Emotion/inference/data/run_config.yaml
+  btc_checkpoint: /home/osiris181/Music2Emotion/inference/data/btc_model_large_voca.pt
+  report: ../../../outputs/deam/chords_keys_report.json
+harmony:
+  scope: independent_per_source
+  chord_vocabulary: large_170
+  midi_policy: music2emotion_released
+  key_failure_policy: record_none
+  normalization: C_major_A_minor
+output:
+  keep_midi: true
+runtime:
+  device: cuda
+execution:
+  retry_failures: true
+  limit_per_split: null
+  overwrite: false
+  fail_fast: false
+  dry_run: false

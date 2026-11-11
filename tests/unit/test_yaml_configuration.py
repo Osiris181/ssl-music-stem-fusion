@@ -14,7 +14,7 @@ from stemfusion.cli import build_parser
 from stemfusion.configuration import default_config_path, load_configuration
 from stemfusion.experiments.fma_medium.extraction import musicfm_config_from_args
 from stemfusion.features._musicfm import extract_musicfm
-from stemfusion.experiments.fma_medium.training import config_from_args as mid_config_from_args
+from stemfusion.experiments._genre import config_from_args as mid_config_from_args
 
 
 class YAMLConfigurationTests(unittest.TestCase):

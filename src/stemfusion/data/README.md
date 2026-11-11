@@ -14,11 +14,18 @@ Current implementation:
 | `fma.py` | Parse FMA-Medium metadata and align mixture and HT-Demucs paths by six-digit track ID. |
 | `fma_features.py` | Verify extraction reports, cache contents, exact split IDs, labels, and dimensions; load the common training track set. |
 | `features.py` | Dataset-independent aligned feature containers passed to training. |
-| `gtzan.py` | Read provided stratified splits, apply explicit unavailable-track exclusions, assign ten-class labels, and generate audio manifests. |
+| `gtzan.py` | Read provided stratified splits, check common audio availability, assign ten-class labels, and generate audio manifests. |
 | `gtzan_features.py` | Load NumPy or PyTorch GTZAN caches with exact ID alignment and extraction/import provenance validation. |
 | `ismir04.py` | Preserve CSV partitions and six-class labels, exclude confirmed duplicates, and assign collision-safe IDs. |
 | `ismir04_features.py` | Align NumPy/PyTorch ISMIR04 caches to manifest IDs and verify shared layer-7 extraction reports and the full-duration chunk policy. |
 | `audio_duplicates.py` | Read-only file/decoded-PCM hashes, saved audit progress, and reuse of unchanged local files. |
+| `mtg_jamendo.py` | Preserve provided mood/theme split records and tags, prepare separation destinations, and bind complete feature manifests with validated audio overrides. |
+| `segments.py` | Load segment filenames in numeric time order and pool aligned source views using a shared random training window or all segments for evaluation. |
+| `jamendo_mid_fusion.py` | Verify source-specific MERT/harmony caches and common IDs/boundaries, preserve baseline identity, and synchronize temporal sampling across views. |
+| `jamendo_late_fusion.py` | Optional feature payload checksums shared by Jamendo mid/late fusion; retain mandatory structural/alignment checks and declared cache identities. The historical filename is retained for completed-run compatibility. |
+| `pmemo.py` | Preserve supplied split IDs and original 0-1 continuous annotations, validate PMEmo identities, and bind chorus/stem paths for extraction without creating binary labels. |
+| `deam.py` | Preserve supplied split IDs and 1-9 song-level valence/arousal means, validate numeric DEAM identities and bind existing audio for extraction without re-averaging or binarizing labels. |
+| `emomusic.py` | Preserve supplied EmoMusic split IDs and annotation columns; bind EmoMusic mixtures to same-ID DEAM stems without changing scores or generating binary labels. |
 
 The FMA builder writes JSON Lines records containing `track_id`, `split`,
 `genre`, `label`, and a `paths` mapping. It supports mixture-only manifests and
@@ -39,10 +46,13 @@ Inspect all arguments with:
 
 Alternatively, from `src/stemfusion/experiments/fma_medium/`, run
 `python prepare_manifest.py --help`. This direct entry point uses the same
-builder and defaults its output to
+builder and YAML preset `configs/experiments/fma_medium/manifest.yaml` as
+`stemfusion data fma-manifest`. The preset points to the local official
+`data/manifests/fma_medium/metadata/tracks.csv` and configured audio roots.
+Both interfaces default their output to
 `data/manifests/fma_medium/fma_medium_htdemucs.jsonl` in the repository. The
-extraction and training YAML files reference that path. The CLI command above
-continues to require an explicit `--output`.
+extraction and training YAML files reference that path. Explicit CLI options
+override YAML. Existing manifests are protected unless `--overwrite` is used.
 
 Multi-disk HT-Demucs examples are in `docs/fma_medium_extraction.md`.
 The builder inventories all six separator outputs; revised training selects
@@ -63,3 +73,12 @@ through `configs/experiments/gtzan/manifest.yaml`. Labels come from the fixed
 mapping and assignments from the provided split text files; the copied
 metadata pickle is not read by the code. The `mix` cache alias maps to the
 internal `mixture` source. See [the GTZAN guide](../experiments/gtzan/README.md).
+
+## Music2Emo mixture baseline
+
+`jamendo_reproduction.py` verifies cached mixture MERT/harmony artifacts and
+fixed split/label alignment without opening audio. It selects saved layer
+indices 5/6, preserves the author's root/quality token encoding and None-key
+mode fallback, verifies training-only class frequencies, and supplies seeded
+consecutive-range training pooling or all-segment evaluation means. See the
+[reproduction guide](../../../docs/music2emotion_reproduction.md).

@@ -1,0 +1,13 @@
+dataset: pmemo
+paths:
+  train_split: ../../../data/manifests/pmemo/split/train.txt
+  validation_split: ../../../data/manifests/pmemo/split/validation.txt
+  test_split: ../../../data/manifests/pmemo/split/test.txt
+  annotations: ../../../data/manifests/pmemo/static_annotations.csv
+  metadata: ../../../data/manifests/pmemo/metadata.csv
+  mixture_root: /mnt/HDD/PMEmo2019/chorus
+  htdemucs_root: /mnt/HDD/osiris181/pmemo_separated/htdemucs_6s
+  output: ../../../data/manifests/pmemo/pmemo_features.jsonl
+execution:
+  overwrite: false
+  dry_run: false

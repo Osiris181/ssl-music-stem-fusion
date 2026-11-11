@@ -2,12 +2,21 @@
 
 | File | Active usage |
 | --- | --- |
+| `manifest.yaml` | Official CSV, mixture/stem roots, and generated manifest output. |
 | `extraction.yaml` | Shared feature preset, FMA manifest/output paths, and six selected inputs. |
 | `separation.yaml` | Dataset input/output roots; inherits the shared HT-Demucs inference preset. |
-| `mid_fusion.yaml` | Seven conditions: original mixture, three capacity-matched mixture controls, three source combinations. |
+| `mid_fusion.yaml` | Seven conditions: original mixture, three repeated-mixture input controls, three source combinations. |
 | `late_fusion.yaml` | Three stem ensembles and three matched mixture-only ensembles with independent branch selection. |
 
 The corresponding entry script loads its experiment YAML automatically.
+`prepare_manifest.py` and `stemfusion data fma-manifest` both load
+`manifest.yaml`. Its default CSV is the local copy in
+`data/manifests/fma_medium/metadata/tracks.csv`; other users must supply their
+official metadata and configure their own audio roots. `genres.csv` is
+reference-only. Repeated CLI `--htdemucs-root` values replace the YAML root
+list. Existing manifests require explicit
+`--overwrite` before replacement; dry runs check paths without writing.
+
 Both training matrices inherit common settings from
 `configs/training/fma_medium_genre.yaml`, including outer seeds
 32, 64, 128, 256, 512 and manifest/feature/output paths.

@@ -1,0 +1,23 @@
+dataset: emomusic
+feature_profile: ../../features/mert_v1_95m.yaml
+sources: [mixture, guitar, drums, piano, bass, vocals]
+splits: [train, validation, test]
+paths:
+  manifest: ../../../data/manifests/emomusic/emomusic_features.jsonl
+  output_dir: ../../../data/features/emomusic/mert_v1_95m
+  report: ../../../outputs/emomusic/mert_extraction_report.json
+audio:
+  segment_seconds: 30.0
+  tail_policy: retain
+  stem_alignment: mixture_duration
+  max_alignment_seconds: 0.25
+  short_segment_policy: pad_to_minimum
+  minimum_input_samples: 400
+output:
+  format: npy
+  shape: [1, 12, 768]
+execution:
+  limit_per_split: null
+  overwrite: false
+  fail_fast: false
+  dry_run: false

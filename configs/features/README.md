@@ -1,5 +1,12 @@
 # Feature configurations
 
+`mert_v1_95m.yaml` supplies the Jamendo MERT model's pinned revision,
+24 kHz mono waveform settings, frozen float32 all-layer representation, device,
+and cache-only model policy. Set its optional `paths.model_path` for a local
+snapshot; otherwise the pinned Hugging Face snapshot is used. The dataset
+`mert.yaml` defines segment/padding/alignment rules and output
+paths. See the [MERT usage guide](../../src/stemfusion/experiments/mtg_jamendo/README.md#mert-segment-extraction).
+
 `musicfm_msd_layer7.yaml` is the shared preset referenced by the FMA-Medium
 and GTZAN/ISMIR04 task YAMLs in `configs/experiments/`. Each dataset entry point
 selects its task YAML. This feature preset supplies checkpoint/statistics names,

@@ -1,0 +1,7 @@
+# Audio separation for MERT plus chord/key representations.
+dataset: mtg_jamendo
+separator_profile: ../../separators/htdemucs_6s.yaml
+paths:
+  manifest: ../../../data/manifests/mtg_jamendo/mtg_jamendo_separation.jsonl
+  output_root: /home/osiris181/mtg_jamendo_separated_htdemucs/repairs
+  report: ../../../outputs/mtg_jamendo/separation_report_htdemucs.json

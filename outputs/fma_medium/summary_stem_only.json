@@ -558,7 +558,7 @@
     "Soul-RnB": 14,
     "Spoken": 15
   },
-  "manifest_path": "/home/osiris181/stem-fusion-music-classification/data/manifests/fma_medium_htdemucs.jsonl",
+  "manifest_path": "/home/osiris181/stem-fusion-music-classification/data/manifests/fma_medium/fma_medium_htdemucs.jsonl",
   "manifest_sha256": "59f5b096af9c7bc586079d6bffd9d93bc109516696cc0b784f7fffa0e69b027e",
   "metric_conventions": {
     "absent_classes": "error",

@@ -1,0 +1,8 @@
+# Shared recipe for future per-dataset binary valence/arousal training.
+# This task profile is not a runnable experiment or an implemented trainer.
+# Dataset-specific label conversion, output width, prevalence weights, threshold
+# rules, and binary metric definitions must be verified before wiring training.
+training_profile: music2emo.yaml
+task:
+  name: emotion_recognition
+  label_type: binary

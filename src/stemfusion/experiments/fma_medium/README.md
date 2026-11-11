@@ -9,17 +9,19 @@ class mapping are preserved; `other` is excluded.
 | `prepare_manifest.py` | Runnable manifest builder from official metadata and aligned audio paths. |
 | `separation.py` | Runnable HT-Demucs separation using the shared backend and dataset paths. |
 | `extraction.py` | Runnable MusicFM extraction interface. |
-| `train_mid.py` | Runnable mid-fusion matrix, including capacity-matched mixture controls. |
+| `train_mid.py` | Runnable mid-fusion matrix, including repeated-mixture input controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
-| `training.py` | Compatibility interface to shared genre orchestration in `experiments/_genre.py`. |
 | `stem_results.py` | Compatibility interface to shared saved-branch analysis in `experiments/_stem_results.py`. |
 
 Shared training functions are in `training/`, model architectures in
 `models/`, and strict feature loading in `data/fma_features.py`.
+Both training launchers call `experiments/_genre.py` directly, just like
+GTZAN and ISMIR04; no dataset-level training wrapper is needed.
 Each public file supports direct execution without PYTHONPATH.
 
 ## Configuration
 
+- Manifest CSV, audio roots, and output: `configs/experiments/fma_medium/manifest.yaml`.
 - MusicFM settings and checkout location: `configs/features/musicfm_msd_layer7.yaml`.
 - HT-Demucs paths: `configs/experiments/fma_medium/separation.yaml`; inference settings inherit `configs/separators/htdemucs_6s.yaml`.
 - Extraction manifest/output/source list: `configs/experiments/fma_medium/extraction.yaml`.
@@ -51,21 +53,40 @@ commands only when separation is needed.
 From this directory:
 
 ```bash
+python prepare_manifest.py --dry-run
+python prepare_manifest.py
+```
+
+Both this script and `stemfusion data fma-manifest` automatically load
+`configs/experiments/fma_medium/manifest.yaml`. The default CSV is
+`data/manifests/fma_medium/metadata/tracks.csv`; place your official copy there
+or change `paths.tracks_csv`. The copied `genres.csv` is reference information
+and is not required by the builder. Edit the audio roots for your storage.
+
+The HT-Demucs output root must contain `htdemucs_6s/`. Multiple roots can be
+listed in YAML or supplied with repeated `--htdemucs-root` flags. Explicit
+CLI lists replace YAML lists. For example:
+
+```bash
 python prepare_manifest.py \
   --tracks-csv /path/to/fma_metadata/tracks.csv \
   --mixture-root /path/to/fma_medium \
-  --htdemucs-root /path/to/htdemucs_outputs
+  --htdemucs-root /path/to/htdemucs_outputs \
+  --output /path/to/fma_medium_manifest.jsonl
 ```
 
-The HT-Demucs output root must contain `htdemucs_6s/`. Repeat
-`--htdemucs-root` for tracks distributed across disks. The script calls the
-shared builder in `data/fma.py` and defaults to
-`data/manifests/fma_medium/fma_medium_htdemucs.jsonl` in this checkout.
-`--output` overrides that path. Input CLI paths are relative to the working
-directory; the default output is independent of it. Use `--allow-missing` only
-to explicitly exclude incomplete tracks, `--dry-run` to inspect without writing,
-and `--overwrite` to replace an existing manifest. Existing manifests can be
-reused directly for extraction and training.
+The script calls the shared metadata/path alignment logic in `data/fma.py`
+and preserves the official split assignments and full 16-class label mapping.
+The preset builds a common track set from the configured audio files.
+Use `--no-allow-missing` to require complete audio availability.
+
+The default output remains
+`data/manifests/fma_medium/fma_medium_htdemucs.jsonl`. YAML paths resolve
+relative to the declaring file; CLI paths resolve relative to the working
+directory. Dry runs check audio-file availability without writing a manifest;
+they can take time on HDD storage. Existing manifests are protected unless
+`--overwrite` is explicit. Reuse the existing manifest for completed extraction
+and training; this configuration addition does not require rebuilding it.
 
 ## Training commands
 
@@ -105,7 +126,7 @@ mixture model trained by the mid command when their effective settings match.
 To run one condition and one seed:
 
 ```bash
-python train_mid.py --run matched_mixture_4 --seed 32
+python train_mid.py --run repeated_mixture_4 --seed 32
 ```
 
 The same workflows are available from the project root:
@@ -117,10 +138,15 @@ PYTHONPATH=src python -m stemfusion train fma-medium late-fusion
 
 ## Experiment matrix
 
-Mid fusion has seven conditions: the standard mixture MLP; three wider
-mixture-only controls; and `M+G+D+P`, `M+G+D+P+B`, `M+G+D+P+B+V`.
-The measured matched first-hidden widths are 3071, 3753, 4435 for
-1024-dimensional features and the standard 1024/512 architecture.
+Mid fusion has seven conditions: the standard mixture MLP;
+`M+M+M+M`, `M+M+M+M+M`, `M+M+M+M+M+M`; and
+`M+G+D+P`, `M+G+D+P+B`, `M+G+D+P+B+V`. All retain hidden widths
+1024/512. Repeated-mixture controls exactly match their corresponding fusion
+input dimensions and parameter counts, without adding new input information.
+They are named `repeated_mixture_4`, `repeated_mixture_5`, and `repeated_mixture_6`.
+The superseded widened-control results and previous mid summaries are archived
+under `outputs/fma_medium/archive/widened_mixture_20261103/`. Unchanged fusion
+and branch artifacts remain in their existing run directories for verified reuse.
 
 Late fusion has six conditions: three 4/5/6-member independent mixture-only
 ensembles, and the same three source combinations. The ordinary mixture

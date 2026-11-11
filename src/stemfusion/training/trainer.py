@@ -54,9 +54,9 @@ class TrainingSettings:
 
 
 def implementation_fingerprint() -> str:
-    package = Path(__file__).resolve().parents[1]
-    files = [*Path(__file__).parent.glob("*.py"), package / "models/mlp.py", package / "data/features.py", package / "data/fma_features.py"]
-    return fingerprint({str(path.relative_to(package)): file_checksum(path) for path in sorted(files)})
+    from stemfusion.training._identity import genre_implementation_fingerprint
+
+    return genre_implementation_fingerprint()
 
 
 def seed_worker(_: int) -> None:

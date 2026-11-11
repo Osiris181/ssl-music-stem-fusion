@@ -11,7 +11,29 @@ requires-python = ">=3.10"
 dependencies = ["PyYAML>=6,<7", "tqdm>=4.66,<5"]
 
 [project.optional-dependencies]
-htdemucs = ["demucs==4.0.1"]
+music2emo = [
+    "numpy>=1.24,<3",
+    "torch>=2.3,<3",
+    "torchmetrics>=1.2,<2",
+]
+chords-keys = [
+    "librosa==0.10.2.post1",
+    "mir_eval @ git+https://github.com/mir-evaluation/mir_eval.git@1fed5327e2a65c3294579beafa03a6498b4da3d0",
+    "music21==9.3.0",
+    "numpy>=1.24,<3",
+    "pretty_midi==0.2.10",
+    "setuptools>=68,<81",
+    "torch>=2.1,<3",
+]
+htdemucs = ["demucs==4.0.1", "soundfile>=0.12,<1"]
+mert = [
+    "huggingface-hub>=0.20,<1",
+    "nnAudio==0.3.1",
+    "numpy>=1.24,<3",
+    "torch>=2.1,<3",
+    "torchaudio>=2.1,<3",
+    "transformers>=4.30,<5",
+]
 musicfm = [
     "einops>=0.7,<1",
     "librosa>=0.10,<0.12",
@@ -29,6 +51,9 @@ training = [
 [project.scripts]
 stemfusion = "stemfusion.cli:main"
 
+[tool.setuptools]
+license-files = ["THIRD_PARTY_NOTICES.md"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
@@ -39,3 +64,7 @@ where = ["src"]
 "share/stemfusion/configs/experiments/fma_medium" = ["configs/experiments/fma_medium/*.yaml"]
 "share/stemfusion/configs/experiments/gtzan" = ["configs/experiments/gtzan/*.yaml"]
 "share/stemfusion/configs/experiments/ismir04" = ["configs/experiments/ismir04/*.yaml"]
+"share/stemfusion/configs/experiments/pmemo" = ["configs/experiments/pmemo/*.yaml"]
+"share/stemfusion/configs/experiments/deam" = ["configs/experiments/deam/*.yaml"]
+"share/stemfusion/configs/experiments/emomusic" = ["configs/experiments/emomusic/*.yaml"]
+"share/stemfusion/configs/experiments/mtg_jamendo" = ["configs/experiments/mtg_jamendo/*.yaml"]

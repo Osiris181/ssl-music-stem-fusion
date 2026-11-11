@@ -1,0 +1,15 @@
+# Official CSV split assignments and local audio locations.
+dataset: fma_medium
+audio:
+  mixture_extension: .mp3
+paths:
+  tracks_csv: ../../../data/manifests/fma_medium/metadata/tracks.csv
+  mixture_root: /mnt/HDD/osiris181/fma_medium
+  # Each root contains htdemucs_6s/. Add roots when outputs span disks.
+  htdemucs_root:
+    - /mnt/HDD/osiris181/fma_separated_htdemucs/fma_separated_htdemucs
+  output: ../../../data/manifests/fma_medium/fma_medium_htdemucs.jsonl
+execution:
+  allow_missing: true
+  overwrite: false
+  dry_run: false

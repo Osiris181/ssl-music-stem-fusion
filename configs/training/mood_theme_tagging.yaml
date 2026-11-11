@@ -1,0 +1,7 @@
+# Multilabel mood/theme settings; the common recipe lives in music2emo.yaml.
+training_profile: music2emo.yaml
+model:
+  output_labels: 56
+evaluation:
+  roc_auc: macro
+  pr_auc: macro_average_precision

@@ -3,6 +3,24 @@
 Store extracted embeddings in `features/` and dataset split/label metadata in
 `manifests/`. These data files are excluded from Git; this README is tracked.
 
+Jamendo harmonic descriptors are saved separately under
+`features/mtg_jamendo/harmony/<source>/<bucket>/<track_id>/`.
+Each folder contains raw and normalized chord labels, global key, generated
+MIDI (unless disabled), provenance, and verified completion checksums. These
+are not MusicFM features and do not replace the separate MERT embedding stage.
+The shared dataset-level `extract_chords_keys.py` uses
+`configs/experiments/mtg_jamendo/chords_keys.yaml` for both representations.
+Descriptor contents are not MERT-specific. The shared harmony directory is
+independent of both encoder-specific feature directories. Moving it preserves
+the existing files and relative artifact checksums; no re-extraction is needed.
+
+Jamendo MERT arrays are saved by `extract_mert.py` under
+`features/mtg_jamendo/mert_chord_key/mert_v1_95m/mert_30s{_<source>}/<bucket>/<track_id>/`.
+Each `segment_N.npy` contains float32 `(1, 12, 768)` all-layer features, with
+sample-boundary/padding metadata and verified completion checksums beside it.
+The `mert_30s` directory is the original mixture. These arrays are not combined
+with harmony files during extraction.
+
 ```text
 data/
 ├── features/
@@ -10,8 +28,12 @@ data/
 │   ├── ismir04/musicfm_msd_layer7/
 │   └── gtzan/musicfm_msd_layer7/
 └── manifests/
+    ├── mtg_jamendo/
+    │   ├── tag_list.npy              # Original 183-tag order; mood/theme uses indices 127 onward
+    │   └── split-0/                  # Copied Music2Emotion mood/theme train/validation/test TSVs
     ├── ismir04/                       # Fixed partitions, duplicate audit, and exclusions
     ├── fma_medium/
+    │   ├── metadata/                 # Local official tracks.csv and reference genres.csv
     │   ├── fma_medium_htdemucs.jsonl
     │   └── fma_medium_htdemucs.report.json
     └── gtzan/
@@ -24,11 +46,36 @@ data/
         └── test_stratified.txt
 ```
 
+## MTG-Jamendo split metadata
+
+`manifests/mtg_jamendo/split-0/` contains exact copies of
+`autotagging_moodtheme-{train,validation,test}.tsv` from
+`/home/osiris181/Music2Emotion/dataset/jamendo/splits/split-0/`.
+These define 9,949/3,802/4,231 tracks and 56 mood/theme tags. Preserve their
+assignments and ordering; the broader `autotagging_moodtheme.tsv` is not the
+source of this experiment's track selection.
+
+`tag_list.npy` is copied from `Music2Emotion/dataset/jamendo/meta/`.
+It contains the original full 183-tag order; its final 56 entries, beginning
+at index 127, define the mood/theme label order used by the original loaders.
+All four copied files were verified byte-for-byte against their sources.
+Audio and extracted features remain at their existing locations. Generated
+audio manifests will bind these metadata records to configured local paths.
+
+`repair_tracks.txt` selects canonical IDs for separation through
+`experiments/mtg_jamendo/prepare_manifest.py --purpose separation`. Its generated
+`mtg_jamendo_separation.jsonl` preserves provided tags and split assignments
+and binds selected original mixtures to separate stem destinations. This
+selected-audio manifest is not the complete training manifest. It and its
+report remain local; the separator reads only the explicitly selected paths.
+
 ## FMA-Medium manifest
 
 Run `python prepare_manifest.py` from
-`src/stemfusion/experiments/fma_medium/`, providing `--tracks-csv`,
-`--mixture-root`, and `--htdemucs-root`. The default output is
+`src/stemfusion/experiments/fma_medium/`. It loads CSV/audio paths from
+`configs/experiments/fma_medium/manifest.yaml`. Explicit `--tracks-csv`,
+`--mixture-root`, and `--htdemucs-root` options override those defaults.
+The default output is
 `data/manifests/fma_medium/fma_medium_htdemucs.jsonl` relative to the repository
 root, regardless of the working directory. Use `--output` to choose another
 location. The builder also writes metadata and report sidecars beside the
@@ -36,11 +83,17 @@ manifest. Extraction and both training YAML profiles reference this default
 manifest. Older `fma_medium_legacy.*` files are retained in the same folder
 for reference and are not selected by the active YAML profiles.
 
+`metadata/tracks.csv` and `metadata/genres.csv` are verified copies of the
+official files in `/home/osiris181/fma_metadata/`. Only `tracks.csv` is read by
+the builder; `genres.csv` is retained as a reference. Metadata copies and
+generated manifests remain local under the existing `data/` Git-ignore rule.
+Other users must supply their official CSV copy or override its configured path.
+
 Generated manifests contain absolute audio paths and remain excluded from Git.
 Other users should generate their own with `prepare_manifest.py`, supplying
 their local metadata and audio locations. The builder preserves the splits
-and labels from the supplied FMA metadata; any exclusions of incomplete tracks
-are recorded in its report. Comparable experiments must use the same retained
+and labels from the supplied FMA metadata and records file-availability
+diagnostics in its report. Comparable experiments must use the same retained
 track set.
 
 ## GTZAN imported features
@@ -80,10 +133,9 @@ the GTZAN manifest, with the fixed label mapping below.
 | Validation | 250 | 250 |
 | Test | 250 | 250 |
 
-`jazz.00054` is absent from all six training caches. The imported metadata remains
-unchanged; downstream loading must use the same 999 available tracks for every
-condition and record this exclusion. The split track IDs are disjoint. Retain
-these provided stratified splits across every condition and all five seeds.
+The imported metadata remains unchanged. Use the provided stratified split
+assignments and the same source-aligned IDs across every condition and all
+five seeds. The split track IDs are disjoint.
 
 The labels are `blues=0`, `classical=1`, `country=2`, `disco=3`, `hiphop=4`,
 `jazz=5`, `metal=6`, `pop=7`, `reggae=8`, and `rock=9`.
@@ -91,7 +143,7 @@ The labels are `blues=0`, `classical=1`, `country=2`, `disco=3`, `hiphop=4`,
 ### Import audit and use
 
 `features/gtzan/musicfm_msd_layer7/import_audit.json` records source and destination
-paths, SHA-256 checksums, vector validation, retained IDs, and the missing track.
+paths, SHA-256 checksums, vector validation, and retained IDs.
 The copied caches and metadata were verified against their sources; source files
 were preserved.
 
@@ -118,3 +170,26 @@ Fresh MSD/layer-7 caches are written by ISMIR04's `extraction.py` into
 canonical train/validation/test names, with `mix` as the mixture filename
 alias. Long-track chunking is explicit in the task YAML and saved reports.
 Legacy feature caches remain outside this folder.
+
+## MTG-Jamendo MusicFM segments
+
+`manifests/mtg_jamendo/mtg_jamendo_features.jsonl` binds the copied mood/theme
+split TSVs to existing mixtures and stems, with optional validated audio
+overrides. Its builder reads metadata without scanning audio and preserves
+the provided assignments and multi-label tags.
+
+Build it with `python prepare_manifest.py` at the Jamendo experiment root.
+Both MusicFM and MERT+chord/key audio preprocessing use this shared mapping.
+
+`features/mtg_jamendo/musicfm_msd_layer7/` is the default destination for fresh
+1,024-dimensional float32 MusicFM-MSD layer-7 arrays. Stems match the decoded
+mixture's duration, and fixed-width 30-second segmentation retains partial
+tails. Only inputs shorter than 1,025 samples are padded to that minimum;
+supported tails are unchanged. Freshly extracted source/track folders include
+actual boundaries, encoder input lengths, end adjustments, and checksums.
+Previously imported arrays can remain in `features/mtg_jamendo/musicfm/`.
+Imported legacy arrays retain their existing representations; their source
+locations, splits, and per-segment checksums can be recorded in the consolidated
+`import_audit.json` and `import_audit.records.jsonl` files. See the
+[Jamendo MusicFM guide](../src/stemfusion/experiments/mtg_jamendo/musicfm/README.md)
+for preparation, selected-track extraction, full extraction, and reuse rules.

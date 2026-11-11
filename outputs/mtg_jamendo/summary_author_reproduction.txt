@@ -1,0 +1,16 @@
+Music2Emo mixture-only single-dataset reproduction
+Original mixture only; MERT + chord Transformer + key mode; no stems or KD.
+Budget: paper_200_epoch_cap; checkpoint: minimum validation weighted BCE.
+Early stopping: patience=10, min_delta=0.0001; monitor=val_loss, mode=min (released_configuration).
+PR-AUC denotes macro average precision; SD is sample SD across training seeds.
+
+Seed | Trained epochs | Best epoch | Stop reason | Test PR-AUC | Test ROC-AUC
+--- | --- | --- | --- | --- | ---
+32 | 18 | 9 | early_stopping | 0.1402 | 0.7751
+64 | 17 | 11 | early_stopping | 0.1433 | 0.7747
+128 | 20 | 10 | early_stopping | 0.1433 | 0.7745
+256 | 15 | 10 | early_stopping | 0.1405 | 0.7734
+512 | 23 | 13 | early_stopping | 0.1478 | 0.7784
+
+Test macro PR-AUC: 0.1430 +/- 0.0031; published single-dataset reference: 0.1521
+Test macro ROC-AUC: 0.7752 +/- 0.0019; published single-dataset reference: 0.7806
