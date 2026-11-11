@@ -1,0 +1,7 @@
+# Same inference settings as Jamendo and the genre separation workflows.
+dataset: pmemo
+separator_profile: ../../separators/htdemucs_6s.yaml
+paths:
+  manifest: ../../../data/manifests/pmemo/pmemo_separation.jsonl
+  output_root: /mnt/HDD/osiris181/pmemo_separated
+  report: ../../../outputs/pmemo/separation_report_htdemucs.json

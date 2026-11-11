@@ -3,14 +3,28 @@
 Dataset-specific entry points live here. Shared data, separation, feature,
 model, and training implementations stay in their corresponding packages.
 
-[PMEmo](pmemo/README.md) provides `prepare_feature_manifest.py`,
-`extract_mert.py` and `extract_chords_keys.py`, preserving the supplied splits
-and reusing the Jamendo MERT/BTC runtimes. PMEmo training is a separate step.
+[PMEmo](pmemo/README.md) provides `prepare_manifest.py` with feature/separation
+purposes, `separation.py`, `extract_mert.py` and `extract_chords_keys.py`. It
+preserves supplied splits, uses the same HT-Demucs backend as Jamendo and
+reuses its MERT/BTC runtimes. Existing feature-reader identities and outputs
+are unchanged. `train_mid.py` calls `_emotion_recognition.py` for the shared
+seven conditions/five seeds and separate binary targets. Model fitting stays
+in `training/music2emo.py`; binary metrics are supplied by a task adapter.
+`train_late.py` calls `_emotion_late_fusion.py` for independent branches,
+position-paired mixture ensembles and stem-only results. It shares the fitter
+and binary metrics, reusing the completed mid-fusion mixture references without
+changing the fingerprinted mid controller or its outputs.
 
-[DEAM](deam/README.md) provides those same three entry points, preserving
+[DEAM](deam/README.md) provides `prepare_manifest.py` with the same feature/
+separation purposes, `separation.py`, `extract_mert.py`
+and `extract_chords_keys.py`, preserving
 the supplied song-level annotations and splits. It shares the same extraction
 backends through `_emotion_features.py` and `features/emotion_dataset.py`;
-the running PMEmo adapter remains unchanged.
+the running PMEmo adapter remains unchanged. Separation uses the same shared
+HT-Demucs backend and exact existing stem destinations; the fingerprinted DEAM
+feature reader and extracted features remain unchanged.
+`train_mid.py` uses `_emotion_mid_fusion.py` and the same PMEmo Music2Emo fitter,
+binary metrics, seven conditions and five seeds, with DEAM's native >= 5 labels.
 
 [EmoMusic](emomusic/README.md) uses these same shared implementations with
 its supplied partitions, EmoMusic mixtures and matching DEAM stem folders.
@@ -59,6 +73,9 @@ Shared orchestration is:
 | `_extraction.py` | Common extraction CLI and handoff to `features/_musicfm.py`. |
 | `_genre.py` | Common training CLI, seed/condition scheduling, reuse, and summaries. |
 | `_mood_theme_tagging.py` | MERT/harmony mood/theme experiment CLI, mid/late scheduling, protected reuse, and reporting; currently used by MTG-Jamendo. |
+| `_emotion_recognition.py` | MERT/harmony binary-emotion mid-fusion CLI, two-target scheduling and reporting; currently used by PMEmo with the same fitting loop. |
+| `_emotion_mid_fusion.py` | Native-score emotion mid-fusion adapters and scheduling; DEAM uses its reviewed original-score boundary without modifying PMEmo's running controller. |
+| `_emotion_late_fusion.py` | Binary-emotion late-fusion CLI, paired independent branch scheduling, mid-reference reuse and per-target ensemble/stem-only reporting. |
 | `_mid_controls.py` | Construct exact repeated-mixture inputs and fit parameter-count/input-width matched controls through the unchanged trainer. |
 | `_stem_results.py` | Common standalone-branch validation and reporting. |
 

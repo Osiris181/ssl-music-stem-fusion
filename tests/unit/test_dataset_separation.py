@@ -141,9 +141,8 @@ class DatasetSeparationTests(unittest.TestCase):
                     "paths": {"input_root": str(input_root), "output_root": str(self.output)}}))
                 result = subprocess.run([sys.executable, str(repo / f"src/stemfusion/experiments/{dataset}/separation.py"),
                     "--config", str(custom), "--dry-run"], cwd=self.root, env=env, text=True, capture_output=True, check=True)
-                data = json.loads(result.stdout)
-                self.assertEqual(data["planned"], 1)
-                self.assertEqual(data["resolved_config"]["model_name"], "htdemucs_6s")
+                self.assertIn("Pending separation: 1", result.stdout)
+                self.assertIn("Model: htdemucs_6s", result.stdout)
         self.assertFalse(self.output.exists())
 
 

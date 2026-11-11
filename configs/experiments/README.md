@@ -1,10 +1,21 @@
 # Dataset experiment configurations
 
-[PMEmo](pmemo/README.md) defines fixed-split manifest preparation and MERT plus
-BTC/music21 extraction with the same scientific settings as Jamendo.
+[PMEmo](pmemo/README.md) defines fixed-split feature/separation manifest
+preparation, shared HT-Demucs separation and MERT plus BTC/music21 extraction
+with the same scientific settings as Jamendo. Existing extracted features can
+be reused without regenerating their manifest or audio.
+Its mid- and late-fusion presets share the same binary emotion training profile;
+late fusion reuses the mid mixture reference and reports independent ensembles
+and five stem-only rows per target, with outputs in separate directories.
 
 [DEAM](deam/README.md) uses the same extraction rules with its own copied
 Music2Emotion splits, supplied song-level scores and original/stem paths.
+It also has feature/separation manifest presets selected by `prepare_manifest.py`
+and the same shared HT-Demucs separation preset/backend as PMEmo. Existing
+feature caches and their reader identity remain unchanged.
+Its `mid_fusion.yaml` inherits the same PMEmo binary model/optimization recipe,
+with native 1-9 annotations thresholded directly at 5 (no score normalization),
+seven conditions, two separate targets and five seeds.
 
 [EmoMusic](emomusic/README.md) uses the same rules and shared DEAM scheduler,
 with EmoMusic mixtures, its copied splits and matching existing DEAM stems.

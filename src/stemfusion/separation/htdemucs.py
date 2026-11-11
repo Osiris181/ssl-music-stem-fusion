@@ -15,6 +15,9 @@ from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
+from tqdm.auto import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
+
 from stemfusion.configuration import configuration_dict
 from stemfusion.separation.manifest import read_manifest
 from stemfusion.training.reporting import file_checksum
@@ -173,17 +176,19 @@ def discover_audio_files(config: HTDemucsSeparationConfig) -> list[Path]:
 
     extensions = set(_normalize_extensions(config.extensions))
     discovered: list[Path] = []
-    for input_root in config.input_roots:
-        candidates = (
-            input_root.rglob("*")
-            if config.recursive
-            else input_root.glob("*")
-        )
-        discovered.extend(
-            path
-            for path in candidates
-            if path.is_file() and path.suffix.lower() in extensions
-        )
+    with tqdm(desc="Discover audio files", unit="path", dynamic_ncols=True) as discovery:
+        for input_root in config.input_roots:
+            discovery.set_postfix(root=input_root.name, audio=len(discovered))
+            candidates = (
+                input_root.rglob("*")
+                if config.recursive
+                else input_root.glob("*")
+            )
+            for path in candidates:
+                if path.is_file() and path.suffix.lower() in extensions:
+                    discovered.append(path)
+                discovery.set_postfix(root=input_root.name, audio=len(discovered), refresh=False)
+                discovery.update()
 
     discovered.sort(key=lambda path: str(path))
     duplicate_stems: dict[str, list[Path]] = defaultdict(list)
@@ -351,12 +356,17 @@ def separate_dataset(
         selected=len(selected),
     )
     pending: list[Path] = []
-    for input_path in selected:
-        if not config.overwrite and _is_complete_anywhere(config, input_path):
-            summary.skipped_existing += 1
-        else:
-            pending.append(input_path)
+    with tqdm(selected, desc="Check existing stems", unit="track", dynamic_ncols=True) as checks:
+        for input_path in checks:
+            if not config.overwrite and _is_complete_anywhere(config, input_path):
+                summary.skipped_existing += 1
+            else:
+                pending.append(input_path)
+            checks.set_postfix(existing=summary.skipped_existing, pending=len(pending), refresh=False)
+        checks.set_postfix(existing=summary.skipped_existing, pending=len(pending))
 
+    LOGGER.info("HT-Demucs input check: %d selected, %d already complete, %d pending.",
+                len(selected), summary.skipped_existing, len(pending))
     if config.dry_run:
         summary.planned = len(pending)
         for input_path in pending:
@@ -365,114 +375,122 @@ def separate_dataset(
 
     config.output_root.mkdir(parents=True, exist_ok=True)
     total_batches = (len(pending) + config.batch_size - 1) // config.batch_size
-    for batch_number, batch in enumerate(
-        _batches(pending, config.batch_size),
-        start=1,
-    ):
-        LOGGER.info(
-            "Processing HT-Demucs batch %d/%d with %d tracks.",
-            batch_number,
-            total_batches,
-            len(batch),
-        )
-        return_code, execution_error, started_ns = _run_command(
-            config,
-            batch,
-            runner,
-            capture_output=False,
-        )
-
-        if execution_error is not None:
-            summary.failed_batches += 1
-            summary.failures.extend(
-                _failure(input_path, None, execution_error)
-                for input_path in batch
-            )
-            break
-
-        incomplete: list[Path] = []
-        for input_path in batch:
-            modified_since = started_ns if config.overwrite else None
-            if is_complete_track(
-                config.output_root,
-                config,
-                input_path,
-                modified_since_ns=modified_since,
-            ):
-                summary.succeeded += 1
-            else:
-                incomplete.append(input_path)
-
-        if not incomplete:
-            continue
-
-        if return_code != 0:
-            summary.failed_batches += 1
-            LOGGER.warning(
-                "Batch %d exited with status %d; retrying %d incomplete "
-                "tracks individually.",
+    with logging_redirect_tqdm(loggers=[LOGGER]), tqdm(
+        _batches(pending, config.batch_size), total=total_batches,
+        desc="HT-Demucs batches", unit="batch", dynamic_ncols=True,
+    ) as batches:
+        for batch_number, batch in enumerate(
+            batches,
+            start=1,
+        ):
+            batches.set_postfix(tracks=len(batch))
+            LOGGER.info(
+                "Processing HT-Demucs batch %d/%d with %d tracks.",
                 batch_number,
-                return_code,
-                len(incomplete),
+                total_batches,
+                len(batch),
             )
-        else:
-            LOGGER.warning(
-                "Batch %d exited successfully but left %d incomplete tracks; "
-                "retrying them individually.",
-                batch_number,
-                len(incomplete),
-            )
-
-        if len(batch) == 1:
-            reason = (
-                f"Demucs exited with status {return_code}."
-                if return_code != 0
-                else "Demucs did not produce all six non-empty stem files."
-            )
-            summary.failures.append(
-                _failure(incomplete[0], return_code, reason)
-            )
-            if not config.continue_on_error:
-                return summary
-            continue
-
-        for input_path in incomplete:
-            summary.rescue_attempts += 1
-            rescue_code, rescue_error, rescue_started_ns = _run_command(
+            return_code, execution_error, started_ns = _run_command(
                 config,
-                [input_path],
+                batch,
                 runner,
-                capture_output=True,
+                capture_output=False,
             )
-            modified_since = rescue_started_ns if config.overwrite else None
-            if (
-                rescue_error is None
-                and rescue_code == 0
-                and is_complete_track(
+
+            if execution_error is not None:
+                summary.failed_batches += 1
+                summary.failures.extend(
+                    _failure(input_path, None, execution_error)
+                    for input_path in batch
+                )
+                break
+
+            incomplete: list[Path] = []
+            for input_path in batch:
+                modified_since = started_ns if config.overwrite else None
+                if is_complete_track(
                     config.output_root,
                     config,
                     input_path,
                     modified_since_ns=modified_since,
-                )
-            ):
-                summary.succeeded += 1
+                ):
+                    summary.succeeded += 1
+                else:
+                    incomplete.append(input_path)
+
+            if not incomplete:
                 continue
 
-            if rescue_error is not None:
-                reason = rescue_error
-            elif rescue_code != 0:
-                reason = f"Demucs rescue exited with status {rescue_code}."
-            else:
-                reason = (
-                    "Demucs rescue did not produce all six non-empty "
-                    "stem files."
+            if return_code != 0:
+                summary.failed_batches += 1
+                LOGGER.warning(
+                    "Batch %d exited with status %d; retrying %d incomplete "
+                    "tracks individually.",
+                    batch_number,
+                    return_code,
+                    len(incomplete),
                 )
-            summary.failures.append(
-                _failure(input_path, rescue_code, reason)
-            )
-            LOGGER.error("%s Input: %s", reason, input_path)
-            if not config.continue_on_error:
-                return summary
+            else:
+                LOGGER.warning(
+                    "Batch %d exited successfully but left %d incomplete tracks; "
+                    "retrying them individually.",
+                    batch_number,
+                    len(incomplete),
+                )
+
+            if len(batch) == 1:
+                reason = (
+                    f"Demucs exited with status {return_code}."
+                    if return_code != 0
+                    else "Demucs did not produce all six non-empty stem files."
+                )
+                summary.failures.append(
+                    _failure(incomplete[0], return_code, reason)
+                )
+                if not config.continue_on_error:
+                    return summary
+                continue
+
+            with tqdm(incomplete, desc="Retry incomplete tracks", unit="track", leave=False,
+                      dynamic_ncols=True) as retries:
+                for input_path in retries:
+                    retries.set_postfix(track=input_path.stem)
+                    summary.rescue_attempts += 1
+                    rescue_code, rescue_error, rescue_started_ns = _run_command(
+                        config,
+                        [input_path],
+                        runner,
+                        capture_output=True,
+                    )
+                    modified_since = rescue_started_ns if config.overwrite else None
+                    if (
+                        rescue_error is None
+                        and rescue_code == 0
+                        and is_complete_track(
+                            config.output_root,
+                            config,
+                            input_path,
+                            modified_since_ns=modified_since,
+                        )
+                    ):
+                        summary.succeeded += 1
+                        continue
+
+                    if rescue_error is not None:
+                        reason = rescue_error
+                    elif rescue_code != 0:
+                        reason = f"Demucs rescue exited with status {rescue_code}."
+                    else:
+                        reason = (
+                            "Demucs rescue did not produce all six non-empty "
+                            "stem files."
+                        )
+                    summary.failures.append(
+                        _failure(input_path, rescue_code, reason)
+                    )
+                    LOGGER.error("%s Input: %s", reason, input_path)
+                    if not config.continue_on_error:
+                        return summary
 
     return summary
 
@@ -493,6 +511,7 @@ def separate_manifest(
     validate_config(config, require_input_roots=False)
     if config.existing_output_roots:
         raise HTDemucsConfigurationError("Manifest mode uses its exact stem paths; omit --existing-output-root.")
+    LOGGER.info("Reading separation manifest: %s", manifest_path)
     records = read_manifest(manifest_path)
     selected = records[:config.limit] if config.limit else records
     selected_ids = {record.track_id for record in selected}
@@ -502,52 +521,58 @@ def separate_manifest(
     seen_targets = set()
     allowed_root = config.output_root.resolve()
     selected_sources = {"guitar", "drums", "piano", "bass", "vocals"}
-    for record in records:
-        if "mixture" not in record.paths or not selected_sources <= record.paths.keys():
-            raise HTDemucsConfigurationError(f"Manifest needs mixture and five selected stem paths: {record.track_id}")
-        destinations = set()
-        for stem in config.expected_stems:
-            if stem not in record.paths:
+    with tqdm(records, desc="Check manifest and stems", unit="track", dynamic_ncols=True) as checks:
+        for record in checks:
+            checks.set_postfix(existing=summary.skipped_existing, pending=len(summary.manifest_jobs), refresh=False)
+            if "mixture" not in record.paths or not selected_sources <= record.paths.keys():
+                raise HTDemucsConfigurationError(f"Manifest needs mixture and five selected stem paths: {record.track_id}")
+            destinations = set()
+            for stem in config.expected_stems:
+                if stem not in record.paths:
+                    continue
+                path = Path(record.paths[stem]).resolve()
+                if path.name != f"{stem}.mp3":
+                    raise HTDemucsConfigurationError(f"Expected MP3 stem filename: {path}")
+                destinations.add(path.parent)
+            if len(destinations) != 1:
+                raise HTDemucsConfigurationError(f"All stems must share one destination: {record.track_id}")
+            destination = destinations.pop()
+            if destination.parent.name != config.model_name or not destination.is_relative_to(allowed_root):
+                raise HTDemucsConfigurationError(f"Manifest stem destination must be under --output-root/<...>/{config.model_name}: {destination}")
+            if destination in seen_targets:
+                raise HTDemucsConfigurationError(f"Distinct manifest records share a stem destination: {destination}")
+            seen_targets.add(destination)
+            if record.track_id not in selected_ids:
                 continue
-            path = Path(record.paths[stem]).resolve()
-            if path.name != f"{stem}.mp3":
-                raise HTDemucsConfigurationError(f"Expected MP3 stem filename: {path}")
-            destinations.add(path.parent)
-        if len(destinations) != 1:
-            raise HTDemucsConfigurationError(f"All stems must share one destination: {record.track_id}")
-        destination = destinations.pop()
-        if destination.parent.name != config.model_name or not destination.is_relative_to(allowed_root):
-            raise HTDemucsConfigurationError(f"Manifest stem destination must be under --output-root/<...>/{config.model_name}: {destination}")
-        if destination in seen_targets:
-            raise HTDemucsConfigurationError(f"Distinct manifest records share a stem destination: {destination}")
-        seen_targets.add(destination)
-        if record.track_id not in selected_ids:
-            continue
-        if not config.overwrite and all((destination / f"{stem}.mp3").is_file()
-                and (destination / f"{stem}.mp3").stat().st_size > 0 for stem in config.expected_stems):
-            summary.skipped_existing += 1
-            continue
-        source = Path(record.paths["mixture"]).resolve()
-        if not source.is_file() or not source.stat().st_size:
-            raise HTDemucsConfigurationError(f"Missing or empty mixture audio: {source}")
-        if source.is_relative_to(destination):
-            raise HTDemucsConfigurationError(f"Mixture audio must be outside its stem destination: {source}")
-        if source.suffix.lower() not in _normalize_extensions(config.extensions):
-            raise HTDemucsConfigurationError(f"Mixture audio has an unsupported extension: {source}")
-        groups[destination.parent.parent].append((source, destination))
-        summary.manifest_jobs.append({"track_id": record.track_id, "input_path": str(source),
-                                      "output_directory": str(destination)})
+            if not config.overwrite and all((destination / f"{stem}.mp3").is_file()
+                    and (destination / f"{stem}.mp3").stat().st_size > 0 for stem in config.expected_stems):
+                summary.skipped_existing += 1
+                continue
+            source = Path(record.paths["mixture"]).resolve()
+            if not source.is_file() or not source.stat().st_size:
+                raise HTDemucsConfigurationError(f"Missing or empty mixture audio: {source}")
+            if source.is_relative_to(destination):
+                raise HTDemucsConfigurationError(f"Mixture audio must be outside its stem destination: {source}")
+            if source.suffix.lower() not in _normalize_extensions(config.extensions):
+                raise HTDemucsConfigurationError(f"Mixture audio has an unsupported extension: {source}")
+            groups[destination.parent.parent].append((source, destination))
+            summary.manifest_jobs.append({"track_id": record.track_id, "input_path": str(source),
+                                          "output_directory": str(destination)})
+        checks.set_postfix(existing=summary.skipped_existing, pending=len(summary.manifest_jobs))
     summary.planned = len(summary.manifest_jobs)
+    LOGGER.info("HT-Demucs manifest check: %d selected, %d already complete, %d pending.",
+                len(selected), summary.skipped_existing, summary.planned)
     if config.dry_run:
         return summary
     for output_root, jobs in groups.items():
         with tempfile.TemporaryDirectory(prefix="stemfusion-demucs-") as temporary:
             staging = Path(temporary)
             originals = {}
-            for source, destination in jobs:
-                alias = staging / f"{destination.name}{source.suffix.lower()}"
-                alias.symlink_to(source)
-                originals[str(alias)] = str(source)
+            with tqdm(jobs, desc="Prepare separation inputs", unit="track", dynamic_ncols=True) as staging_progress:
+                for source, destination in staging_progress:
+                    alias = staging / f"{destination.name}{source.suffix.lower()}"
+                    alias.symlink_to(source)
+                    originals[str(alias)] = str(source)
             part = separate_dataset(replace(config, input_roots=(staging,), output_root=output_root,
                 existing_output_roots=(), recursive=False, limit=None), runner=runner)
             summary.succeeded += part.succeeded
@@ -570,6 +595,56 @@ def write_report(
         json.dumps(summary.to_dict(), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def format_summary(
+    summary: HTDemucsSeparationSummary,
+    config: HTDemucsSeparationConfig,
+    report_path: Path | None = None,
+) -> str:
+    """Render run outcomes without changing counters or the saved JSON schema."""
+
+    unprocessed = max(
+        0, summary.selected - summary.skipped_existing - summary.succeeded - summary.failed
+    )
+    if config.dry_run:
+        status = "Dry run (no separation performed)"
+    elif summary.failed or unprocessed:
+        status = "Finished with failures or unprocessed tracks"
+    else:
+        status = "Completed"
+    lines = [
+        "HT-Demucs separation summary",
+        f"  Status: {status}",
+        f"  Model: {config.model_name}",
+        f"  Discovered tracks: {summary.discovered:,}",
+        f"  Selected tracks: {summary.selected:,}",
+        f"  Reused existing tracks: {summary.skipped_existing:,}",
+    ]
+    if config.dry_run:
+        lines.append(f"  Pending separation: {summary.planned:,}")
+    else:
+        lines.extend([
+            f"  Newly separated tracks: {summary.succeeded:,}",
+            f"  Failed tracks: {summary.failed:,}",
+            f"  Unprocessed tracks: {unprocessed:,}",
+            f"  Individual retry attempts: {summary.rescue_attempts:,}",
+            f"  Failed batches: {summary.failed_batches:,}",
+        ])
+    lines.append(f"  Output root: {config.output_root}")
+    if summary.manifest_path is not None:
+        lines.append(f"  Input manifest: {summary.manifest_path}")
+    if config.dry_run:
+        lines.append("  Detailed report: not written (dry run)")
+    elif report_path is not None:
+        lines.append(f"  Detailed JSON report: {report_path}")
+    if summary.failures:
+        lines.extend(["", "Failed tracks (up to 10 shown):"])
+        for failure in summary.failures[:10]:
+            lines.append(f"  {failure.input_path}: {failure.reason}")
+        if summary.failed > 10:
+            lines.append(f"  ... {summary.failed - 10:,} additional failures in the detailed report.")
+    return "\n".join(lines)
 
 
 def configure_parser(parser: argparse.ArgumentParser) -> None:
@@ -656,11 +731,10 @@ def run_from_args(args: argparse.Namespace) -> int:
         LOGGER.error("%s", error)
         return 2
 
-    report_path = args.report
+    report_path = None
     if not config.dry_run:
-        if report_path is None:
-            report_path = config.output_root / "separation_report_htdemucs.json"
-        write_report(summary, report_path.expanduser().resolve())
+        report_path = (args.report or config.output_root / "separation_report_htdemucs.json").expanduser().resolve()
+        write_report(summary, report_path)
 
-    print(json.dumps(summary.to_dict(), indent=2, sort_keys=True))
+    print(format_summary(summary, config, report_path))
     return summary.exit_code

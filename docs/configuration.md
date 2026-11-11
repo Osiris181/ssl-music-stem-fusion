@@ -16,6 +16,15 @@ separation, and selecting a run does not launch a batch of experiments.
 | `data ismir04-manifest` | `configs/experiments/ismir04/manifest.yaml` |
 | `data mtg-jamendo-manifest` (default `--purpose features`) | `configs/experiments/mtg_jamendo/feature_manifest.yaml` |
 | `data mtg-jamendo-manifest --purpose separation` | `configs/experiments/mtg_jamendo/separation_manifest.yaml` |
+| `data pmemo-manifest` (default `--purpose features`) | `configs/experiments/pmemo/feature_manifest.yaml` |
+| `data pmemo-manifest --purpose separation` | `configs/experiments/pmemo/separation_manifest.yaml` |
+| `train pmemo mid-fusion` | `configs/experiments/pmemo/mid_fusion.yaml`, inheriting the shared emotion and Music2Emo profiles |
+| `train pmemo late-fusion` | `configs/experiments/pmemo/late_fusion.yaml`, same training profiles plus independent branch conditions and the explicit mid-reference path |
+| `separate htdemucs --config configs/experiments/pmemo/separation.yaml` | PMEmo paths inheriting `configs/separators/htdemucs_6s.yaml` |
+| `data deam-manifest` (default `--purpose features`) | `configs/experiments/deam/feature_manifest.yaml` |
+| `data deam-manifest --purpose separation` | `configs/experiments/deam/separation_manifest.yaml` |
+| `train deam mid-fusion` | `configs/experiments/deam/mid_fusion.yaml`, same binary model/fitter with native 1-9 midpoint 5 and no score normalization |
+| `separate htdemucs --config configs/experiments/deam/separation.yaml` | DEAM paths inheriting the same shared HT-Demucs profile |
 | `extract mtg-jamendo chords-keys` | `configs/experiments/mtg_jamendo/chords_keys.yaml`, paired with MERT |
 | `extract mtg-jamendo mert` | `configs/experiments/mtg_jamendo/mert.yaml`, inheriting the pinned MERT profile |
 | `train mtg-jamendo author-reproduction` | `configs/experiments/mtg_jamendo/reproduction.yaml`, isolated five-seed mixture-only baseline with a 200-epoch cap |
@@ -40,6 +49,19 @@ and its validation rules. The older installed commands
 `data mtg-jamendo-feature-manifest` and `data mtg-jamendo-separation-manifest`
 remain compatibility aliases with their original default purposes. Existing
 manifest paths and extraction settings are unchanged.
+
+PMEmo follows the same purpose-aware preparation flow. Its feature purpose
+calls the unchanged original PMEmo builder; the separation purpose reads only
+the supplied split IDs and binds exact stem destinations. Installed commands
+`data pmemo-feature-manifest` and `data pmemo-separation-manifest` are aliases
+with feature and separation defaults respectively. Existing features and split
+assignments do not change.
+
+DEAM uses the same flow with `data deam-manifest` and `--purpose separation`.
+`data deam-feature-manifest` remains a feature-default compatibility alias,
+and `data deam-separation-manifest` defaults to separation. The separation
+purpose reads only the supplied split IDs; the original feature builder and
+its 1-9 annotations stay unchanged. The direct script is `prepare_manifest.py`.
 
 Each extraction entry point selects its dataset's default task YAML and uses
 the shared parser in `experiments/_extraction.py`. The shared

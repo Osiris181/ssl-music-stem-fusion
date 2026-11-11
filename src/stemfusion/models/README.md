@@ -41,3 +41,9 @@ views and concatenates complete 1,545-dimensional representations before the
 one encoded mixture, matching the corresponding fusion model's full trainable
 parameter count. The single-input case preserves the original model's state
 dictionary and forward calculation exactly.
+
+`music2emo_emotion.py` subclasses that model and replaces only its final output
+layer with one logit per independently trained binary target. The shared chord
+Transformer, 1,545 encoded values per source, 512/256 hidden layers and
+encode-once repeated-mixture construction are unchanged. PMEmo uses separate
+valence/arousal classifiers, not a joint regression head.

@@ -1,0 +1,14 @@
+# Label-independent jobs from the same supplied fixed splits as feature extraction.
+dataset: pmemo
+paths:
+  train_split: ../../../data/manifests/pmemo/split/train.txt
+  validation_split: ../../../data/manifests/pmemo/split/validation.txt
+  test_split: ../../../data/manifests/pmemo/split/test.txt
+  track_list: null
+  mixture_root: /mnt/HDD/PMEmo2019/chorus
+  output_root: /mnt/HDD/osiris181/pmemo_separated
+  output: ../../../data/manifests/pmemo/pmemo_separation.jsonl
+execution:
+  all_tracks: true
+  overwrite: false
+  dry_run: false

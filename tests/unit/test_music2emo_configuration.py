@@ -68,9 +68,11 @@ class Music2EmoConfigurationTests(unittest.TestCase):
         self.assertEqual(mood["training_profile"], "music2emo.yaml")
         self.assertEqual(emotion["training_profile"], "music2emo.yaml")
         self.assertEqual(mood["model"]["output_labels"], 56)
-        self.assertEqual(emotion["task"], {"name": "emotion_recognition", "label_type": "binary"})
+        self.assertEqual(emotion["task"], {"name": "emotion_recognition", "label_type": "binary",
+                         "targets": ["valence", "arousal"], "score_scale": "zero_one",
+                         "label_threshold": 0.5, "positive_comparison": "greater_equal"})
         self.assertNotIn("paths", emotion)
-        self.assertNotIn("model", emotion)
+        self.assertEqual(emotion["model"]["output_labels"], 1)
 
     def test_inherited_values_can_be_overridden_without_mutating_shared_defaults(self):
         preset = default_config_path("experiments/mtg_jamendo/reproduction.yaml")

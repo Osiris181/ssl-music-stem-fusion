@@ -52,11 +52,8 @@ class JamendoChecksumCompatibilityTests(unittest.TestCase):
                 self.assertNotEqual(compatibility.implementation_identity(kind), identity)
 
     def test_other_training_dependencies_still_invalidate_identities(self):
-        original = compatibility.file_checksum
-        def changed(path):
-            return "changed-training-dependency" if path.name == "music2emo.py" else original(path)
         before = [compatibility.implementation_identity(kind) for kind in ("mid", "late")]
-        with patch.object(compatibility, "file_checksum", side_effect=changed):
+        with patch("stemfusion.training._music2emo_identity.canonical_trainer_checksum", return_value="changed-training-dependency"):
             for kind, identity in zip(("mid", "late"), before, strict=True):
                 self.assertNotEqual(compatibility.implementation_identity(kind), identity)
 

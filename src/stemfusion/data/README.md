@@ -24,7 +24,11 @@ Current implementation:
 | `jamendo_mid_fusion.py` | Verify source-specific MERT/harmony caches and common IDs/boundaries, preserve baseline identity, and synchronize temporal sampling across views. |
 | `jamendo_late_fusion.py` | Optional feature payload checksums shared by Jamendo mid/late fusion; retain mandatory structural/alignment checks and declared cache identities. The historical filename is retained for completed-run compatibility. |
 | `pmemo.py` | Preserve supplied split IDs and original 0-1 continuous annotations, validate PMEmo identities, and bind chorus/stem paths for extraction without creating binary labels. |
+| `pmemo_separation.py` | Prepare label-independent jobs from the same fixed PMEmo split IDs, with exact existing stem destinations and optional explicit track selection; leaves the fingerprinted feature reader unchanged. |
+| `emotion_mid_fusion.py` | Verify PMEmo source-aligned MERT/harmony caches once, create separate binary targets/training-only prevalences and reuse Jamendo feature containers, encoding and sampling. |
+| `emotion_fusion.py` | Explicit native-score dataset adapters with the same PMEmo cache-loading/encoding algorithm, separate raw-score target policies and training-only prevalence; used by DEAM without score normalization. |
 | `deam.py` | Preserve supplied split IDs and 1-9 song-level valence/arousal means, validate numeric DEAM identities and bind existing audio for extraction without re-averaging or binarizing labels. |
+| `deam_separation.py` | Label-independent separation jobs from the same DEAM split IDs, following the PMEmo preparation policy without changing the feature reader/cache identity. |
 | `emomusic.py` | Preserve supplied EmoMusic split IDs and annotation columns; bind EmoMusic mixtures to same-ID DEAM stems without changing scores or generating binary labels. |
 
 The FMA builder writes JSON Lines records containing `track_id`, `split`,

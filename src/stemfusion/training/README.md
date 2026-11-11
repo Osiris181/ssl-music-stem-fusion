@@ -11,7 +11,10 @@ FMA audio paths or hardcodes dataset cache filenames.
 | `late_fusion.py` | Train branches independently and assemble equal-logit-sum ensembles from their selected predictions. |
 | `metrics.py` | Task loss, validation score, and metric definitions. Genre is implemented first; other task adapters remain future work. |
 | `reporting.py` | Atomic artifacts, checksums, mean/sample SD, and paired differences. |
-| `music2emo.py` | Multi-view weighted-BCE fitting, retained loss-based stopping/checkpoints, bit-exact optimizer resume, multilabel metrics, and validation-only thresholds. |
+| `music2emo.py` | Shared multi-view weighted-BCE fitting, retained stopping/checkpoints and exact optimizer resume; Jamendo metrics by default, optional binary task adapter. |
+| `emotion.py` | Binary low/high macro metrics and validation-only prediction-threshold selection for separate emotion targets. |
+| `emotion_late_fusion.py` | One-output binary adaptation of the Jamendo logit-sum ensemble contract, using the same binary metrics and verified branch/checkpoint artifacts. |
+| `_music2emo_identity.py` | Strict reviewed compatibility for optional binary hooks; preserves completed Jamendo identities while rejecting actual fitting changes. |
 | `music2emo_late_fusion.py` | Verify selected branch predictions, sum logits then sigmoid, choose validation-only ensemble thresholds, and save multilabel ensemble results without additional fitting. |
 
 FMA settings live in `configs/training/fma_medium_genre.yaml`. Both fusion
@@ -33,8 +36,13 @@ Run [the FMA entry scripts](../experiments/fma_medium/README.md). Dataset
 loading belongs in `data/`; dataset conditions/scheduling belong in
 `experiments/`. Additional task adapters can supply different losses,
 selection scores, and metrics to the common trainer. The separate Jamendo
-mood/theme mid-fusion implementation retains the Music2Emo protocol; binary
-emotion training remains future work.
+mood/theme implementation retains the Music2Emo protocol; PMEmo binary mid-
+and late-fusion branches use the same fitter with a task adapter. Late fusion
+reuses completed mid mixture-only models; each target has separate labels,
+training prevalence, selected checkpoints and validation thresholds.
+DEAM mid fusion uses this same fitter/metric adapter and settings. Its dataset
+adapter preserves the original 1-9 scores and labels high >= 5, low < 5; it
+does not normalize scores or modify the running PMEmo fitting modules.
 
 The isolated Music2Emo mixture-only reproduction is implemented in
 `experiments/mtg_jamendo/reproduction.py`, with its model and

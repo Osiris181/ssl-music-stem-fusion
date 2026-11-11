@@ -102,6 +102,38 @@ New stems are written only to --output-root.
 
 ## Output and resume behavior
 
+### Terminal progress
+
+All dataset entry scripts and the unified CLI use the same tqdm displays:
+
+- `Discover audio files`: directory mode only; counts visited filesystem entries
+  and shows audio files found. The total is unknown until discovery finishes,
+  so the scan does not display an invented percentage or perform an extra pass.
+- `Check existing stems`: counts candidate tracks and shows existing/pending
+  totals after checking the six required nonempty stem files.
+- `Check manifest and stems`: manifest mode; validates destinations and checks
+  selected tracks for complete outputs without scanning the entire mixture root.
+- `Prepare separation inputs`: manifest mode only; stages symlinks for pending
+  tracks, without copying or renaming original audio.
+- `HT-Demucs batches`: advances after each batch finishes. The `tracks` field
+  identifies the current batch size; Demucs still provides its own internal
+  output while that subprocess runs.
+- `Retry incomplete tracks`: appears only when a batch needs individual retries.
+
+Wrapper progress is written to stderr; the final human-readable summary goes
+to stdout. It distinguishes reused tracks, newly separated tracks, failures,
+and unprocessed tracks, and includes retry counts and the detailed report path.
+The JSON report is still saved to `<output_root>/separation_report_htdemucs.json`
+(or the `--report` path); its contents and schema are unchanged. Dry runs show
+pending separation instead and write no report. Demucs' own console output is
+unchanged.
+Initial checks do not decode audio or certify its quality. With `--dry-run`,
+only discovery/checking/planning stages run; there is no staging or inference.
+All inference settings, output paths, completion checks, retries and existing
+output reuse rules are unchanged.
+
+### Saved stems
+
 For an input named 089843.mp3, Demucs writes:
 
     <output_root>/htdemucs_6s/089843/

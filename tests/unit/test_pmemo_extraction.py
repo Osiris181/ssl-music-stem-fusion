@@ -135,7 +135,7 @@ class PMEmoExtractionTests(unittest.TestCase):
 
     def test_direct_entrypoint_help_from_outside_repository(self):
         directory = Path(__file__).resolve().parents[2] / "src/stemfusion/experiments/pmemo"
-        for name in ("prepare_feature_manifest.py", "extract_mert.py", "extract_chords_keys.py"):
+        for name in ("prepare_manifest.py", "separation.py", "extract_mert.py", "extract_chords_keys.py"):
             result = subprocess.run([sys.executable, str(directory / name), "--help"], cwd=self.root,
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

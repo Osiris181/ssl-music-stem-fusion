@@ -14,7 +14,13 @@ datasets or model checkpoints.
 | File | Coverage |
 | --- | --- |
 | `test_pmemo_extraction.py` | Original split/annotation preservation, strict numeric IDs and source paths, settings and scheduling parity with Jamendo, direct/unified commands, retained tails, verified resume and bounded CQT retry through the same per-view writers. |
+| `test_pmemo_preparation.py` | Unified feature/separation manifest purposes, unchanged feature bytes, fixed split IDs and exact audio destinations, protected outputs, targeted selection, strict YAML, direct commands, shared Jamendo inference settings and complete-stem reuse. |
+| `test_pmemo_mid_fusion.py` | Midpoint/equality, separate targets and training-only prevalence, source alignment, optional checksums, binary macro metrics, actual architecture matching, synthetic 70-fit matrix, exact resume/reuse and direct/unified commands. |
+| `test_pmemo_late_fusion.py` | Two-target/five-seed branch matrix, protected mid-reference reuse, position-paired controls, real binary stem fit, logit-sum metrics, stem-only summaries, strict artifacts, exact resume and direct/unified commands. |
+| `test_music2emo_task_adapter.py` | Strict optional-task compatibility, unchanged Jamendo identities and rejection of optimizer or compatibility-policy edits. |
 | `test_deam_extraction.py` | Supplied DEAM splits/scores, strict IDs and paths, explicit dataset adapters, PMEmo/Jamendo setting parity, scheduler parity, direct/unified commands, real per-view writer fixtures, corrupted-cache detection and targeted CQT retry. |
+| `test_deam_preparation.py` | Combined feature/separation purposes, byte-identical feature manifests, PMEmo preparation-policy parity, fixed split/ID paths, selection/protection, CLI aliases, exact shared HT-Demucs settings and completed-stem reuse. |
+| `test_deam_mid_fusion.py` | Native >= 5 labels without score changes, AST-identical cache algorithm, PMEmo representation/fit parity, target-specific prevalence, 70-fit synthetic matrix, strict caches/reuse, real architecture, exact resume and direct/unified commands. |
 | `test_emomusic_extraction.py` | Supplied EmoMusic splits and unchanged annotation columns, shared DEAM stem configuration, four-dataset settings parity, identical scheduler routing, direct commands, retained tails, strict cache reuse and targeted CQT retry. |
 | `test_archived_harmony_variants.py` | Rejection of archived S-KEY/ChordFormer/SheetSage2 commands and absence of their modules, with original MERT/BTC/music21 imports, presets and commands intact. |
 | `test_jamendo_relocation.py` | Flattened entry points, strict path-only trainer identities, unchanged dependency hashing, and rejection of actual optimizer/adapter changes for legacy cache reuse. |
@@ -27,6 +33,8 @@ datasets or model checkpoints.
 | `test_yaml_configuration.py` | YAML precedence, relative paths, run selection, strict validation, safe loading, and saved resolved settings. |
 | `test_multi_source_extraction.py` | YAML source lists, CLI subsets, one-time encoder loading, cache skipping, partial failures, and aggregate reports. |
 | `test_htdemucs.py` | Multi-root discovery, six-stem completion, commands, storage resume, and rescue behavior. |
+| `test_separation_progress.py` | Shared discovery/checking/staging/batch/retry progress, unchanged commands and reuse counts, closed bars on failures, non-writing dry runs, and readable stdout summaries versus stderr progress across all six dataset scripts. |
+| `test_separation_reporting.py` | Readable success/reuse/failure/dry-run summaries, unprocessed tracks, bounded failure previews, and unchanged saved JSON reports and exit codes. |
 | `test_dataset_separation.py` | Direct scripts for all three datasets, shared inference settings, manifest aliases, exact destination reuse, collision/root validation, and staging cleanup on failure. |
 | `test_mtg_jamendo_separation.py` | Provided mood/theme TSV selection, split/tag preservation, label-independent manifests, output reuse, direct scripts, shared settings, full-waveform validation, lossless WAV round trips, and rejection of invalid durations. |
 | `test_jamendo_segments.py` | Shared full feature manifests, numeric ordering, temporal sampling, retained tails, encoder-specific padding, bounded alignment, active MERT/harmony commands, and rejection of the archived Jamendo MusicFM command. |

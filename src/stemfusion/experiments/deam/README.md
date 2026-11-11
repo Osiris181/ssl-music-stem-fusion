@@ -1,16 +1,19 @@
-# DEAM feature preparation
+# DEAM preparation and mid-fusion experiments
 
-Prepare frozen MERT embeddings and BTC/music21 chord/key descriptors using
-the same scientific extraction settings as Jamendo and PMEmo. These scripts
-do not train classifiers, binarize emotion labels or replace old features.
+Prepare separation jobs, frozen MERT embeddings and BTC/music21 chord/key
+descriptors, then train separate binary valence/arousal classifiers using the
+same model/fitting settings as PMEmo. Preparation/extraction does not binarize
+labels or replace old features; training applies the native-score rule below.
 
 ## Files and inputs
 
 | File | Purpose |
 | --- | --- |
-| `prepare_feature_manifest.py` | Preserve supplied split IDs and song-level valence/arousal scores; bind mixture/stem audio paths. |
+| `prepare_manifest.py` | Default `--purpose features`: preserve split IDs/scores and bind audio. `--purpose separation`: label-independent jobs from the same split IDs. |
+| `separation.py` | Shared HT-Demucs backend, tqdm progress and readable final summary; reuse complete existing native six-stem outputs. |
 | `extract_mert.py` | Save all 12 frozen MERT transformer layers for every retained 30-second segment. |
 | `extract_chords_keys.py` | Extract whole-track BTC chords, generated MIDI, music21 key and normalized chords independently for each source. |
+| `train_mid.py` | Seven mid-fusion conditions, separate targets and five seeds through the shared Music2Emo fitter and binary metrics. |
 
 Presets are in `configs/experiments/deam/`. All relative YAML paths resolve
 against the YAML file's parent directory, not the shell's working directory.
@@ -33,9 +36,16 @@ provided Music2Emotion splits, not independently verified official DEAM splits.
 
 The manifest preserves the supplied `valence_mean` and `arousal_mean` on
 their 1-9 scale. It does not recompute means from dynamic annotations or
-perform label normalization. Binary thresholds and target definitions must
-be verified when implementing training. The same audio features will serve
+perform label normalization. Training assigns **high for native score >= 5**
+and **low for score < 5**, independently for each target. The same audio features serve
 both valence and arousal; do not extract once per target.
+
+Both manifest purposes use one entry point, as in PMEmo and Jamendo. They
+still save separate files for separate stages. The separation purpose reads
+only split IDs, not annotations, and does not need existing stems. It uses
+all supplied tracks by default; `--track-list` selects an explicit subset.
+It preserves the same IDs, split order, mixture paths and six stem destinations
+as the feature manifest. The existing feature builder/reader remains unchanged.
 
 Default audio locations:
 
@@ -67,6 +77,12 @@ extraction, where failures are reported instead of silently changing splits.
 - Default-on second pass for recognized tiny CQT-tail failures only; no
   hardcoded failing-track list. `--no-retry-failures` disables that retry.
 
+Separation uses the exact shared `configs/separators/htdemucs_6s.yaml` profile:
+`htdemucs_6s`, one shift, overlap 0.25, split inference, rescale clipping and
+320 kbps MP3. Dataset paths live in `separation_manifest.yaml` and
+`separation.yaml`. Set `output_root` to `/mnt/HDD/osiris181/DEAM_separated`,
+the parent of `htdemucs_6s`, not the model directory itself.
+
 `experiments/_emotion_features.py` handles CLI/preset routing.
 `features/emotion_dataset.py` supplies dataset-neutral scheduling with an
 explicit DEAM manifest adapter. It calls the unchanged existing MERT/BTC
@@ -86,8 +102,8 @@ Inspect options with `--help`; `--source` and `--split` can be repeated.
 source /home/osiris181/.venv/bin/activate
 cd /home/osiris181/stem-fusion-music-classification/src/stemfusion/experiments/deam
 
-python prepare_feature_manifest.py --dry-run
-python prepare_feature_manifest.py
+python prepare_manifest.py --dry-run
+python prepare_manifest.py
 python extract_mert.py --dry-run
 python extract_chords_keys.py --dry-run
 ```
@@ -96,6 +112,23 @@ The local feature manifest has already been generated during preparation.
 Skip the non-dry preparation command unless generating it for the first time.
 Existing manifests are protected; use `--overwrite` explicitly only when
 regenerating them.
+
+If separation is needed, first generate its label-independent job manifest:
+
+```bash
+python prepare_manifest.py --purpose separation --dry-run
+python prepare_manifest.py --purpose separation
+python separation.py --dry-run
+python separation.py
+```
+
+Skip the manifest-creation command if that manifest already exists. Preparation
+reads metadata only; separation checks existing stem files on the HDD. The dry
+run does not launch Demucs or write stems/reports. A normal run skips tracks
+with all six nonempty native stems and attempts missing/incomplete tracks.
+No automatic source-quality certification is implied by that completeness
+check. `--overwrite` is explicit; do not use it merely to inspect completed stems.
+The new preparation/separation flow does not require re-extracting valid features.
 
 Test one training track (six views), then run the full extraction:
 
@@ -117,15 +150,24 @@ guarantee that every waveform decodes successfully.
 Equivalent installed commands:
 
 ```bash
-stemfusion data deam-feature-manifest --dry-run
+stemfusion data deam-manifest --dry-run
+stemfusion data deam-manifest --purpose separation --dry-run
+stemfusion separate htdemucs --config configs/experiments/deam/separation.yaml --dry-run
 stemfusion extract deam mert --dry-run
 stemfusion extract deam chords-keys --dry-run
 ```
+
+Run the unified separation command from the repository root when passing that
+relative config path. `data deam-feature-manifest` remains a compatibility alias;
+`data deam-separation-manifest` defaults to the separation purpose. The direct
+preparation filename is now `prepare_manifest.py`.
 
 ## Saved features and reports
 
 ```text
 data/manifests/deam/
+  deam_separation.jsonl
+  deam_separation.report.json
   deam_features.jsonl
   deam_features.report.json
 data/features/deam/
@@ -140,6 +182,7 @@ data/features/deam/
     metadata.json
     run_manifest.json
 outputs/deam/
+  separation_report_htdemucs.json
   mert_extraction_report.json
   chords_keys_report.json
   chords_keys_report.initial.json  # only when automatic CQT retries occur
@@ -155,3 +198,96 @@ outcomes and failures. Dry runs do not decode audio, initialize models or
 write extraction outputs/reports. A later full-run report replaces its earlier
 smoke-test report while valid per-view files are reused. Previous features in
 `Music2Emotion/dataset/deam/` remain untouched.
+The separation command prints a readable final summary (reused/new/failed/
+unprocessed tracks, retries and saved report path), retaining detailed JSON
+on disk like the other datasets.
+
+## Mid-fusion training
+
+Use the uv environment with the `music2emo` extra, then run from this directory:
+
+```bash
+python train_mid.py --dry-run
+python train_mid.py --validate-only
+python train_mid.py
+```
+
+Equivalent installed command: `stemfusion train deam mid-fusion`. The default
+trains **70 classifiers**: seven conditions x five seeds x two independent
+targets. Select a subset with the same arguments as PMEmo:
+
+```bash
+python train_mid.py --target valence
+python train_mid.py --target arousal --seed 32 --run mixture_only
+```
+
+`configs/experiments/deam/mid_fusion.yaml` inherits the same
+`configs/training/emotion_recognition.yaml` and `music2emo.yaml` profiles as
+PMEmo, overriding only the native annotation scale/midpoint and dataset paths.
+Other users must supply the released `chord_root.json` and `chord_attr.json`
+vocabularies at the configured paths (local copies here are in
+`data/manifests/deam/music2emotion/`). These are the same root/quality mappings
+as PMEmo/Jamendo, not dataset class-frequency files.
+
+### Labels, features and conditions
+
+- Keep original song-level scores on **1-9**. High is **>= 5** and low is **< 5**;
+  equality is high. There is no score normalization, median fitting, dynamic
+  annotation re-averaging, new split or track filtering. This is our binary
+  adaptation, not a claim about the original regression loader's labels.
+- Reuse the existing aligned feature caches: saved MERT indices 5/6 yield 1,536
+  audio values; the shared source-specific chord Transformer output (8) and key
+  mode (1) yield 1,545 encoded values per source. Use exactly the PMEmo/Jamendo
+  sampler: one shared consecutive training range, all segments for evaluation.
+- Conditions: mixture only; repeated-mixture M x 4/5/6; M+G+D+P; M+G+D+P+B;
+  M+G+D+P+B+V. Repeated controls encode the mixture once and repeat its complete
+  vector, including the same dropout realization. Each fusion/control pair has
+  identical input width and trainable parameter count.
+- Separate one-output models for valence and arousal; the same shared chord
+  Transformer and 512/256 classifier as PMEmo. Cached MERT stays frozen.
+  The author-weighted BCE uses each target's training-only positive prevalence,
+  with `pos_weight=1/p` and `weight=2/(1+1/p)`.
+
+### Fitting, evaluation and output
+
+All conditions use seeds **32, 64, 128, 256, 512**, Adam `1e-4`, batch 8, at most
+200 epochs, no scheduler, validation weighted-BCE early stopping (patience 10,
+min delta `0.0001`), and minimum validation-loss checkpoint selection (earliest
+exact tie). Keep five best checkpoints plus `last.pt`. The exact unchanged
+`training/music2emo.py::fit_model` and `training/emotion.py::BinaryEmotionTask`
+handle both datasets. The native-score loader is regression-tested against
+PMEmo's loader, and equivalent synthetic inputs/seeds produce identical fits.
+PMEmo's fingerprinted controller/loader remain unchanged while its jobs run.
+
+After checkpoint selection, choose the prediction threshold on validation
+macro F1 using 0.00:0.01:1.00, ties to lowest, then freeze it for test. This
+probability threshold is separate from the fixed **native annotation boundary 5**.
+Report track-level binary accuracy and low/high two-class macro F1, ROC-AUC and
+average precision (PR-AUC). Require both classes in each split rather than
+silently excluding tracks or inventing undefined AUC values.
+
+Payload SHA256 verification defaults on. `--no-verify-checksums` trusts local
+completion markers but retains ID/split/source/shape/finiteness/settings and
+alignment checks; finite cache edits can go undetected in that mode.
+`--validate-only` checks inputs/labels without constructing models or writing
+training results; `--dry-run` resolves only the plan.
+
+```text
+outputs/deam/mid_fusion/<target>/<condition>/seed_<seed>/
+  best.pt
+  last.pt
+  checkpoints/
+  predictions_validation.npz
+  predictions_test.npz
+  result.json
+outputs/deam/summary_mid_fusion_valence.{json,txt}
+outputs/deam/summary_mid_fusion_arousal.{json,txt}
+```
+
+The terminal and TXT summaries show mean +/- sample SD across seeds; JSON keeps
+full metrics, predictions/checkpoint references, label policy and paired
+differences. Seed/condition subset runs use distinct summary filenames.
+Completed compatible models are verified/reused automatically; interrupted
+runs resume from `last.pt`. Changed settings or inputs raise an error. Use
+an isolated output root for changed settings; `--overwrite` is explicit.
+`--output-dir` also redirects summaries unless `--summary-dir` is supplied.

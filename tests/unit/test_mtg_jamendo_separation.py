@@ -127,7 +127,7 @@ class JamendoSeparationTests(unittest.TestCase):
         proc = subprocess.run([sys.executable, str(scripts / "separation.py"), "--manifest", str(self.config.output_path),
                                "--output-root", str(self.config.output_root), "--dry-run"],
                               cwd=self.root, env=env, text=True, capture_output=True, check=True)
-        self.assertEqual(json.loads(proc.stdout)["planned"], 2)
+        self.assertIn("Pending separation: 2", proc.stdout)
         self.assertFalse(self.config.output_root.exists())
 
     def prepare_validation(self):

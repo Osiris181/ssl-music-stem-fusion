@@ -78,11 +78,13 @@ def implementation_identity(kind="mid"):
     if kind not in LEGACY_RAW:
         raise ValueError(f"Unknown checksum compatibility kind: {kind}")
     from stemfusion.experiments.mtg_jamendo import reproduction
+    from stemfusion.training._music2emo_identity import canonical_trainer_checksum
 
     package = Path(__file__).resolve().parents[2]
     controller = package / "experiments/_mood_theme_tagging.py"
     names = ["data/jamendo_mid_fusion.py", "models/music2emo_mid_fusion.py", "training/music2emo.py"]
-    identities = {name: file_checksum(package / name) for name in names}
+    identities = {name: canonical_trainer_checksum(package / name) if name == "training/music2emo.py"
+                  else file_checksum(package / name) for name in names}
     identities["experiments/mtg_jamendo/mid_fusion.py"] = compatible_source_checksum(controller, "mid")
     if kind == "late":
         reviewed = _reviewed_layout(controller)

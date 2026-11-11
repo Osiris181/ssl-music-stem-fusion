@@ -1,0 +1,24 @@
+dataset: pmemo
+training_profile: ../../training/emotion_recognition.yaml
+paths:
+  manifest: ../../../data/manifests/pmemo/pmemo_features.jsonl
+  mert_dir: ../../../data/features/pmemo/mert_v1_95m
+  harmony_dir: ../../../data/features/pmemo/harmony
+  chord_root: ../../../data/manifests/pmemo/music2emotion/chord_root.json
+  chord_attr: ../../../data/manifests/pmemo/music2emotion/chord_attr.json
+  output_dir: ../../../outputs/pmemo/mid_fusion
+  summary_dir: ../../../outputs/pmemo
+features:
+  fusion: concatenate
+  harmony_encoder: shared
+  training_alignment: shared_segment_range
+runtime:
+  verify_checksums: true
+runs:
+  mixture_only: {kind: reference, sources: [mixture]}
+  repeated_mixture_4: {kind: repeated_mixture, sources: [mixture], matched_sources: 4}
+  repeated_mixture_5: {kind: repeated_mixture, sources: [mixture], matched_sources: 5}
+  repeated_mixture_6: {kind: repeated_mixture, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}

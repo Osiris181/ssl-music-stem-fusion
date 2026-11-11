@@ -5,7 +5,7 @@
 | `genre.yaml` | Common architecture, optimization, metrics, validation selection, and five outer seeds for all three genre datasets. |
 | `music2emo.yaml` | Shared MERT/chord/key feature construction, chord Transformer/MLP architecture, optimizer, loss/stopping/checkpoint recipe, runtime, and five seeds. |
 | `mood_theme_tagging.yaml` | Inherits `music2emo.yaml`; supplies the 56-label head and macro AUROC/average-precision evaluation for Jamendo. |
-| `emotion_recognition.yaml` | Inherits the same recipe and identifies separate binary valence/arousal tasks; a preparation-only profile, not a runnable emotion trainer yet. |
+| `emotion_recognition.yaml` | Same one-logit recipe and two-class metrics; PMEmo defaults to native 0-1 midpoint 0.5, while DEAM explicitly overrides native 1-9 midpoint 5 without score normalization. |
 | `fma_medium_genre.yaml` | Inherits `genre.yaml`; sets 16 classes and FMA paths. |
 | `fma_medium_mid_fusion.yaml` | Inherits the shared settings and selects concatenation. |
 | `fma_medium_late_fusion.yaml` | Inherits the shared settings and selects independent branches with equal logit summation. |
@@ -44,13 +44,18 @@ early stopping with patience 10 and minimum delta `0.0001`, and lowest-loss
 checkpoint selection. Five best checkpoints plus last are retained.
 
 `emotion_recognition.yaml` shares these defaults without copying Jamendo paths,
-56-tag output settings, or class-frequency arrays. Its task definition is
-declarative until emotion training is implemented. Dataset-specific binary
-labels, output width, prevalence weights, thresholds, and metric averaging must
-be verified when adding the corresponding experiment; the preset does not
-make the current Jamendo trainer a binary-emotion trainer.
+56-tag output settings, or class-frequency arrays. PMEmo uses the same fitting
+loop via `training/emotion.py`'s binary metric adapter. Original scores >= 0.5
+are high, lower scores low. Training-only positive prevalence supplies the
+retained author BCE weights. Each target has one logit; macro metrics average
+low/high classes. Prediction thresholds maximize validation macro F1 on the
+101-point grid, ties to lowest. Other emotion datasets still need explicit
+native-score/manifest review. DEAM now uses the same mid-fusion fitter with
+its original supplied 1-9 scores and the equivalent midpoint 5; scores are not
+normalized or rewritten. Its dataset preset overrides only native label
+settings and paths; optimization/evaluation rules remain identical to PMEmo.
 
-Only preset locations and inheritance changed. Existing feature/checkpoint
+Existing Jamendo and genre feature/checkpoint
 directories and saved scientific provenance are not renamed or rewritten.
 MERT extraction remains in each dataset's experiment YAML and the shared
 `configs/features/mert_v1_95m.yaml`, not in training profiles.

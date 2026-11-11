@@ -148,11 +148,16 @@ _METADATA = {
     "suggested_output_directory",
 }
 _PATHS = {
+    "deam_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir"},
+    "emotion_late_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir", "reference_output_dir"},
+    "emotion_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir"},
     "jamendo_late_fusion": {"manifest", "mert_dir", "harmony_dir", "tag_list", "author_metadata", "output_dir", "summary_dir", "reference_output_dir"},
     "jamendo_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "tag_list", "author_metadata", "output_dir", "summary_dir", "reference_output_dir"},
     "emomusic_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "mixture_root", "htdemucs_root", "output"},
     "deam_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "mixture_root", "htdemucs_root", "output"},
+    "deam_separation_manifest": {"train_split", "validation_split", "test_split", "track_list", "mixture_root", "output_root", "output"},
     "pmemo_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "metadata", "mixture_root", "htdemucs_root", "output"},
+    "pmemo_separation_manifest": {"train_split", "validation_split", "test_split", "track_list", "mixture_root", "output_root", "output"},
     "jamendo_sheetsage2_training": {"manifest", "mert_dir", "harmony_dir", "original_harmony_dir", "tag_list", "author_metadata", "baseline_summary", "output_dir", "summary_dir"},
     "sheetsage2_extraction": {"manifest", "model_dir", "backbone_dir", "output_dir", "report"},
     "jamendo_chordformer_training": {"manifest", "mert_dir", "harmony_dir", "skey_dir", "tag_list", "author_metadata", "baseline_summary", "skey_summary", "output_dir", "summary_dir"},
@@ -332,6 +337,67 @@ def load_configuration(
 
     data = load(path, ())
     yaml_snapshot = json.loads(json.dumps(data, default=str))
+    if role in {"emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
+        defaults = dict(data.pop("paths", {}))
+        runs = data.pop("runs", None)
+        flat = _flatten(data)
+        fixed = {
+            "dataset": "pmemo", "author_commit": "c5f7984f78d9928b841f25bd05a47377c12c58ca",
+            "task.name": "emotion_recognition", "task.label_type": "binary", "task.score_scale": "zero_one",
+            "task.label_threshold": 0.5, "task.positive_comparison": "greater_equal",
+            "features.saved_layer_indices": [5, 6], "features.audio_dimension": 1536,
+            "features.training_pooling": "random_consecutive_segment_mean", "features.evaluation_pooling": "all_segment_mean",
+            "features.normalization": "none", "features.unavailable_key_mode": "major",
+            "features.fusion": "concatenate", "features.harmony_encoder": "shared", "features.training_alignment": "shared_segment_range",
+            "model.architecture": "music2emo_single_task", "model.chord_sequence_length": 100,
+            "model.root_vocabulary_size": 14, "model.quality_vocabulary_size": 14,
+            "model.root_embedding_dimension": 4, "model.quality_embedding_dimension": 4,
+            "model.transformer_layers": 2, "model.transformer_heads": 8, "model.transformer_feedforward_dimension": 64,
+            "model.transformer_dropout": 0.1, "model.cls_token": "zeros", "model.padding_mask": "none",
+            "model.hidden_dimensions": [512, 256], "model.activation": "relu", "model.output_labels": 1,
+            "model.multitask": False, "model.knowledge_distillation": False,
+            "optimization.optimizer": "adam", "optimization.loss": "author_frequency_weighted_bce",
+            "optimization.betas": [0.9, 0.999], "optimization.epsilon": 1e-8, "optimization.weight_decay": 0.0,
+            "optimization.early_stopping.monitor": "val_loss", "optimization.early_stopping.mode": "min",
+            "optimization.scheduler": "none", "checkpoint.split": "validation",
+            "checkpoint.minimize": "weighted_bce_loss", "checkpoint.ties": "earliest_epoch",
+            "checkpoint.save_top_k": 5, "checkpoint.save_last": True,
+            "evaluation.output_transform": "sigmoid", "evaluation.accuracy": "binary", "evaluation.f1": "macro_two_class",
+            "evaluation.roc_auc": "macro_two_class_one_vs_rest", "evaluation.pr_auc": "macro_two_class_average_precision",
+            "evaluation.threshold_policy": "validation_macro_f1_global_grid",
+            "evaluation.threshold_grid.start": 0.0, "evaluation.threshold_grid.stop": 1.0, "evaluation.threshold_grid.steps": 101,
+            "reproducibility.deterministic_algorithms": True, "reproducibility.sampling_seed": "sha256_per_seed_per_epoch",
+            "runtime.matmul_precision": "medium", "runtime.attention_backend": "math"}
+        mappings = {"task.targets": ("targets", "str_list"),
+                    "optimization.learning_rate": ("learning_rate", "float"), "optimization.batch_size": ("batch_size", "int"),
+                    "optimization.epochs": ("epochs", "int"), "reproducibility.seeds": ("seeds", "int_list"),
+                    "optimization.early_stopping.patience": ("early_stopping_patience", "int"),
+                    "optimization.early_stopping.min_delta": ("early_stopping_min_delta", "float"),
+                    "runtime.device": ("device", "str"), "runtime.num_workers": ("num_workers", "int"),
+                    "runtime.verify_checksums": ("verify_checksums", "bool"),
+                    "execution.resume": ("resume", "bool"), "execution.overwrite": ("overwrite", "bool"),
+                    "execution.validate_only": ("validate_only", "bool"), "execution.dry_run": ("dry_run", "bool")}
+        if role == "deam_mid_fusion":
+            fixed.update({"dataset": "deam", "task.score_scale": "one_nine", "task.label_threshold": 5.0})
+        late_fusion = role == "emotion_late_fusion"
+        if late_fusion:
+            fixed.update({"features.fusion": "sum_logits_then_sigmoid",
+                          "features.harmony_encoder": "independent_per_branch",
+                          "features.training_alignment": "independent_per_branch",
+                          "reproducibility.branch_seed": "sha256_position_paired"})
+        if set(defaults) != _PATHS[role] or set(flat) != set(fixed) | set(mappings):
+            raise ConfigurationError("Unknown or missing binary-emotion fusion settings.")
+        for name, expected in fixed.items():
+            if flat[name] != expected or type(flat[name]) is not type(expected):
+                raise ConfigurationError(f"{name} must be {expected!r}.")
+        expected_runs = JAMENDO_LATE_CONDITIONS if late_fusion else JAMENDO_MID_CONDITIONS
+        if runs != expected_runs or (run_name is not None and run_name not in runs):
+            raise ConfigurationError("Use the shared fixed fusion matrix and a valid run name.")
+        for name, (destination, kind) in mappings.items():
+            defaults[destination] = _coerce(flat[name], kind, name)
+        defaults.update(runs=runs, run=run_name)
+        return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
+                          "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
     if role in {"jamendo_reproduction", "jamendo_mid_fusion", "jamendo_late_fusion", "jamendo_skey_training", "jamendo_chordformer_training", "jamendo_sheetsage2_training"}:
         defaults = dict(data.pop("paths", {}))
         fusion_role = role in {"jamendo_mid_fusion", "jamendo_late_fusion"}
@@ -563,6 +629,21 @@ def load_configuration(
             defaults[destination] = _coerce(flat[name], kind, name)
         return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
                           "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
+    if role in {"pmemo_separation_manifest", "deam_separation_manifest"}:
+        defaults = dict(data.pop("paths", {}))
+        flat = _flatten(data)
+        settings = {"execution.all_tracks": ("all_tracks", "bool"),
+                    "execution.overwrite": ("overwrite", "bool"),
+                    "execution.dry_run": ("dry_run", "bool")}
+        if not (_PATHS[role] - {"track_list"}) <= defaults.keys() or set(flat) != {"dataset", *settings}:
+            raise ConfigurationError("Unknown or missing emotion separation-manifest settings.")
+        dataset = role.removesuffix("_separation_manifest")
+        if flat.get("dataset") != dataset:
+            raise ConfigurationError(f"dataset must be {dataset}.")
+        for name, (destination, kind) in settings.items():
+            defaults[destination] = _coerce(flat[name], kind, name)
+        return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
+                          "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
     if role == "mtg_jamendo_separation_manifest":
         defaults = dict(data.pop("paths", {}))
         flat = _flatten(data)
@@ -675,7 +756,7 @@ def load_configuration(
     classes = {"fma_medium": 16, "gtzan": 10, "ismir04": 6}
     if role == "separation":
         classes["mtg_jamendo"] = 56
-    if dataset not in classes:
+    if dataset not in classes and not (role == "separation" and dataset in {"pmemo", "deam"}):
         raise ConfigurationError(f"Unsupported dataset configuration: {dataset}")
     command_dataset = dataset.replace("_", "-")
     expected_command = {
@@ -685,7 +766,9 @@ def load_configuration(
     }.get(role)
     if metadata.get("command", expected_command) != expected_command:
         raise ConfigurationError(f"Configuration command does not match {expected_command}.")
-    if metadata.get("number_of_classes", classes[dataset]) != classes[dataset]:
+    if dataset in {"pmemo", "deam"} and "number_of_classes" in metadata:
+        raise ConfigurationError("Emotion separation is label-independent; omit number_of_classes.")
+    if dataset in classes and metadata.get("number_of_classes", classes[dataset]) != classes[dataset]:
         raise ConfigurationError(f"{dataset} configurations must describe {classes[dataset]} classes.")
     if role in {"mid_fusion", "late_fusion"}:
         fixed["task.number_of_classes"] = classes[dataset]
@@ -800,7 +883,7 @@ class YAMLArgumentParser(argparse.ArgumentParser):
         selector.add_argument("--config", type=Path)
         if self.yaml_purposes is not None:
             selector.add_argument("--purpose", choices=tuple(self.yaml_purposes), default=self.get_default("purpose"))
-        if self.yaml_role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion"}:
+        if self.yaml_role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
             selector.add_argument("--run")
         selected, _ = selector.parse_known_args(arguments)
         role, preset = self.yaml_role, self.yaml_default
@@ -853,7 +936,7 @@ def configure_yaml(parser: argparse.ArgumentParser, role: str, preset: str) -> N
         "--config", type=Path,
         help=f"YAML preset or experiment file. Default preset: configs/{preset}",
     )
-    if role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion"}:
+    if role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
         parser.add_argument("--run", help="Run one named condition; omit to run the complete YAML matrix.")
     if not isinstance(parser, YAMLArgumentParser):
         raise TypeError("Public YAML-configured tasks require YAMLArgumentParser.")

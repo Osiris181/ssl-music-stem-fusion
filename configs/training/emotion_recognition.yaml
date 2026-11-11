@@ -1,8 +1,19 @@
-# Shared recipe for future per-dataset binary valence/arousal training.
-# This task profile is not a runnable experiment or an implemented trainer.
-# Dataset-specific label conversion, output width, prevalence weights, threshold
-# rules, and binary metric definitions must be verified before wiring training.
+# Shared binary-emotion recipe, retaining the completed Jamendo optimization.
+# PMEmo defaults to 0-1 scores; dataset presets explicitly override native scale/midpoint.
 training_profile: music2emo.yaml
 task:
   name: emotion_recognition
   label_type: binary
+  targets: [valence, arousal]
+  score_scale: zero_one
+  label_threshold: 0.5
+  positive_comparison: greater_equal
+model:
+  output_labels: 1
+evaluation:
+  accuracy: binary
+  f1: macro_two_class
+  roc_auc: macro_two_class_one_vs_rest
+  pr_auc: macro_two_class_average_precision
+  threshold_policy: validation_macro_f1_global_grid
+  threshold_grid: {start: 0.0, stop: 1.0, steps: 101}

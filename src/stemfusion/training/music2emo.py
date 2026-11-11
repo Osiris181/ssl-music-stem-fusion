@@ -67,7 +67,7 @@ def select_threshold(validation_arrays):
     return float(grid[int(np.argmax(scores))])
 
 
-def _evaluate(model, records, criterion, config, device, *, loader, predictions=False):
+def _evaluate(model, records, criterion, config, device, *, loader, predictions=False, task=None):
     model.eval()
     total, ids, logits, targets = 0., [], [], []
     with torch.inference_mode():
@@ -89,12 +89,15 @@ def _evaluate(model, records, criterion, config, device, *, loader, predictions=
 
     values, labels = torch.cat(logits), torch.cat(targets)
     probabilities = values.sigmoid()
-    roc = multilabel_auroc(probabilities, labels.int(), num_labels=56, average=None, thresholds=None)
-    pr = multilabel_average_precision(probabilities, labels.int(), num_labels=56, average=None, thresholds=None)
-    if not torch.isfinite(roc).all() or not torch.isfinite(pr).all():
-        raise ValueError("Undefined macro AUC; every tag must have positive and negative examples.")
-    result.update(roc_auc_macro=float(roc.mean()), pr_auc_macro=float(pr.mean()),
-                  per_tag_roc_auc=roc.tolist(), per_tag_average_precision=pr.tolist())
+    if task is None:
+        roc = multilabel_auroc(probabilities, labels.int(), num_labels=56, average=None, thresholds=None)
+        pr = multilabel_average_precision(probabilities, labels.int(), num_labels=56, average=None, thresholds=None)
+        if not torch.isfinite(roc).all() or not torch.isfinite(pr).all():
+            raise ValueError("Undefined macro AUC; every tag must have positive and negative examples.")
+        result.update(roc_auc_macro=float(roc.mean()), pr_auc_macro=float(pr.mean()),
+                      per_tag_roc_auc=roc.tolist(), per_tag_average_precision=pr.tolist())
+    else:
+        result.update(task.ranking_metrics(probabilities, labels))
     return result, {"track_ids": np.asarray(ids), "targets": labels.numpy().astype(np.uint8),
                     "logits": values.numpy(), "probabilities": probabilities.numpy()}
 
@@ -147,7 +150,7 @@ def _rank_checkpoint(directory, entries, *, epoch, loss, signature, model, optim
     return ranked[:5], ranked[5:]
 
 
-def fit_model(config, data, seed, *, model_factory, dataset_factory, implementation, protocol_updates, epoch_callback=None):
+def fit_model(config, data, seed, *, model_factory, dataset_factory, implementation, protocol_updates, epoch_callback=None, task=None):
     """Use released stopping/checkpoint rules under the paper's epoch cap."""
     device = torch.device(config.device)
     if device.type == "cuda" and not torch.cuda.is_available():
@@ -165,6 +168,9 @@ def fit_model(config, data, seed, *, model_factory, dataset_factory, implementat
                 "sampling": "epoch_seeded_conditional_uniform_consecutive_segment_mean",
                 "versions": {name: importlib.metadata.version(name) for name in ("torch", "numpy", "torchmetrics")}}
     protocol.update(protocol_updates)
+    if task is not None:
+        protocol.update(task.protocol())
+    evaluation_options = {} if task is None else {"task": task}
     signature = fingerprint({"seed": seed, "protocol": protocol, "data": data.data_fingerprint, "implementation": implementation})
     directory = config.output_dir / f"seed_{seed}"
     if not config.overwrite and config.resume and (directory / "run_manifest.json").exists():
@@ -228,7 +234,7 @@ def fit_model(config, data, seed, *, model_factory, dataset_factory, implementat
                 optimizer.step()
                 training_loss += float(loss.detach()) * len(labels)
             training_loss /= len(data.splits["train"])
-            validation = _evaluate(model, data.splits["validation"], criterion, config, device, loader=loader)
+            validation = _evaluate(model, data.splits["validation"], criterion, config, device, loader=loader, **evaluation_options)
             if validation["loss"] < best_loss:
                 best_loss, best_epoch = validation["loss"], epoch
                 best_state = {name: value.detach().cpu().clone() for name, value in model.state_dict().items()}
@@ -263,11 +269,13 @@ def fit_model(config, data, seed, *, model_factory, dataset_factory, implementat
         model.load_state_dict(best_state)
         _save_torch(directory / "best.pt", {"signature": signature, "epoch": best_epoch,
                      "validation_loss": best_loss, "model_state": best_state})
-        validation, validation_arrays = _evaluate(model, data.splits["validation"], criterion, config, device, loader=loader, predictions=True)
-        test, test_arrays = _evaluate(model, data.splits["test"], criterion, config, device, loader=loader, predictions=True)
-    threshold = select_threshold(validation_arrays)
+        validation, validation_arrays = _evaluate(model, data.splits["validation"], criterion, config, device, loader=loader, predictions=True, **evaluation_options)
+        test, test_arrays = _evaluate(model, data.splits["test"], criterion, config, device, loader=loader, predictions=True, **evaluation_options)
+    threshold_selector = select_threshold if task is None else task.select_threshold
+    metric_function = threshold_metrics if task is None else task.threshold_metrics
+    threshold = threshold_selector(validation_arrays)
     for metrics, arrays in ((validation, validation_arrays), (test, test_arrays)):
-        metrics.update(threshold_metrics(arrays, threshold))
+        metrics.update(metric_function(arrays, threshold))
         arrays["predictions"] = (arrays["probabilities"] >= threshold).astype(np.uint8)
         arrays["threshold"] = np.asarray(threshold)
     _save_predictions(directory / "predictions_validation.npz", validation_arrays)

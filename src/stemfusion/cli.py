@@ -35,12 +35,15 @@ from stemfusion.experiments.mtg_jamendo import extract_mert as jamendo_mert
 from stemfusion.experiments.mtg_jamendo import train_reproduction as jamendo_reproduction
 from stemfusion.experiments.mtg_jamendo import train_mid as jamendo_mid
 from stemfusion.experiments.mtg_jamendo import train_late as jamendo_late
-from stemfusion.experiments.pmemo import prepare_feature_manifest as pmemo_manifest
+from stemfusion.experiments.pmemo import prepare_manifest as pmemo_manifest
 from stemfusion.experiments.pmemo import extract_mert as pmemo_mert
 from stemfusion.experiments.pmemo import extract_chords_keys as pmemo_chords_keys
-from stemfusion.experiments.deam import prepare_feature_manifest as deam_manifest
+from stemfusion.experiments.pmemo import train_mid as pmemo_mid
+from stemfusion.experiments.pmemo import train_late as pmemo_late
+from stemfusion.experiments.deam import prepare_manifest as deam_manifest
 from stemfusion.experiments.deam import extract_mert as deam_mert
 from stemfusion.experiments.deam import extract_chords_keys as deam_chords_keys
+from stemfusion.experiments.deam import train_mid as deam_mid
 from stemfusion.experiments.emomusic import prepare_feature_manifest as emomusic_manifest
 from stemfusion.experiments.emomusic import extract_mert as emomusic_mert
 from stemfusion.experiments.emomusic import extract_chords_keys as emomusic_chords_keys
@@ -85,8 +88,16 @@ def build_parser() -> argparse.ArgumentParser:
         help="Compatibility alias for mtg-jamendo-manifest."))
     jamendo_manifest.configure_parser(data_commands.add_parser("mtg-jamendo-separation-manifest",
         help="Compatibility alias for mtg-jamendo-manifest --purpose separation."), purpose="separation")
-    pmemo_manifest.configure_parser(data_commands.add_parser("pmemo-feature-manifest"))
-    deam_manifest.configure_parser(data_commands.add_parser("deam-feature-manifest"))
+    pmemo_manifest.configure_parser(data_commands.add_parser("pmemo-manifest"))
+    pmemo_manifest.configure_parser(data_commands.add_parser("pmemo-feature-manifest",
+        help="Compatibility alias for pmemo-manifest."))
+    pmemo_manifest.configure_parser(data_commands.add_parser("pmemo-separation-manifest",
+        help="Compatibility alias for pmemo-manifest --purpose separation."), purpose="separation")
+    deam_manifest.configure_parser(data_commands.add_parser("deam-manifest"))
+    deam_manifest.configure_parser(data_commands.add_parser("deam-feature-manifest",
+        help="Compatibility alias for deam-manifest."))
+    deam_manifest.configure_parser(data_commands.add_parser("deam-separation-manifest",
+        help="Compatibility alias for deam-manifest --purpose separation."), purpose="separation")
     emomusic_manifest.configure_parser(data_commands.add_parser("emomusic-feature-manifest"))
 
     extract_parser = commands.add_parser(
@@ -155,6 +166,13 @@ def build_parser() -> argparse.ArgumentParser:
     jamendo_reproduction.configure_parser(jamendo_training_methods.add_parser("author-reproduction"))
     jamendo_mid.configure_parser(jamendo_training_methods.add_parser("mid-fusion"))
     jamendo_late.configure_parser(jamendo_training_methods.add_parser("late-fusion"))
+    pmemo_train = datasets.add_parser("pmemo", help="PMEmo separate binary valence/arousal experiments.")
+    pmemo_training_methods = pmemo_train.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
+    pmemo_mid.configure_parser(pmemo_training_methods.add_parser("mid-fusion"))
+    pmemo_late.configure_parser(pmemo_training_methods.add_parser("late-fusion"))
+    deam_train = datasets.add_parser("deam", help="DEAM separate binary valence/arousal experiments using native 1-9 scores.")
+    deam_training_methods = deam_train.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
+    deam_mid.configure_parser(deam_training_methods.add_parser("mid-fusion"))
     return parser
 
 

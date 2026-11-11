@@ -205,7 +205,7 @@ command-line options override YAML. Use `--help` to inspect options,
 features without training. Complete, compatible runs are verified and reused
 automatically.
 
-FMA-Medium, GTZAN, ISMIR04, and MTG-Jamendo provide `separation.py` in their experiment
+FMA-Medium, GTZAN, ISMIR04, MTG-Jamendo, PMEmo, and DEAM provide `separation.py` in their experiment
 folder, using the shared HT-Demucs backend. Dataset paths are configured in
 `configs/experiments/<dataset>/separation.yaml`; inference settings inherit
 `configs/separators/htdemucs_6s.yaml`. Start with `python separation.py --dry-run`
@@ -219,6 +219,29 @@ Shared harmonic preprocessing lives at
 `src/stemfusion/experiments/mtg_jamendo/extract_chords_keys.py`, outside the
 encoder directory. Its chord/key outputs are paired with the MERT embeddings;
 see the [shared guide](src/stemfusion/experiments/mtg_jamendo/README.md#chordkey-extraction).
+
+[PMEmo preparation](src/stemfusion/experiments/pmemo/README.md) follows the same
+Jamendo flow: `prepare_manifest.py` defaults to the feature mapping, and
+`--purpose separation` prepares jobs for the shared separator. Existing
+manifests, separated audio and extracted features can be reused unchanged.
+
+[DEAM preparation](src/stemfusion/experiments/deam/README.md) uses this same
+purpose-aware manifest entry point and shared separator, preserving the
+existing feature manifest, extracted features and split assignments.
+
+PMEmo mid-fusion uses `python train_mid.py` in its experiment directory or
+`stemfusion train pmemo mid-fusion`. It trains separate binary valence/arousal
+models with the fixed 0.5 annotation midpoint, shared Music2Emo validation-loss
+recipe, and the same five seeds/matched conditions as Jamendo. See the
+[PMEmo training guide](src/stemfusion/experiments/pmemo/README.md#mid-fusion-training)
+for validation, metrics, checkpoint reuse and per-target JSON/TXT summaries.
+PMEmo late fusion uses `python train_late.py` or `stemfusion train pmemo late-fusion`:
+independent position-paired branches, logit-sum ensembles and stem-only rows,
+with the same fitting/metric rules and reused mid-fusion mixture references.
+DEAM uses `python train_mid.py` in its experiment directory or
+`stemfusion train deam mid-fusion`, with the same seven conditions and fitting
+recipe. Original 1-9 scores remain unchanged: high >= 5, low < 5, independently
+for valence/arousal. See the [DEAM training guide](src/stemfusion/experiments/deam/README.md#mid-fusion-training).
 
 For Jamendo's controlled mid-fusion comparison, run `python train_mid.py` from
 its experiment directory, or `stemfusion train mtg-jamendo mid-fusion`.

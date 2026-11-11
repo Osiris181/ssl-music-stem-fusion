@@ -71,9 +71,41 @@ headline reporting metric, not the checkpoint criterion. This supersedes the
 earlier Jamendo 500-epoch / validation-PR-AUC proposal below; the historical
 manuscript table is retained as historical evidence. Shared defaults now live
 in `configs/training/music2emo.yaml`, inherited by `mood_theme_tagging.yaml`
-and the future `emotion_recognition.yaml`. The binary-emotion profile is not
-a runnable trainer; dataset-specific targets, heads, prevalence weighting,
-thresholds and evaluation conventions still require implementation review.
+and `emotion_recognition.yaml`. The latter now supports PMEmo mid and late fusion
+and DEAM mid fusion; other emotion datasets still need native-score/adaptor review.
+
+**PMEmo implementation decision (2026-11-11):** Preserve the supplied
+536/116/115 splits and existing aligned MERT/BTC/music21 caches. Original 0-1
+annotation scores **>= 0.5 are high**, **< 0.5 are low**, for independently
+trained valence/arousal classifiers. This fixed ground-truth boundary is not
+the prediction threshold. Use one sigmoid logit per target and training-only
+positive prevalence for the same author-weighted BCE. The shared Music2Emo
+fitter retains the 200-epoch/Adam `1e-4`/batch-8 recipe, validation-loss patience
+10/min delta `0.0001`, and minimum validation-loss checkpoint. Report binary
+accuracy and two-class (low/high) macro F1, one-vs-rest ROC-AUC and average
+precision. Select a prediction threshold from validation macro F1 on
+0.00:0.01:1.00, ties to lowest. Each target uses the same seven mid-fusion
+conditions and five agreed seeds. This is a binary adaptation, not a claim
+that the original Music2Emotion PMEmo regression loader defines these labels.
+Late fusion retains the same binary fitting/metric rules and position-paired
+branch seeds as Jamendo: reuse the selected mid mixture-only reference, train
+five additional independent mixture models and five stem models per target/seed,
+sum branch logits then sigmoid, and select only prediction thresholds on
+validation. Report all five stem-only branches without extra training. The
+configured reference root is separate and protected from late-run overwrite.
+Code implementation/validation does not establish a full PMEmo late-fusion result.
+
+**DEAM implementation decision (2026-11-11):** Keep the supplied 1,261/271/270
+splits and original 1-9 song-level means. Independently label valence/arousal
+**high for native score >= 5, low for score < 5**, including equality in high.
+Do not normalize or rewrite the stored scores, recompute dynamic annotation
+means, or fit a median boundary. This is the same midpoint convention as PMEmo,
+not a claim about its historical regression loader. Mid fusion uses the exact
+PMEmo model/fitter, shared aligned MERT/BTC encoding/sampling, training-only
+positive prevalence, validation-loss selection/stopping, binary macro metrics,
+validation-only probability-threshold grid, seven conditions and five seeds.
+Existing PMEmo fitting modules/identities remain unchanged. DEAM late fusion
+is not enabled by this implementation; full production fitting is user-initiated.
 
 **Source and status conventions.** The facts marked **[MANUSCRIPT]** below are documented in the original submitted manuscript *Enhancing Music Classification via Source Separation and Feature Fusion* (especially Sections **3.1–3.4 and 4.1–4.4**). They describe the **historical implementation as reported**, not proof that every current code path agrees. **[DECIDED]** identifies a revision decision made with the author. **[VERIFY]** is not specified precisely enough in the manuscript or conversation; inspect the existing implementation before writing a new config. **Do not silently replace an unknown with a common library default.** If the PDF is present alongside this handoff, it is named `ATSIP-07-2026-0064_Proof_hi.pdf`; otherwise locate it only if the user supplies access.
 
@@ -398,9 +430,9 @@ Use the same original branch MLP architecture (`input -> 1024 -> 512 -> C`, subj
 | --- | --- | --- |
 | Genre (FMA-Medium, GTZAN, ISMIR04) | Maximize `validation_accuracy + validation_PR_AUC + validation_ROC_AUC`, each on **0–1** scale | Original regime: Adam `1e-4`, batch size 128, max 20 epochs; choose best checkpoint. |
 | MTG-Jamendo mood/theme | Minimize **validation weighted BCE loss**, matching the completed reproduction; report macro PR-AUC separately | Retained reproduction: Adam `1e-4`, batch size 8, max 200 epochs, validation-loss patience 10, min delta `1e-4`. |
-| Binary emotion (valence and arousal) | Planned shared validation-loss recipe; verify binary loss/targets when implementing the task | `emotion_recognition.yaml` inherits the same 200-epoch shared defaults; no binary trainer is wired yet. |
+| Binary emotion (valence and arousal) | PMEmo and DEAM: minimum validation weighted BCE; separate classifier per target | Same 200-epoch/Adam `1e-4`/batch-8 recipe, patience 10, min delta `1e-4`; unimplemented datasets need explicit adapters. |
 
-Jamendo's rule now retains the completed reproduction protocol; binary-emotion training remains to be implemented and checked. A metric change must be implemented **for every model within the same dataset/target**, including the original mixture-only baseline; never mix checkpoints selected under different criteria in one comparison. Fix conventions for macro/micro/weighted AUCs and F1, ties, invalid one-class AUC cases, and validation-selected prediction thresholds. Do not tune/checkpoint on test data.
+Jamendo retains the completed reproduction protocol; PMEmo and DEAM share its fitting loop through the same binary metric adapter. Other binary-emotion datasets still need implementation review. A metric change must be implemented **for every model within the same dataset/target**, including the original mixture-only baseline; never mix checkpoints selected under different criteria in one comparison. Fix conventions for macro/micro/weighted AUCs and F1, ties, invalid one-class AUC cases, and validation-selected prediction thresholds. Do not tune/checkpoint on test data.
 
 ## G. Five-seed evaluation and results reporting
 
