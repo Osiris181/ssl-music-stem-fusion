@@ -16,9 +16,22 @@ feature caches and their reader identity remain unchanged.
 Its `mid_fusion.yaml` inherits the same PMEmo binary model/optimization recipe,
 with native 1-9 annotations thresholded directly at 5 (no score normalization),
 seven conditions, two separate targets and five seeds.
+Its `late_fusion.yaml` uses the same recipe with independent matched ensembles
+and stem-only rows, reusing configured mid mixture references without changing
+their code/checkpoint identities.
 
 [EmoMusic](emomusic/README.md) uses the same rules and shared DEAM scheduler,
 with EmoMusic mixtures, its copied splits and matching existing DEAM stems.
+It now uses the same `prepare_manifest.py` feature/separation purposes and
+shared separation backend, preserving existing stem destinations and feature
+reader identities. Binary training is not enabled by these preparation presets.
+Its `mid_fusion.yaml` inherits the same binary-emotion training profile and
+seven-condition/five-seed recipe as DEAM/PMEmo. Native scores use high >= 5
+without normalization or column swapping; the annotation-column provenance
+caveat remains unresolved and documented in its guide.
+Its `late_fusion.yaml` uses the same DEAM/PMEmo branch/ensemble settings,
+including position-paired seeds, configured protected mid references and all
+five standalone stems without extra fits.
 
 [FMA-Medium](fma_medium/README.md), [GTZAN](gtzan/README.md), and
 [ISMIR04](ismir04/README.md) task files reference shared feature and

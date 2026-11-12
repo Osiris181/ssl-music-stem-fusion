@@ -1,0 +1,23 @@
+DEAM: binary valence | MERT + source-specific chord/key mid-fusion
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Ground truth: original 1-9 score >= 5 is high; lower scores are low. No score normalization.
+Checkpoint: minimum validation weighted BCE; threshold: validation macro-F1 grid, ties to lowest.
+Accuracy is track-level; macro metrics average low and high classes. PR-AUC means average precision.
+Shared chord Transformer; controls repeat the complete encoded mixture vector.
+
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 77.7778 +/- 0.5856 | 0.7766 +/- 0.0056 | 0.8707 +/- 0.0016 | 0.8694 +/- 0.0018
+repeated_mixture_4 | 77.2593 +/- 0.6197 | 0.7711 +/- 0.0060 | 0.8693 +/- 0.0042 | 0.8681 +/- 0.0041
+repeated_mixture_5 | 77.1852 +/- 0.7680 | 0.7711 +/- 0.0077 | 0.8691 +/- 0.0044 | 0.8678 +/- 0.0044
+repeated_mixture_6 | 77.7037 +/- 0.5493 | 0.7749 +/- 0.0058 | 0.8698 +/- 0.0048 | 0.8687 +/- 0.0050
+mixture_guitar_drums_piano | 75.7037 +/- 1.1295 | 0.7558 +/- 0.0116 | 0.8571 +/- 0.0064 | 0.8578 +/- 0.0060
+mixture_guitar_drums_piano_bass | 75.9259 +/- 1.4344 | 0.7575 +/- 0.0141 | 0.8535 +/- 0.0050 | 0.8518 +/- 0.0030
+mixture_all_five_stems | 75.4815 +/- 0.6086 | 0.7523 +/- 0.0068 | 0.8542 +/- 0.0027 | 0.8521 +/- 0.0029
+
+Paired differences: fusion minus its matched repeated-mixture control.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - repeated_mixture_4 | -1.5556 +/- 0.9587 | -0.0153 +/- 0.0086 | -0.0123 +/- 0.0046 | -0.0103 +/- 0.0038
+mixture_guitar_drums_piano_bass - repeated_mixture_5 | -1.2593 +/- 1.4953 | -0.0136 +/- 0.0141 | -0.0157 +/- 0.0021 | -0.0161 +/- 0.0026
+mixture_all_five_stems - repeated_mixture_6 | -2.2222 +/- 0.7407 | -0.0226 +/- 0.0081 | -0.0157 +/- 0.0046 | -0.0166 +/- 0.0060

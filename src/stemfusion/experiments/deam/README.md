@@ -1,4 +1,4 @@
-# DEAM preparation and mid-fusion experiments
+# DEAM preparation and fusion experiments
 
 Prepare separation jobs, frozen MERT embeddings and BTC/music21 chord/key
 descriptors, then train separate binary valence/arousal classifiers using the
@@ -14,6 +14,7 @@ labels or replace old features; training applies the native-score rule below.
 | `extract_mert.py` | Save all 12 frozen MERT transformer layers for every retained 30-second segment. |
 | `extract_chords_keys.py` | Extract whole-track BTC chords, generated MIDI, music21 key and normalized chords independently for each source. |
 | `train_mid.py` | Seven mid-fusion conditions, separate targets and five seeds through the shared Music2Emo fitter and binary metrics. |
+| `train_late.py` | Independent position-paired branches, matched mixture ensembles and five standalone stem rows through the same fitter and binary ensemble evaluator as PMEmo. |
 
 Presets are in `configs/experiments/deam/`. All relative YAML paths resolve
 against the YAML file's parent directory, not the shell's working directory.
@@ -291,3 +292,84 @@ Completed compatible models are verified/reused automatically; interrupted
 runs resume from `last.pt`. Changed settings or inputs raise an error. Use
 an isolated output root for changed settings; `--overwrite` is explicit.
 `--output-dir` also redirects summaries unless `--summary-dir` is supplied.
+
+## Late-fusion training
+
+Once mid-fusion training has finished, use the same uv environment and run
+from this directory:
+
+```bash
+python train_late.py --dry-run
+python train_late.py --validate-only
+python train_late.py
+```
+
+Equivalent installed command: `stemfusion train deam late-fusion`. Both targets
+and all five outer seeds run by default. The same subset and checksum arguments
+are supported, for example:
+
+```bash
+python train_late.py --target valence --seed 32 --run mixture_ensemble_4
+python train_late.py --target arousal --run guitar_only
+```
+
+The native score rule stays **high >= 5, low < 5**, without normalization.
+Model architecture, sampler, optimizer, weighted BCE, training-only prevalence,
+early stopping, checkpoint selection and binary metrics are the same as mid
+fusion and PMEmo. New branch fitting calls the exact shared
+`training/music2emo.py::fit_model`; ensemble evaluation calls the exact shared
+`training/emotion_late_fusion.py::assemble_ensemble`, with no DEAM-specific
+optimizer or aggregation implementation.
+
+For each target/outer seed, use eleven independent classifiers: six mixture
+branches and one per guitar/drums/piano/bass/vocals. Mixture branch 1 reuses the
+selected mid-fusion `mixture_only` model and its validation threshold. Its root
+is explicitly configured by `reference_output_dir` in `late_fusion.yaml`;
+there is no hardcoded trained-model path in Python. Incompatible references
+raise an error. Missing compatible references may be fitted/resumed with the
+same mid-fusion recipe, so do not run mid and late training concurrently in
+the same reference directory. Even late `--overwrite` never overwrites an
+existing mid reference.
+
+With all ten references complete, the full late run trains **100 new branch
+models**: ten additional branches x five outer seeds x two targets. Reference
+reuse adds no training; missing references can add up to ten fits.
+
+Seeds match PMEmo, Jamendo and the genre experiments. Outer seeds are
+**32, 64, 128, 256, 512**. Position 0 uses the outer seed; positions 1-5 use
+the first 32 SHA256 bits of `stemfusion-phase2:<outer>:<index>`. Each stem is
+paired with the corresponding independently trained mixture position's seed.
+
+Report twelve conditions per target/outer seed: mixture only; independent
+M x 4/5/6 ensembles; M+G+D+P, +B and +V ensembles; five standalone stem rows.
+Every ensemble sums selected raw logits, then applies sigmoid, rather than
+voting or averaging probabilities. Select each ensemble's prediction threshold
+on validation macro F1 (the same 101-point grid, ties to lowest) and freeze it
+for test. No ensemble weights or ensemble-specific checkpoints are fitted.
+Stem-only rows reuse the same selected branches and their thresholds without
+extra training. The mean/sample SD comes from the same five outer-seed runs.
+
+Outputs stay separate from mid fusion:
+
+```text
+outputs/deam/late_fusion/<target>/
+  branches/<branch_id>/seed_<actual_training_seed>/
+  ensembles/<condition>/seed_<outer_seed>/
+outputs/deam/summary_late_fusion_valence.{json,txt}
+outputs/deam/summary_late_fusion_arousal.{json,txt}
+```
+
+New branches save the same best/last/ranked checkpoints and prediction files
+as mid fusion. The terminal and TXT summaries include stem-only rows; JSON
+retains branch provenance, per-run metrics and paired comparisons. Matching
+completed runs are verified/reused and compatible interrupted branches resume.
+Subset runs use distinct summary filenames, avoiding replacement of full-run
+summaries.
+
+`--output-dir` redirects late outputs and, unless explicitly supplied, summaries
+to that directory and references to a separate sibling `<output_dir_name>_reference`.
+Use `--reference-output-dir /path/to/mid_fusion` explicitly when reusing another
+mid root. Reference and late roots must not overlap. Payload checksums default
+on; `--no-verify-checksums` has the same mandatory structural checks and finite
+cache-edit limitation as mid fusion. Validation-only does not fit models or
+write outputs; dry-run resolves only the schedule.

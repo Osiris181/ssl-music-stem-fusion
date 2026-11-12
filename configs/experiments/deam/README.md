@@ -8,6 +8,7 @@
 | `mert.yaml` | Shared pinned MERT profile, retained 30-second tails and mixture-duration stem alignment. |
 | `chords_keys.yaml` | Shared BTC/music21 descriptors, independent per source, with bounded CQT retries. |
 | `mid_fusion.yaml` | Same PMEmo model/fitting recipe, seven conditions and five seeds for each target; native 1-9 scores use high >= 5, low < 5 without normalization. |
+| `late_fusion.yaml` | Same recipe with independent paired-seed branches, twelve reports including stem-only, logit-sum ensembles and an explicit protected mid-reference root. |
 
 See the [dataset guide](../../../src/stemfusion/experiments/deam/README.md)
 for commands and output locations. Paths are relative to the YAML file, not

@@ -1,0 +1,34 @@
+EMOMUSIC: binary arousal | MERT + source-specific chord/key unweighted late fusion
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Ground truth: original 1-9 score >= 5 is high; lower scores are low. No score normalization.
+Each branch: minimum validation weighted BCE checkpoint; ensembles sum raw logits, then sigmoid.
+Threshold: validation macro-F1 grid, ties to lowest; frozen for test.
+Accuracy is track-level; macro metrics average low/high. PR-AUC means average precision.
+Mixture reference reuses mid fusion; stem-only rows reuse the selected stem branches.
+
+Mixture reference and late-fusion ensembles
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 85.6000 +/- 1.2649 | 0.8557 +/- 0.0126 | 0.9366 +/- 0.0039 | 0.9397 +/- 0.0041
+mixture_ensemble_4 | 85.9200 +/- 0.4382 | 0.8591 +/- 0.0044 | 0.9385 +/- 0.0008 | 0.9415 +/- 0.0008
+mixture_ensemble_5 | 86.4000 +/- 0.5657 | 0.8639 +/- 0.0057 | 0.9378 +/- 0.0019 | 0.9393 +/- 0.0041
+mixture_ensemble_6 | 86.2400 +/- 0.6693 | 0.8623 +/- 0.0067 | 0.9305 +/- 0.0021 | 0.9225 +/- 0.0039
+mixture_guitar_drums_piano | 82.4000 +/- 1.1314 | 0.8222 +/- 0.0121 | 0.9095 +/- 0.0038 | 0.9083 +/- 0.0042
+mixture_guitar_drums_piano_bass | 83.8400 +/- 1.0431 | 0.8382 +/- 0.0104 | 0.9168 +/- 0.0013 | 0.9143 +/- 0.0035
+mixture_all_five_stems | 85.1200 +/- 0.7155 | 0.8511 +/- 0.0071 | 0.9151 +/- 0.0020 | 0.9123 +/- 0.0042
+
+Supporting stem-only results
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+guitar_only | 76.0000 +/- 2.5298 | 0.7598 +/- 0.0253 | 0.8461 +/- 0.0105 | 0.8470 +/- 0.0094
+drums_only | 76.9600 +/- 1.0431 | 0.7693 +/- 0.0104 | 0.8180 +/- 0.0065 | 0.8192 +/- 0.0064
+piano_only | 68.3200 +/- 1.6589 | 0.6679 +/- 0.0244 | 0.7930 +/- 0.0062 | 0.7830 +/- 0.0069
+bass_only | 77.1200 +/- 1.5595 | 0.7704 +/- 0.0154 | 0.8558 +/- 0.0099 | 0.8583 +/- 0.0114
+vocals_only | 67.0400 +/- 0.8764 | 0.6643 +/- 0.0077 | 0.7639 +/- 0.0092 | 0.7711 +/- 0.0078
+
+Paired differences: stem fusion minus its matched mixture ensemble.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - mixture_ensemble_4 | -3.5200 +/- 1.4533 | -0.0369 +/- 0.0154 | -0.0289 +/- 0.0039 | -0.0332 +/- 0.0040
+mixture_guitar_drums_piano_bass - mixture_ensemble_5 | -2.5600 +/- 0.6693 | -0.0257 +/- 0.0067 | -0.0210 +/- 0.0026 | -0.0250 +/- 0.0064
+mixture_all_five_stems - mixture_ensemble_6 | -1.1200 +/- 1.3387 | -0.0113 +/- 0.0133 | -0.0154 +/- 0.0025 | -0.0102 +/- 0.0053

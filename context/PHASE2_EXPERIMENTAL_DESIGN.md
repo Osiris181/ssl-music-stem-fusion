@@ -72,7 +72,8 @@ earlier Jamendo 500-epoch / validation-PR-AUC proposal below; the historical
 manuscript table is retained as historical evidence. Shared defaults now live
 in `configs/training/music2emo.yaml`, inherited by `mood_theme_tagging.yaml`
 and `emotion_recognition.yaml`. The latter now supports PMEmo mid and late fusion
-and DEAM mid fusion; other emotion datasets still need native-score/adaptor review.
+and DEAM/EmoMusic mid and late fusion. EmoMusic's supplied target
+columns are preserved; their provenance caveat remains unresolved.
 
 **PMEmo implementation decision (2026-11-11):** Preserve the supplied
 536/116/115 splits and existing aligned MERT/BTC/music21 caches. Original 0-1
@@ -104,8 +105,52 @@ not a claim about its historical regression loader. Mid fusion uses the exact
 PMEmo model/fitter, shared aligned MERT/BTC encoding/sampling, training-only
 positive prevalence, validation-loss selection/stopping, binary macro metrics,
 validation-only probability-threshold grid, seven conditions and five seeds.
-Existing PMEmo fitting modules/identities remain unchanged. DEAM late fusion
-is not enabled by this implementation; full production fitting is user-initiated.
+Existing PMEmo fitting modules/identities remain unchanged.
+
+**DEAM late-fusion decision (2026-11-12):** Retain that native-score rule and
+the exact PMEmo branch/ensemble implementation: same 512/256 binary classifier,
+shared fitter, optimization/stopping/checkpoints, source-position SHA256 branch
+seeds and frozen validation-selected prediction thresholds. Reuse the configured
+mid mixture reference, train the independent mixture/stem branches and sum
+their selected logits before sigmoid. Include five stem-only rows without new
+fits. Keep new outputs separate and references protected from overwrite; do
+not run mid and late fitting concurrently against the same reference directory.
+Completed DEAM mid and PMEmo/Jamendo scientific identities stay unchanged.
+Full production fitting is user-initiated; implementation tests are not results.
+
+**EmoMusic mid-fusion implementation (2026-11-12):** Preserve the supplied
+495/124/125 partitions, existing MERT/BTC/music21 caches, annotation column
+names and original 1-9 scores. Apply the same native midpoint as DEAM:
+**high >= 5, low < 5**, independently for valence/arousal, without score
+normalization, column swapping or a fitted median. The supplied EmoMusic and
+DEAM metadata have an unresolved valence/arousal column-correspondence
+discrepancy; retaining the supplied columns does not resolve their provenance
+or establish correct target semantics. Interpret target-specific results with
+that limitation until verified. This is our binary adaptation, not a claim
+that the author's original regression loader defined these labels.
+Use the same shared binary model/fitter/sampler/metrics, 200-epoch/Adam
+1e-4/batch-8 recipe, validation weighted-BCE checkpoint/stopping, training-only
+target prevalence, validation-only probability-threshold grid, seven matched
+mid-fusion conditions and outer seeds 32, 64, 128, 256, 512. Both targets
+require 70 fits total. EmoMusic's cache/scheduling algorithm is parity-tested
+against DEAM/PMEmo; existing fingerprinted DEAM/PMEmo modules remain untouched
+while training runs. No production fit is started by implementation/validation.
+
+**EmoMusic late-fusion implementation (2026-11-12):** Retain the same supplied
+columns, native >= 5 labels, partitions and feature caches as its mid run;
+the target-column provenance caveat above remains unresolved. Use the exact
+DEAM/PMEmo branch schedule, shared fitter/model/binary evaluator, five outer
+seeds and position-paired SHA256 branch seeds. Reuse the configured mid
+mixture reference; train five further independent mixtures and five stem
+branches per target/outer seed. Sum selected raw logits before sigmoid, then
+select only probability thresholds on validation. Report matched mixture
+ensembles, three stem fusions and five standalone stems without extra fits.
+With all references complete, both targets/five seeds require 100 new branch
+fits; up to ten references may be fitted if missing. Keep output/reference
+roots separate, protect mid references from late overwrite, and finish mid
+training before late fitting against the same root. Adding the late adapter
+does not change EmoMusic mid or existing DEAM/PMEmo scientific identities.
+Implementation tests and read-only cache validation are not production results.
 
 **Source and status conventions.** The facts marked **[MANUSCRIPT]** below are documented in the original submitted manuscript *Enhancing Music Classification via Source Separation and Feature Fusion* (especially Sections **3.1–3.4 and 4.1–4.4**). They describe the **historical implementation as reported**, not proof that every current code path agrees. **[DECIDED]** identifies a revision decision made with the author. **[VERIFY]** is not specified precisely enough in the manuscript or conversation; inspect the existing implementation before writing a new config. **Do not silently replace an unknown with a common library default.** If the PDF is present alongside this handoff, it is named `ATSIP-07-2026-0064_Proof_hi.pdf`; otherwise locate it only if the user supplies access.
 
@@ -205,7 +250,7 @@ The following are dataset characteristics and split descriptions **reported in t
 | **ISMIR04 genre** | 1,458 full tracks, **6** genre labels; originally **729 training + 729 test** in the contest description | **[USER-REPORTED]** existing `ismir04_genre` **train/validation/test CSVs**; **[VERIFY]** provenance and whether validation is drawn only from the original training portion, no duplicate tracks; author prefers to retain existing split |
 | **MTG-Jamendo mood/theme** | **17,982** tracks, **56** simultaneous mood/theme labels; multi-label, imbalanced | **[MANUSCRIPT]** official train/validation/test; **[VERIFY]** exact tag list and manifest correspondence |
 | **PMEmo** | **794** clips with continuously annotated valence/arousal | **[MANUSCRIPT]** use splits from Kang & Herremans; **[VERIFY]** precise binary-label construction/thresholds and IDs |
-| **EmoMusic** | **744** clips, **45 s**, emotion annotations | **[MANUSCRIPT]** use splits from Kang & Herremans; **[VERIFY]** binary-label construction/thresholds and IDs |
+| **EmoMusic** | **744** clips, **45 s**, emotion annotations | **[MANUSCRIPT]** use splits from Kang & Herremans; **[DECIDED]** preserve supplied 495/124/125 IDs/columns and use native >= 5 binary midpoint; **[VERIFY]** annotation-column provenance |
 | **DEAM** | **1,802** clips, second-by-second valence/arousal; manuscript uses **per-clip mean** label | **[MANUSCRIPT]** use splits from Kang & Herremans; **[VERIFY]** mean interval, threshold(s), IDs |
 
 - **Genre targets:** one mutually exclusive class per track; use saved class-index mapping, not an arbitrary new alphabetical ordering. **[MANUSCRIPT / VERIFY mapping]**
@@ -430,9 +475,9 @@ Use the same original branch MLP architecture (`input -> 1024 -> 512 -> C`, subj
 | --- | --- | --- |
 | Genre (FMA-Medium, GTZAN, ISMIR04) | Maximize `validation_accuracy + validation_PR_AUC + validation_ROC_AUC`, each on **0–1** scale | Original regime: Adam `1e-4`, batch size 128, max 20 epochs; choose best checkpoint. |
 | MTG-Jamendo mood/theme | Minimize **validation weighted BCE loss**, matching the completed reproduction; report macro PR-AUC separately | Retained reproduction: Adam `1e-4`, batch size 8, max 200 epochs, validation-loss patience 10, min delta `1e-4`. |
-| Binary emotion (valence and arousal) | PMEmo and DEAM: minimum validation weighted BCE; separate classifier per target | Same 200-epoch/Adam `1e-4`/batch-8 recipe, patience 10, min delta `1e-4`; unimplemented datasets need explicit adapters. |
+| Binary emotion (valence and arousal) | PMEmo, DEAM and EmoMusic mid/late branches: minimum validation weighted BCE; separate classifier per target | Same 200-epoch/Adam `1e-4`/batch-8 recipe, patience 10, min delta `1e-4`; late ensembles reuse selected branches. |
 
-Jamendo retains the completed reproduction protocol; PMEmo and DEAM share its fitting loop through the same binary metric adapter. Other binary-emotion datasets still need implementation review. A metric change must be implemented **for every model within the same dataset/target**, including the original mixture-only baseline; never mix checkpoints selected under different criteria in one comparison. Fix conventions for macro/micro/weighted AUCs and F1, ties, invalid one-class AUC cases, and validation-selected prediction thresholds. Do not tune/checkpoint on test data.
+Jamendo retains the completed reproduction protocol; PMEmo, DEAM and EmoMusic mid/late branches share its fitting loop through the same binary metric adapter. A metric change must be implemented **for every model within the same dataset/target**, including the original mixture-only baseline; never mix checkpoints selected under different criteria in one comparison. Fix conventions for macro/micro/weighted AUCs and F1, ties, invalid one-class AUC cases, and validation-selected prediction thresholds. Do not tune/checkpoint on test data.
 
 ## G. Five-seed evaluation and results reporting
 

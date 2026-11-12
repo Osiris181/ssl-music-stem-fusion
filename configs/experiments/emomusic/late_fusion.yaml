@@ -1,0 +1,35 @@
+dataset: emomusic
+training_profile: ../../training/emotion_recognition.yaml
+task:
+  score_scale: one_nine
+  label_threshold: 5.0
+paths:
+  manifest: ../../../data/manifests/emomusic/emomusic_features.jsonl
+  mert_dir: ../../../data/features/emomusic/mert_v1_95m
+  harmony_dir: ../../../data/features/emomusic/harmony
+  chord_root: ../../../data/manifests/emomusic/music2emotion/chord_root.json
+  chord_attr: ../../../data/manifests/emomusic/music2emotion/chord_attr.json
+  output_dir: ../../../outputs/emomusic/late_fusion
+  summary_dir: ../../../outputs/emomusic
+  reference_output_dir: ../../../outputs/emomusic/mid_fusion
+features:
+  fusion: sum_logits_then_sigmoid
+  harmony_encoder: independent_per_branch
+  training_alignment: independent_per_branch
+reproducibility:
+  branch_seed: sha256_position_paired
+runtime:
+  verify_checksums: true
+runs:
+  mixture_only: {kind: reference, sources: [mixture]}
+  mixture_ensemble_4: {kind: mixture_ensemble, sources: [mixture], matched_sources: 4}
+  mixture_ensemble_5: {kind: mixture_ensemble, sources: [mixture], matched_sources: 5}
+  mixture_ensemble_6: {kind: mixture_ensemble, sources: [mixture], matched_sources: 6}
+  mixture_guitar_drums_piano: {kind: fusion, sources: [mixture, guitar, drums, piano]}
+  mixture_guitar_drums_piano_bass: {kind: fusion, sources: [mixture, guitar, drums, piano, bass]}
+  mixture_all_five_stems: {kind: fusion, sources: [mixture, guitar, drums, piano, bass, vocals]}
+  guitar_only: {kind: stem_only, sources: [guitar]}
+  drums_only: {kind: stem_only, sources: [drums]}
+  piano_only: {kind: stem_only, sources: [piano]}
+  bass_only: {kind: stem_only, sources: [bass]}
+  vocals_only: {kind: stem_only, sources: [vocals]}

@@ -44,7 +44,10 @@ from stemfusion.experiments.deam import prepare_manifest as deam_manifest
 from stemfusion.experiments.deam import extract_mert as deam_mert
 from stemfusion.experiments.deam import extract_chords_keys as deam_chords_keys
 from stemfusion.experiments.deam import train_mid as deam_mid
-from stemfusion.experiments.emomusic import prepare_feature_manifest as emomusic_manifest
+from stemfusion.experiments.deam import train_late as deam_late
+from stemfusion.experiments.emomusic import train_mid as emomusic_mid
+from stemfusion.experiments.emomusic import train_late as emomusic_late
+from stemfusion.experiments.emomusic import prepare_manifest as emomusic_manifest
 from stemfusion.experiments.emomusic import extract_mert as emomusic_mert
 from stemfusion.experiments.emomusic import extract_chords_keys as emomusic_chords_keys
 
@@ -98,7 +101,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Compatibility alias for deam-manifest."))
     deam_manifest.configure_parser(data_commands.add_parser("deam-separation-manifest",
         help="Compatibility alias for deam-manifest --purpose separation."), purpose="separation")
-    emomusic_manifest.configure_parser(data_commands.add_parser("emomusic-feature-manifest"))
+    emomusic_manifest.configure_parser(data_commands.add_parser("emomusic-manifest"))
+    emomusic_manifest.configure_parser(data_commands.add_parser("emomusic-feature-manifest",
+        help="Compatibility alias for emomusic-manifest."))
+    emomusic_manifest.configure_parser(data_commands.add_parser("emomusic-separation-manifest",
+        help="Compatibility alias for emomusic-manifest --purpose separation."), purpose="separation")
 
     extract_parser = commands.add_parser(
         "extract",
@@ -173,6 +180,11 @@ def build_parser() -> argparse.ArgumentParser:
     deam_train = datasets.add_parser("deam", help="DEAM separate binary valence/arousal experiments using native 1-9 scores.")
     deam_training_methods = deam_train.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
     deam_mid.configure_parser(deam_training_methods.add_parser("mid-fusion"))
+    deam_late.configure_parser(deam_training_methods.add_parser("late-fusion"))
+    emomusic_train = datasets.add_parser("emomusic", help="EmoMusic separate binary valence/arousal experiments using supplied 1-9 scores.")
+    emomusic_training_methods = emomusic_train.add_subparsers(dest="training_method", required=True, parser_class=YAMLArgumentParser)
+    emomusic_mid.configure_parser(emomusic_training_methods.add_parser("mid-fusion"))
+    emomusic_late.configure_parser(emomusic_training_methods.add_parser("late-fusion"))
     return parser
 
 

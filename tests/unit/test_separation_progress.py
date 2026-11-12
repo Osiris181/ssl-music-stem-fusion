@@ -233,7 +233,7 @@ class SeparationProgressTests(unittest.TestCase):
 
     def test_all_dataset_scripts_keep_readable_summary_on_stdout_and_progress_on_stderr(self):
         manifest, _ = self.manifest(1)
-        for dataset in ("fma_medium", "gtzan", "ismir04", "mtg_jamendo", "pmemo", "deam"):
+        for dataset in ("fma_medium", "gtzan", "ismir04", "mtg_jamendo", "pmemo", "deam", "emomusic"):
             with self.subTest(dataset=dataset):
                 entry = importlib.import_module(f"stemfusion.experiments.{dataset}.separation")
                 stdout, stderr = io.StringIO(), io.StringIO()

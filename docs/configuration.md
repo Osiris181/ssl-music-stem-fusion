@@ -24,7 +24,13 @@ separation, and selecting a run does not launch a batch of experiments.
 | `data deam-manifest` (default `--purpose features`) | `configs/experiments/deam/feature_manifest.yaml` |
 | `data deam-manifest --purpose separation` | `configs/experiments/deam/separation_manifest.yaml` |
 | `train deam mid-fusion` | `configs/experiments/deam/mid_fusion.yaml`, same binary model/fitter with native 1-9 midpoint 5 and no score normalization |
+| `train deam late-fusion` | `configs/experiments/deam/late_fusion.yaml`, same native labels/training profile, independent branch conditions and configured mid-reference root |
 | `separate htdemucs --config configs/experiments/deam/separation.yaml` | DEAM paths inheriting the same shared HT-Demucs profile |
+| `data emomusic-manifest` (default `--purpose features`) | `configs/experiments/emomusic/feature_manifest.yaml` |
+| `data emomusic-manifest --purpose separation` | `configs/experiments/emomusic/separation_manifest.yaml` |
+| `train emomusic mid-fusion` | `configs/experiments/emomusic/mid_fusion.yaml`, same shared binary recipe and native >= 5 labels; supplied columns unchanged, column provenance caveat unresolved |
+| `train emomusic late-fusion` | `configs/experiments/emomusic/late_fusion.yaml`, same binary settings with independent matched branches, shared logit-sum evaluation and configured protected mid references |
+| `separate htdemucs --config configs/experiments/emomusic/separation.yaml` | EmoMusic paths retaining the shared DEAM stem root, with the same HT-Demucs profile |
 | `extract mtg-jamendo chords-keys` | `configs/experiments/mtg_jamendo/chords_keys.yaml`, paired with MERT |
 | `extract mtg-jamendo mert` | `configs/experiments/mtg_jamendo/mert.yaml`, inheriting the pinned MERT profile |
 | `train mtg-jamendo author-reproduction` | `configs/experiments/mtg_jamendo/reproduction.yaml`, isolated five-seed mixture-only baseline with a 200-epoch cap |
@@ -62,6 +68,12 @@ DEAM uses the same flow with `data deam-manifest` and `--purpose separation`.
 and `data deam-separation-manifest` defaults to separation. The separation
 purpose reads only the supplied split IDs; the original feature builder and
 its 1-9 annotations stay unchanged. The direct script is `prepare_manifest.py`.
+
+EmoMusic follows the same purpose-aware entry and aliases:
+`data emomusic-manifest`, `data emomusic-feature-manifest` and
+`data emomusic-separation-manifest`. Both purposes preserve the current
+EmoMusic mixtures and same-ID DEAM stem destinations. Preparation does not
+resolve the annotation-provenance question or enable training.
 
 Each extraction entry point selects its dataset's default task YAML and uses
 the shared parser in `experiments/_extraction.py`. The shared

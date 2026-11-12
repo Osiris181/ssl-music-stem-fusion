@@ -1,0 +1,7 @@
+# Preserve the intentional shared DEAM stem root; do not overwrite existing stems.
+dataset: emomusic
+separator_profile: ../../separators/htdemucs_6s.yaml
+paths:
+  manifest: ../../../data/manifests/emomusic/emomusic_separation.jsonl
+  output_root: /mnt/HDD/osiris181/DEAM_separated
+  report: ../../../outputs/emomusic/separation_report_htdemucs.json

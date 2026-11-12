@@ -148,12 +148,16 @@ _METADATA = {
     "suggested_output_directory",
 }
 _PATHS = {
+    "deam_late_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir", "reference_output_dir"},
     "deam_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir"},
+    "emomusic_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir"},
+    "emomusic_late_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir", "reference_output_dir"},
     "emotion_late_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir", "reference_output_dir"},
     "emotion_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "chord_root", "chord_attr", "output_dir", "summary_dir"},
     "jamendo_late_fusion": {"manifest", "mert_dir", "harmony_dir", "tag_list", "author_metadata", "output_dir", "summary_dir", "reference_output_dir"},
     "jamendo_mid_fusion": {"manifest", "mert_dir", "harmony_dir", "tag_list", "author_metadata", "output_dir", "summary_dir", "reference_output_dir"},
     "emomusic_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "mixture_root", "htdemucs_root", "output"},
+    "emomusic_separation_manifest": {"train_split", "validation_split", "test_split", "track_list", "mixture_root", "output_root", "output"},
     "deam_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "mixture_root", "htdemucs_root", "output"},
     "deam_separation_manifest": {"train_split", "validation_split", "test_split", "track_list", "mixture_root", "output_root", "output"},
     "pmemo_feature_manifest": {"train_split", "validation_split", "test_split", "annotations", "metadata", "mixture_root", "htdemucs_root", "output"},
@@ -337,7 +341,7 @@ def load_configuration(
 
     data = load(path, ())
     yaml_snapshot = json.loads(json.dumps(data, default=str))
-    if role in {"emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
+    if role in {"emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion", "deam_late_fusion", "emomusic_mid_fusion", "emomusic_late_fusion"}:
         defaults = dict(data.pop("paths", {}))
         runs = data.pop("runs", None)
         flat = _flatten(data)
@@ -377,9 +381,11 @@ def load_configuration(
                     "runtime.verify_checksums": ("verify_checksums", "bool"),
                     "execution.resume": ("resume", "bool"), "execution.overwrite": ("overwrite", "bool"),
                     "execution.validate_only": ("validate_only", "bool"), "execution.dry_run": ("dry_run", "bool")}
-        if role == "deam_mid_fusion":
+        if role in {"deam_mid_fusion", "deam_late_fusion"}:
             fixed.update({"dataset": "deam", "task.score_scale": "one_nine", "task.label_threshold": 5.0})
-        late_fusion = role == "emotion_late_fusion"
+        if role in {"emomusic_mid_fusion", "emomusic_late_fusion"}:
+            fixed.update({"dataset": "emomusic", "task.score_scale": "one_nine", "task.label_threshold": 5.0})
+        late_fusion = role in {"emotion_late_fusion", "deam_late_fusion", "emomusic_late_fusion"}
         if late_fusion:
             fixed.update({"features.fusion": "sum_logits_then_sigmoid",
                           "features.harmony_encoder": "independent_per_branch",
@@ -629,7 +635,7 @@ def load_configuration(
             defaults[destination] = _coerce(flat[name], kind, name)
         return defaults, {"config_files": [{"path": name, "sha256": sha} for name, sha in files.items()],
                           "yaml_settings_before_cli_overrides": yaml_snapshot, "cli_overrides": {}}
-    if role in {"pmemo_separation_manifest", "deam_separation_manifest"}:
+    if role in {"pmemo_separation_manifest", "deam_separation_manifest", "emomusic_separation_manifest"}:
         defaults = dict(data.pop("paths", {}))
         flat = _flatten(data)
         settings = {"execution.all_tracks": ("all_tracks", "bool"),
@@ -756,7 +762,7 @@ def load_configuration(
     classes = {"fma_medium": 16, "gtzan": 10, "ismir04": 6}
     if role == "separation":
         classes["mtg_jamendo"] = 56
-    if dataset not in classes and not (role == "separation" and dataset in {"pmemo", "deam"}):
+    if dataset not in classes and not (role == "separation" and dataset in {"pmemo", "deam", "emomusic"}):
         raise ConfigurationError(f"Unsupported dataset configuration: {dataset}")
     command_dataset = dataset.replace("_", "-")
     expected_command = {
@@ -766,7 +772,7 @@ def load_configuration(
     }.get(role)
     if metadata.get("command", expected_command) != expected_command:
         raise ConfigurationError(f"Configuration command does not match {expected_command}.")
-    if dataset in {"pmemo", "deam"} and "number_of_classes" in metadata:
+    if dataset in {"pmemo", "deam", "emomusic"} and "number_of_classes" in metadata:
         raise ConfigurationError("Emotion separation is label-independent; omit number_of_classes.")
     if dataset in classes and metadata.get("number_of_classes", classes[dataset]) != classes[dataset]:
         raise ConfigurationError(f"{dataset} configurations must describe {classes[dataset]} classes.")
@@ -883,7 +889,7 @@ class YAMLArgumentParser(argparse.ArgumentParser):
         selector.add_argument("--config", type=Path)
         if self.yaml_purposes is not None:
             selector.add_argument("--purpose", choices=tuple(self.yaml_purposes), default=self.get_default("purpose"))
-        if self.yaml_role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
+        if self.yaml_role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion", "deam_late_fusion", "emomusic_mid_fusion", "emomusic_late_fusion"}:
             selector.add_argument("--run")
         selected, _ = selector.parse_known_args(arguments)
         role, preset = self.yaml_role, self.yaml_default
@@ -936,7 +942,7 @@ def configure_yaml(parser: argparse.ArgumentParser, role: str, preset: str) -> N
         "--config", type=Path,
         help=f"YAML preset or experiment file. Default preset: configs/{preset}",
     )
-    if role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion"}:
+    if role in {"mid_fusion", "late_fusion", "jamendo_mid_fusion", "jamendo_late_fusion", "emotion_mid_fusion", "emotion_late_fusion", "deam_mid_fusion", "deam_late_fusion", "emomusic_mid_fusion", "emomusic_late_fusion"}:
         parser.add_argument("--run", help="Run one named condition; omit to run the complete YAML matrix.")
     if not isinstance(parser, YAMLArgumentParser):
         raise TypeError("Public YAML-configured tasks require YAMLArgumentParser.")

@@ -25,9 +25,23 @@ HT-Demucs backend and exact existing stem destinations; the fingerprinted DEAM
 feature reader and extracted features remain unchanged.
 `train_mid.py` uses `_emotion_mid_fusion.py` and the same PMEmo Music2Emo fitter,
 binary metrics, seven conditions and five seeds, with DEAM's native >= 5 labels.
+`train_late.py` calls `_emotion_native_late_fusion.py` for the same independent
+branch/ensemble schedule as PMEmo, reusing DEAM mid references and reporting
+all five standalone stems through the unchanged shared binary evaluator.
 
 [EmoMusic](emomusic/README.md) uses these same shared implementations with
 its supplied partitions, EmoMusic mixtures and matching DEAM stem folders.
+`prepare_manifest.py` combines feature/separation purposes, while
+`separation.py` calls the same shared HT-Demucs backend. The feature reader,
+existing caches and intentionally shared stem paths remain unchanged.
+`train_mid.py` calls `_emomusic_mid_fusion.py` with DEAM/PMEmo-equivalent
+loading/scheduling and the same shared model/fitter/metrics. It retains native
+scores, applies high >= 5 per supplied target column, and uses seven conditions
+and five seeds. The annotation-column provenance caveat remains documented
+in the dataset guide; no automatic column exchange is applied.
+`train_late.py` calls `_emomusic_late_fusion.py` for the same DEAM/PMEmo
+independent branch schedule and shared binary ensemble evaluator, reusing
+mid mixture-only references and reporting all five standalone stems.
 
 [FMA-Medium](fma_medium/README.md), [GTZAN](gtzan/README.md), and
 [ISMIR04](ismir04/README.md) provide dataset entry points. ISMIR04 also
@@ -75,7 +89,10 @@ Shared orchestration is:
 | `_mood_theme_tagging.py` | MERT/harmony mood/theme experiment CLI, mid/late scheduling, protected reuse, and reporting; currently used by MTG-Jamendo. |
 | `_emotion_recognition.py` | MERT/harmony binary-emotion mid-fusion CLI, two-target scheduling and reporting; currently used by PMEmo with the same fitting loop. |
 | `_emotion_mid_fusion.py` | Native-score emotion mid-fusion adapters and scheduling; DEAM uses its reviewed original-score boundary without modifying PMEmo's running controller. |
+| `_emomusic_mid_fusion.py` | EmoMusic native-score mid fusion, parity-tested against DEAM/PMEmo with the same shared model/fitter; supplied target columns are preserved and existing training identities are untouched. |
+| `_emomusic_late_fusion.py` | EmoMusic native-score late fusion; DEAM/PMEmo-equivalent scheduling/branches with shared fitting/evaluation, protected mid references and standalone stem reports. |
 | `_emotion_late_fusion.py` | Binary-emotion late-fusion CLI, paired independent branch scheduling, mid-reference reuse and per-target ensemble/stem-only reporting. |
+| `_emotion_native_late_fusion.py` | Native-score DEAM late-fusion adapter; same branch schedule/fitter/evaluator as PMEmo without modifying existing scientific identities. |
 | `_mid_controls.py` | Construct exact repeated-mixture inputs and fit parameter-count/input-width matched controls through the unchanged trainer. |
 | `_stem_results.py` | Common standalone-branch validation and reporting. |
 

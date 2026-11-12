@@ -1,0 +1,14 @@
+# Same fixed split IDs and existing stem destinations as the feature manifest.
+dataset: emomusic
+paths:
+  train_split: ../../../data/manifests/emomusic/split/train.txt
+  validation_split: ../../../data/manifests/emomusic/split/validation.txt
+  test_split: ../../../data/manifests/emomusic/split/test.txt
+  track_list: null
+  mixture_root: /mnt/HDD/emoMusic/clips_45sec
+  output_root: /mnt/HDD/osiris181/DEAM_separated
+  output: ../../../data/manifests/emomusic/emomusic_separation.jsonl
+execution:
+  all_tracks: true
+  overwrite: false
+  dry_run: false

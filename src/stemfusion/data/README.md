@@ -30,6 +30,8 @@ Current implementation:
 | `deam.py` | Preserve supplied split IDs and 1-9 song-level valence/arousal means, validate numeric DEAM identities and bind existing audio for extraction without re-averaging or binarizing labels. |
 | `deam_separation.py` | Label-independent separation jobs from the same DEAM split IDs, following the PMEmo preparation policy without changing the feature reader/cache identity. |
 | `emomusic.py` | Preserve supplied EmoMusic split IDs and annotation columns; bind EmoMusic mixtures to same-ID DEAM stems without changing scores or generating binary labels. |
+| `emomusic_fusion.py` | DEAM/PMEmo-equivalent cache loading for EmoMusic, reusing the native target/cohort implementation with high >= 5 and unchanged supplied columns. No waveform/annotation rewrite; column provenance remains unresolved. |
+| `emomusic_separation.py` | Same label-independent separation preparation policy as DEAM/PMEmo, preserving fixed EmoMusic IDs and existing shared DEAM stem destinations without modifying the feature reader. |
 
 The FMA builder writes JSON Lines records containing `track_id`, `split`,
 `genre`, `label`, and a `paths` mapping. It supports mixture-only manifests and

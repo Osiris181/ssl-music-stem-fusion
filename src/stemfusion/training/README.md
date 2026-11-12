@@ -40,9 +40,19 @@ mood/theme implementation retains the Music2Emo protocol; PMEmo binary mid-
 and late-fusion branches use the same fitter with a task adapter. Late fusion
 reuses completed mid mixture-only models; each target has separate labels,
 training prevalence, selected checkpoints and validation thresholds.
-DEAM mid fusion uses this same fitter/metric adapter and settings. Its dataset
+DEAM mid fusion and late branches use this same fitter/metric adapter and settings. Its dataset
 adapter preserves the original 1-9 scores and labels high >= 5, low < 5; it
 does not normalize scores or modify the running PMEmo fitting modules.
+DEAM late ensembles also use the exact `emotion_late_fusion.py` evaluator,
+including aligned logit summation, validation-only thresholds and artifact
+verification. No task-specific training math is duplicated in the adapter.
+EmoMusic mid fusion and late branches also use this exact fitter, model and binary metric adapter,
+with the same native >= 5 midpoint, seven conditions and five seeds as DEAM.
+Its supplied annotation columns are not exchanged; their provenance caveat
+is documented in the dataset guide. Adding its adapter does not modify
+fingerprinted DEAM/PMEmo fitting modules or invalidate their checkpoints.
+Its late ensembles also use the same `emotion_late_fusion.py` evaluator and
+position-paired schedule, preserving EmoMusic mid identities and checkpoints.
 
 The isolated Music2Emo mixture-only reproduction is implemented in
 `experiments/mtg_jamendo/reproduction.py`, with its model and
