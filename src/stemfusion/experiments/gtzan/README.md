@@ -10,8 +10,129 @@ and cache filenames.
 | `prepare_manifest.py` | Read provided split lists and bind retained tracks to local audio paths. |
 | `separation.py` | Run the shared HT-Demucs backend with GTZAN paths and WAV input discovery. |
 | `extraction.py` | Extract MusicFM embeddings with the shared encoder and audio policy. |
+| `extraction_cnn.py` | Extract Phase 3 frozen official MSD_musicnn features into a separate cache. |
 | `train_mid.py` | Run the standard mixture baseline, three capacity controls, and three stem-fusion conditions. |
+| `train_mid_cnn.py` | Run the same seven mid-fusion conditions using frozen CNN caches and the shared genre trainer. |
 | `train_late.py` | Run three mixture ensembles, three stem ensembles, and supporting standalone-stem reports. |
+
+## Phase 3 CNN extraction
+
+This is a separate extractor, not a replacement for MusicFM. It reuses the
+existing GTZAN manifest (499/250/250), labels, split assignments and six source
+paths. Configuration is `configs/experiments/gtzan/extraction_cnn.yaml`;
+YAML paths resolve relative to that file and CLI paths to the working directory.
+The reusable backend is `features/musicnn.py`. No new stem separation is needed.
+
+Use the isolated official TensorFlow environment, not the PyTorch training
+environment. Recreate the verified Python 3.12 runtime from the repository root:
+
+```bash
+UV_PROJECT_ENVIRONMENT="$PWD/musicnn" uv sync --project environments/musicnn --inexact
+uv pip install --python musicnn/bin/python --no-deps 'musicnn @ git+https://github.com/jordipons/musicnn.git@516acb2a0ff5ef73f64547898e018e793152c506'
+```
+
+The separate [environment project](../../../../../environments/musicnn/README.md)
+documents setup, activation and the dependency override. `--inexact` preserves
+the separately installed official package on later syncs.
+Do not recreate an already installed environment. The original package declares
+an obsolete NumPy `<1.17` requirement; the verified runtime deliberately uses
+NumPy 1.26.4. This is a documented dependency-metadata override; model source
+and weights are unchanged and checked by SHA256. `uv pip check` therefore
+reports this one known conflict. Do not resolve it by downgrading NumPy.
+
+From the repository root:
+
+```bash
+# Validate configuration and cohort without loading audio or TensorFlow.
+musicnn/bin/python src/stemfusion/experiments/gtzan/extraction_cnn.py --dry-run
+
+# Full extraction, resumable by rerunning the same command.
+musicnn/bin/python src/stemfusion/experiments/gtzan/extraction_cnn.py
+```
+
+With the musicnn environment activated, you can also run `python extraction_cnn.py`
+directly from this GTZAN directory. The entry point automatically supplies
+environment-local CUDA library paths and legacy Keras, restarting the Python
+process once before imports if necessary. No separate launcher is required;
+the existing launchers remain compatible. GPU memory defaults to 768 MB; CPU inference is explicitly
+available with `--device /CPU:0`. GPU errors never silently switch to CPU.
+`--limit-per-split 1 --output-dir /tmp/gtzan-cnn-test --report /tmp/gtzan-cnn-test/report.json`
+tests one track per split without writing into the production cache.
+
+The frozen standard `MSD_musicnn` checkpoint produces 200-dimensional
+penultimate vectors. Official mono 16 kHz log-mel processing is retained
+(512-point FFT, hop 256, 96 bins, float16 mel before log scaling). Consecutive
+187-frame patches have no overlap. Unlike the original extractor, which drops
+incomplete patches and fails on short clips, the final partial patch is retained
+and right-padded with zero log-mel values (silence). Every patch, including the
+final one, has equal weight in the track mean. This explicit adaptation can
+change results relative to the unmodified extractor.
+
+All sources are resampled first and aligned in memory to the original mixture's
+sample count: trim excess samples or zero-pad missing samples only within the
+configured 0.25-second tolerance; larger differences are reported as failures.
+This aligns analysis boundaries, not a measured waveform-latency correction.
+Audio files are never rewritten. Silent inputs remain valid. Spectrograms are
+computed over the full track; inference is batched and pooled by window count,
+not by batch means. Long-recording streaming remains future work.
+
+Caches: `data/features/gtzan/msd_musicnn/{split}/{source}/{track_id}.npz`.
+Each contains `embedding` (finite float32, shape 200) and JSON `metadata`,
+readable with `numpy.load(..., allow_pickle=False)`. Provenance records the
+manifest, implementation/checkpoint hashes, software versions, input file hash,
+sample/frame/window counts, alignment and padding policy. Reruns reuse valid
+matching caches; changed file size/mtime or settings fail compatibility checks.
+The fast resume check uses size/mtime, not a fresh content hash; the original
+content hash remains recorded for auditing. Use `--overwrite` only to replace
+caches deliberately. Do not run concurrent writers on the same cache directory.
+
+A tqdm bar reports all selected views. The readable final count points to
+`outputs/gtzan/cnn/extraction_report.json`, containing failures and provenance.
+Failures return nonzero; no track is silently excluded from the intended
+cohort. CNN classifier training is a subsequent step; the Phase 2 trainers
+continue to load MusicFM, not these caches. MSD pretraining overlap with the
+downstream collections remains unresolved and must not be described as ruled out.
+
+### CNN mid-fusion training
+
+After extraction finishes, switch back to your main **PyTorch training
+environment**; the isolated `(musicnn)` environment is for TensorFlow extraction
+only. From this GTZAN directory:
+
+```bash
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py
+```
+
+`configs/experiments/gtzan/mid_fusion_cnn.yaml` inherits the active
+`mid_fusion.yaml` protocol, including the seven named conditions and genre
+training profile. Only the representation (200-dimensional MSD_musicnn) and
+paths change. The same genre MLP/trainer/metrics/reporting code is used:
+1024/512 hidden widths, ReLU, dropout 0.2, Adam 1e-4, batch 128, 20 epochs,
+no early stopping, and best validation accuracy + macro ROC-AUC + macro AP
+(earliest ties). Seeds remain 32, 64, 128, 256, 512. Test evaluation occurs
+after checkpoint selection. No normalization or chord/key features are added.
+
+The 35 fits comprise mixture only, identical mixture copies x4/x5/x6, and
+M+G+D+P / M+G+D+P+B / M+G+D+P+B+V. Input widths are 200, 800, 1000,
+and 1200. Repeated-mixture and corresponding fusion MLPs match exactly in
+nominal parameter count. No CNN late-fusion or standalone-stem runs are added.
+
+The cache adapter requires all manifest IDs in all six sources, finite float32
+vectors, matching checkpoint/extraction provenance and aligned window counts.
+It reads only cached features and the manifest, not audio or TensorFlow.
+Incomplete or mixed caches fail validation rather than filtering tracks.
+
+Checkpoints and per-run metrics save under `outputs/gtzan/cnn/runs/`.
+The final results print in the terminal and save as
+`outputs/gtzan/cnn/summary_mid_fusion.json` and `.txt`, including mean/sample SD
+and paired fusion-minus-control differences. Subset runs use distinct summary
+suffixes. Rerunning reuses verified completed fits; `--overwrite` explicitly
+retrains them. MusicFM checkpoints and summaries are untouched.
+Use `--run NAME`, repeated `--seed N`, or the same supported training overrides
+for diagnostics; default full experiments use the inherited protocol unchanged.
+An explicit `--output-dir` redirects summaries too unless `--summary-dir` is set.
 
 ## Configuration and data
 

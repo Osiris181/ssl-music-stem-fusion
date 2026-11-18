@@ -1,0 +1,12 @@
+# Inherit the active seven conditions and full genre training protocol.
+# Only the frozen representation and output destinations change.
+protocol: mid_fusion.yaml
+dataset: gtzan
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+paths:
+  manifest: ../../../data/manifests/gtzan/gtzan_htdemucs.jsonl
+  feature_dir: ../../../data/features/gtzan/msd_musicnn
+  output_dir: ../../../outputs/gtzan/cnn/runs
+  summary_dir: ../../../outputs/gtzan/cnn

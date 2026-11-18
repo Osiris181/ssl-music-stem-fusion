@@ -5,6 +5,7 @@ __pycache__/
 .venv-skey/
 .venv-chordformer/
 .venv-sheetsage2/
+/musicnn/
 
 .DS_Store
 .idea/

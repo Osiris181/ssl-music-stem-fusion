@@ -1,0 +1,14 @@
+dataset: gtzan
+paths:
+  manifest: ../../../data/manifests/gtzan/gtzan_htdemucs.jsonl
+  output_dir: ../../../data/features/gtzan/msd_musicnn
+  report: ../../../outputs/gtzan/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 768
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Fixed backend: official MSD_musicnn, mono 16 kHz, 187-frame windows,
+# non-overlapping; right-pad the final partial log-mel window with silence.
+# Sources are aligned to the mixture length before official log-mel processing.

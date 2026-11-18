@@ -116,6 +116,7 @@ stem-fusion-music-classification/
 ├── context/                         # Research motivation and experimental design notes
 ├── data/                            # Local manifests and cached features
 ├── docs/                            # Detailed configuration and usage guides
+├── environments/musicnn/            # Isolated TensorFlow CNN extraction dependencies
 ├── outputs/                         # Result summaries and generated run artifacts
 ├── src/stemfusion/
 │   ├── cli.py                       # Unified command interface
@@ -170,6 +171,27 @@ when selecting those builds.
 For later terminal sessions, activate the existing environment from the
 repository root with `source .venv/bin/activate`; do not recreate it each time.
 The `python` and `stemfusion` commands below then use that environment.
+
+### Separate CNN extraction environment
+
+Official MSD_musicnn extraction uses a separate Python 3.12 TensorFlow runtime; It's up to you to
+either make a new environment or install it on the main environment, but it's recommended to
+keep it separate from the main PyTorch environment above to avoid any package conflicts. Dependencies are
+defined in [environments/musicnn/pyproject.toml](environments/musicnn/pyproject.toml).
+From the repository root:
+
+```bash
+UV_PROJECT_ENVIRONMENT="$PWD/musicnn" uv sync --project environments/musicnn --inexact
+uv pip install --python musicnn/bin/python --no-deps 'musicnn @ git+https://github.com/jordipons/musicnn.git@516acb2a0ff5ef73f64547898e018e793152c506'
+source musicnn/bin/activate
+```
+
+The verified Linux x86_64 CUDA runtime deliberately overrides official musicnn's
+obsolete NumPy constraint; the original model code/weights remain unchanged.
+`--inexact` retains musicnn when synchronizing the runtime again. See the
+[environment README](environments/musicnn/README.md) for the known dependency
+check warning, GPU requirements and usage. If your current musicnn environment
+already works, no reinstall is needed.
 
 ### Running experiments
 

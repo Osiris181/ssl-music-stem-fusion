@@ -41,6 +41,18 @@ class GenreExperimentConfig:
     provenance: dict[str, Any] = field(default_factory=dict)
     summary_directory: Path | None = None
     dataset: str = "fma_medium"
+    feature_backend: str = "musicfm"
+
+
+def dataset_adapter(config: GenreExperimentConfig):
+    if config.feature_backend == "musicfm":
+        return get_dataset(config.dataset)
+    if config.feature_backend == "msd_musicnn" and config.dataset == "gtzan":
+        from stemfusion.data.cnn_features import cache_paths, load_gtzan_cnn_features
+        from stemfusion.data.gtzan import inspect_manifest
+        from stemfusion.experiments._datasets import GenreDataset
+        return GenreDataset("GTZAN", 10, inspect_manifest, cache_paths, load_gtzan_cnn_features)
+    raise ValueError("Unsupported genre feature backend/dataset combination.")
 
 
 def configure_parser(parser: argparse.ArgumentParser, family: str, *, dataset: str = "fma_medium") -> None:
@@ -129,8 +141,9 @@ def selected_conditions(config: GenreExperimentConfig) -> dict:
 
 def plan_experiment(config: GenreExperimentConfig) -> dict:
     conditions = selected_conditions(config)
-    records, mapping = get_dataset(config.dataset).inspect_manifest(config.manifest_path, config.number_of_classes)
-    paths = get_dataset(config.dataset).cache_paths(config.feature_directory)
+    adapter = dataset_adapter(config)
+    records, mapping = adapter.inspect_manifest(config.manifest_path, config.number_of_classes)
+    paths = adapter.cache_paths(config.feature_directory)
     planned = {}
     for name, condition in conditions.items():
         count = len(condition["sources"])
@@ -161,7 +174,7 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
         return plan
     conditions = selected_conditions(config)
     if data is None:
-        data = get_dataset(config.dataset).load_features(config.manifest_path, config.feature_directory, config.dimension, config.number_of_classes)
+        data = dataset_adapter(config).load_features(config.manifest_path, config.feature_directory, config.dimension, config.number_of_classes)
     if data.dimension != config.dimension or data.number_of_classes != config.number_of_classes:
         raise ValueError("Prepared features must match the configured dimension and class count.")
     if config.validate_only:
@@ -221,6 +234,8 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
                     "training_settings": vars(config.settings)})
     if config.family == "mid_fusion":
         summary["mixture_control"] = "repeat_identical_mixture_embedding"
+    if config.feature_backend == "msd_musicnn":
+        summary["feature_description"] = "Features: frozen official MSD_musicnn penultimate, track-window mean; HT-Demucs htdemucs_6s stems."
     note = get_dataset(config.dataset).historical_selection_note
     if note is not None:
         summary["historical_selection_note"] = note
@@ -305,7 +320,7 @@ def format_results(summary: dict) -> str:
 
     family = summary["family"].replace("_", " ").capitalize()
     lines = [f"{family} test results", "Dataset: FMA-Medium | Task: 16-class genre classification",
-             "Features: frozen MusicFM-MSD, layer 7; HT-Demucs htdemucs_6s stems.",
+             summary.get("feature_description", "Features: frozen MusicFM-MSD, layer 7; HT-Demucs htdemucs_6s stems."),
              "Outer seeds: " + ", ".join(map(str, summary["seeds"]))]
     if "number_of_classes" in summary:
         lines[1] = f"Dataset: {summary['dataset']} | Task: {summary['number_of_classes']}-class genre classification"
