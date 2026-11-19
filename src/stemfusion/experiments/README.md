@@ -126,7 +126,8 @@ Shared orchestration is:
 | `_extraction.py` | Common extraction CLI and handoff to `features/_musicfm.py`. |
 | `_cnn_runtime.py` | Automatic legacy Keras and local CUDA setup before official musicnn extraction. |
 | `_cnn_extraction.py` | Shared CNN extraction CLI for genre, Jamendo multi-label and PMEmo/DEAM/EmoMusic continuous-score manifests, source alignment, caching, and reports. |
-| `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared genre scheduler/trainer. |
+| `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared mid/late genre scheduler/trainer; FMA provides `train_late_cnn.py` with read-only CNN-M reuse. |
+| `_genre_reference.py` | Load and verify a completed CNN genre mixture reference without fitting or changing it. |
 | `_cnn_mood.py` | Schedule plain CNN Jamendo tagging experiments with the existing Music2Emo fitter and evaluation protocol. |
 | `_cnn_emotion.py` | Schedule separate binary emotion targets for CNN inputs using the retained shared fitter, training-only prevalence and validation-only thresholds. |
 | `_genre.py` | Common training CLI, seed/condition scheduling, reuse, and summaries. |

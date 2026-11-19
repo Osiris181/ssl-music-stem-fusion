@@ -42,6 +42,7 @@ class GenreExperimentConfig:
     summary_directory: Path | None = None
     dataset: str = "fma_medium"
     feature_backend: str = "musicfm"
+    reference_output_directory: Path | None = None
 
 
 def dataset_adapter(config: GenreExperimentConfig):
@@ -117,6 +118,12 @@ def config_from_args(args: argparse.Namespace) -> GenreExperimentConfig:
 
 def selected_conditions(config: GenreExperimentConfig) -> dict:
     config.settings.validate()
+    if config.reference_output_directory is not None:
+        if config.family != "late_fusion" or config.feature_backend != "msd_musicnn":
+            raise ValueError("An external mixture reference is supported only for CNN late fusion.")
+        reference, output = config.reference_output_directory.resolve(), config.output_directory.resolve()
+        if reference.is_relative_to(output) or output.is_relative_to(reference):
+            raise ValueError("CNN reference and late-fusion outputs must have separate non-nested roots.")
     if config.family not in {"mid_fusion", "late_fusion"}:
         raise ValueError("Unknown fusion family.")
     if not config.seeds or len(set(config.seeds)) != len(config.seeds) or any(type(seed) is not int or not 0 <= seed < 2**32 for seed in config.seeds):
@@ -167,13 +174,23 @@ def plan_experiment(config: GenreExperimentConfig) -> dict:
             count = condition.get("matched_sources", count)
             detail["trainable_parameters"] = count * model_parameter_count(config.dimension, len(mapping), config.settings.hidden_dimensions)
         planned[name] = detail
-    return {"family": config.family, "seeds": list(config.seeds), "conditions": planned,
+    plan = {"family": config.family, "seeds": list(config.seeds), "conditions": planned,
             "manifest": str(config.manifest_path), "manifest_split_counts": {split: sum(record.split == split for record in records) for split in ("train", "validation", "test")},
             "feature_caches": {source: {split: str(path) for split, path in splits.items()} for source, splits in paths.items()},
             "output_directory": str(config.output_directory), "summary_directory": str(config.summary_directory or config.output_directory), "settings": vars(config.settings),
             "branch_seed_rule": "index 0 = outer seed; otherwise first 32 SHA256 bits of stemfusion-phase2:<outer>:<index>",
             "branch_seeds": {str(seed): [branch_seed(seed, index) for index in range(6)] for seed in config.seeds},
             "aggregation": "sum_logits_then_softmax", "dry_run": config.dry_run}
+    if config.reference_output_directory is not None:
+        needed = {("mixture", index) for value in conditions.values() if value["kind"] == "mixture_ensemble"
+                  for index in range(value["matched_sources"])}
+        needed.update((source, index) for value in conditions.values() if value["kind"] == "fusion"
+                      for index, source in enumerate(value["sources"]))
+        plan.update(reference_output_directory=str(config.reference_output_directory),
+                    reference_mode="read_only_completed_cnn_mixture_1",
+                    new_branch_fits_per_seed=len(needed - {("mixture", 0)}),
+                    maximum_new_branch_fits=len(needed - {("mixture", 0)}) * len(config.seeds))
+    return plan
 
 
 def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
@@ -187,9 +204,15 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
         data = dataset_adapter(config).load_features(config.manifest_path, config.feature_directory, config.dimension, config.number_of_classes)
     if data.dimension != config.dimension or data.number_of_classes != config.number_of_classes:
         raise ValueError("Prepared features must match the configured dimension and class count.")
+    task = GenreMetrics(data.number_of_classes)
+    references = {}
+    if config.reference_output_directory is not None:
+        from stemfusion.experiments._genre_reference import load_reference_branch
+
+        # Check every requested M1 before writing outputs or fitting new branches.
+        references = {seed: load_reference_branch(config, data, seed, task) for seed in config.seeds}
     if config.validate_only:
         return {"validation_only": True, "data_fingerprint": data.fingerprint, **data.audit}
-    task = GenreMetrics(data.number_of_classes)
     write_json(config.output_directory / f"data_audit_{data.fingerprint}.json", data.audit)
     write_json(config.output_directory / "plans" / f"{config.family}_{fingerprint(plan)}.json", {**plan, "config_provenance": config.provenance})
     results = {name: {} for name in conditions}
@@ -200,9 +223,12 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
         def branch(source: str, index: int) -> dict:
             key = (source, index)
             if key not in branches:
-                branches[key] = train_branch(data=data, source=source, index=index, outer_seed=seed,
-                    root=config.output_directory, settings=config.settings, task=task, provenance=config.provenance,
-                    resume=config.resume, overwrite=config.overwrite)
+                if key == ("mixture", 0) and seed in references:
+                    branches[key] = references[seed]
+                else:
+                    branches[key] = train_branch(data=data, source=source, index=index, outer_seed=seed,
+                        root=config.output_directory, settings=config.settings, task=task, provenance=config.provenance,
+                        resume=config.resume, overwrite=config.overwrite)
             return branches[key]
 
         for name, condition in conditions.items():
@@ -246,11 +272,14 @@ def run_experiment(config: GenreExperimentConfig, *, data=None) -> dict:
         summary["mixture_control"] = "repeat_identical_mixture_embedding"
     if config.feature_backend == "msd_musicnn":
         summary["feature_description"] = "Features: frozen official MSD_musicnn penultimate, track-window mean; HT-Demucs htdemucs_6s stems."
+    if references:
+        summary["mixture_reference_runs"] = references
+        summary["reference_output_directory"] = str(config.reference_output_directory)
     note = get_dataset(config.dataset).historical_selection_note
     if note is not None:
         summary["historical_selection_note"] = note
     if config.family == "late_fusion" and any(tuple(condition["sources"]) == SOURCES for condition in conditions.values()):
-        stem_summary = save_stem_results(config)
+        stem_summary = save_stem_results(config, data=data if config.feature_backend == "msd_musicnn" else None)
         summary["standalone_stems"] = stem_summary["conditions"]
         summary["standalone_stem_summary"] = str(summary_file(stem_report_config(config)))
     summary_path = summary_file(config)
@@ -267,8 +296,8 @@ def summary_file(config: GenreExperimentConfig) -> Path:
     return (config.summary_directory or config.output_directory) / f"summary_{config.family}{suffix}.json"
 
 
-def save_stem_results(config: GenreExperimentConfig) -> dict:
-    summary = collect_stem_results(config)
+def save_stem_results(config: GenreExperimentConfig, *, data=None) -> dict:
+    summary = collect_stem_results(config, data=data)
     path = summary_file(stem_report_config(config))
     write_json(path, summary)
     write_readable_summary(path, summary)

@@ -17,22 +17,27 @@ from stemfusion.training.reporting import file_checksum
 from stemfusion.training.trainer import TrainingSettings
 
 
-def config_from_args(args, *, dataset="gtzan"):
+def config_from_args(args, *, dataset="gtzan", family="mid_fusion"):
+    if family not in {"mid_fusion", "late_fusion"}:
+        raise ValueError("Choose mid_fusion or late_fusion")
     adapter = get_dataset(dataset)
     path = args.config.resolve()
     raw = yaml.load(path.read_text(), Loader=_UniqueKeyLoader)
     if not isinstance(raw, dict) or set(raw) != {"protocol", "dataset", "features", "paths"} or \
        raw["dataset"] != dataset or raw["features"] != {"name": "msd_musicnn", "dimension_per_source": 200}:
         raise ValueError(f"Expected a {dataset} MSD_musicnn configuration with 200 features per source")
-    defaults, provenance = load_configuration((path.parent / raw["protocol"]).resolve(), "mid_fusion")
+    defaults, provenance = load_configuration((path.parent / raw["protocol"]).resolve(), family)
     if provenance["experiment_metadata"]["dataset"] != dataset:
         raise ValueError(f"CNN protocol must inherit the {dataset} genre experiment")
-    if set(raw["paths"]) != {"manifest", "feature_dir", "output_dir", "summary_dir"}:
+    required_paths = {"manifest", "feature_dir", "output_dir", "summary_dir"}
+    if family == "late_fusion":
+        required_paths.add("reference_output_dir")
+    if set(raw["paths"]) != required_paths:
         raise ValueError("Missing or unsupported CNN training paths")
     paths = {key: (path.parent / value).resolve() for key, value in raw["paths"].items()}
     overrides = {}
     for key in paths:
-        if getattr(args, key) is not None:
+        if getattr(args, key, None) is not None:
             paths[key] = getattr(args, key).resolve()
             overrides[key] = str(paths[key])
     if args.output_dir is not None and args.summary_dir is None:
@@ -51,22 +56,26 @@ def config_from_args(args, *, dataset="gtzan"):
     return GenreExperimentConfig(
         manifest_path=paths["manifest"], feature_directory=paths["feature_dir"],
         output_directory=paths["output_dir"], summary_directory=paths["summary_dir"],
-        family="mid_fusion", dataset=dataset, feature_backend="msd_musicnn", dimension=200,
+        family=family, dataset=dataset, feature_backend="msd_musicnn", dimension=200,
         number_of_classes=adapter.number_of_classes, conditions=provenance["experiment_metadata"]["runs"],
         seeds=tuple(defaults["seeds"]), settings=settings, selected_run=args.run,
         dry_run=args.dry_run, validate_only=args.validate_only,
         resume=not args.overwrite, overwrite=args.overwrite, provenance=provenance,
+        reference_output_directory=paths.get("reference_output_dir"),
     )
 
 
-def main(argv=None, *, dataset="gtzan"):
+def main(argv=None, *, dataset="gtzan", family="mid_fusion"):
     if dataset not in {"gtzan", "ismir04", "fma_medium"}:
         raise ValueError(f"Unsupported CNN genre dataset: {dataset}")
-    default_config = Path(__file__).resolve().parents[3] / f"configs/experiments/{dataset}/mid_fusion_cnn.yaml"
+    default_config = Path(__file__).resolve().parents[3] / f"configs/experiments/{dataset}/{family}_cnn.yaml"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=default_config)
     for name in ("manifest", "feature-dir", "output-dir", "summary-dir"):
         parser.add_argument(f"--{name}", type=Path)
+    if family == "late_fusion":
+        parser.add_argument("--reference-output-dir", type=Path,
+                            help="Completed CNN mid-fusion run root containing branches/seed_N/mixture_1")
     parser.add_argument("--seed", type=int, action="append", dest="seeds")
     parser.add_argument("--run")
     parser.add_argument("--hidden-dimensions", type=int, nargs=2)
@@ -84,7 +93,7 @@ def main(argv=None, *, dataset="gtzan"):
     args = parser.parse_args(argv)
     logging.basicConfig(level=getattr(logging, args.log_level), format="%(asctime)s | %(levelname)s | %(message)s")
     try:
-        config = config_from_args(args, dataset=dataset)
+        config = config_from_args(args, dataset=dataset, family=family)
         result = run_experiment(config)
         if config.dry_run or config.validate_only:
             if config.validate_only:

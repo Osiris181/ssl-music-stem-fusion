@@ -15,7 +15,7 @@ from stemfusion.training.late_fusion import branch_seed
 from stemfusion.training.reporting import file_checksum, fingerprint, reusable_artifacts, summarize_results
 
 
-def collect_stem_results(config) -> dict:
+def collect_stem_results(config, *, data=None) -> dict:
     """Verify the five source branches and shared mixture reference per seed."""
     import numpy as np
 
@@ -25,6 +25,11 @@ def collect_stem_results(config) -> dict:
         selected = [record for record in records if record.split == split]
         expected[split] = (np.asarray([record.track_id for record in selected]),
                            np.asarray([record.label for record in selected], dtype=np.int64))
+    if data is not None:
+        if data.label_mapping != mapping:
+            raise ValueError("Prepared feature labels differ from the report manifest.")
+        # CNN loaders may intentionally retain a complete-view subset of tracks.
+        expected = {split: (np.asarray(values.track_ids), values.labels) for split, values in data.splits.items()}
     counts = {split: len(values[0]) for split, values in expected.items()}
     results = {f"{source}_only": {} for source in SOURCES[1:]}
     mixture = {}
@@ -37,7 +42,10 @@ def collect_stem_results(config) -> dict:
         branch_artifacts[str(outer_seed)] = {}
         for index, source in enumerate(SOURCES):
             branch = "mixture_1" if source == "mixture" else source
-            directory = config.output_directory / "branches" / f"seed_{outer_seed}" / branch
+            root = config.output_directory
+            if source == "mixture" and config.reference_output_directory is not None:
+                root = config.reference_output_directory
+            directory = root / "branches" / f"seed_{outer_seed}" / branch
             marker_path = directory / "run_manifest.json"
             if not marker_path.is_file():
                 raise ValueError(f"Completed branch required for reporting; no training will be started: {directory}")
@@ -55,6 +63,8 @@ def collect_stem_results(config) -> dict:
                 raise ValueError(f"Branch seed does not follow the shared branch-seed convention: {directory}")
             if record["label_mapping"] != mapping or record["split_examples"] != counts:
                 raise ValueError(f"Branch labels or split counts differ from the manifest: {directory}")
+            if data is not None and record["data_fingerprint"] != data.fingerprint:
+                raise ValueError(f"Saved branch inputs differ from the retained feature cohort: {directory}")
             common = {field: resolved[field] for field in common_fields}
             if baseline is None:
                 baseline = common
@@ -93,6 +103,8 @@ def collect_stem_results(config) -> dict:
         "metric_conventions": baseline["metric_conventions"], "selection_rule": baseline["selection_rule"],
         "interpretation": "Standalone source-classifier performance is supporting analysis; it does not establish incremental predictive value beyond the mixture.",
     })
+    if config.feature_backend == "msd_musicnn":
+        summary["feature_description"] = "Features: frozen official MSD_musicnn penultimate, track-window mean; HT-Demucs htdemucs_6s stems."
     return summary
 
 
