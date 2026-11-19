@@ -1,0 +1,18 @@
+# Retain PMEmo binary targets, conditions, loss, optimization and validation.
+protocol: mid_fusion.yaml
+dataset: pmemo
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+  pooling: track_window_mean
+  harmony: false
+model:
+  hidden_dimensions: [512, 256]
+  activation: relu
+  dropout: 0.0
+  output_labels: 1
+paths:
+  manifest: ../../../data/manifests/pmemo/pmemo_features.jsonl
+  feature_dir: ../../../data/features/pmemo/msd_musicnn
+  output_dir: ../../../outputs/pmemo/cnn/runs
+  summary_dir: ../../../outputs/pmemo/cnn

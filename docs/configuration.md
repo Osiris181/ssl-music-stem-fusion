@@ -147,12 +147,14 @@ PYTHONPATH=src python -m stemfusion train fma-medium mid-fusion \
 
 `--run` selects one named condition, including its control/fusion role.
 Without `--run`, training runs the entire matrix in the default experiment
-file. Both methods inherit `configs/training/fma_medium_genre.yaml` for common
-paths, hyperparameters, metric definitions, and outer seeds
-`[32, 64, 128, 256, 512]`. Repeated `--seed` selects a subset and replaces
+file. Both FMA experiment YAMLs inherit `configs/training/genre.yaml` directly
+for common hyperparameters, metric definitions, and outer seeds
+`[32, 64, 128, 256, 512]`; each experiment supplies its dataset paths,
+16-class target, and fusion/model selection. Keep mid/late paths equal for
+shared branch reuse. Repeated `--seed` selects a subset and replaces
 the YAML seed list. GTZAN uses `configs/training/gtzan_genre.yaml` for its
 ten-class target and paths. ISMIR04 uses `configs/training/ismir04_genre.yaml`
-for six classes and its local paths. All three dataset profiles inherit architecture,
+for six classes and its local paths. All three datasets inherit architecture,
 optimization, evaluation, and seed settings from `configs/training/genre.yaml`.
 Training uses the agreed named conditions rather than
 arbitrary `--source` lists. Source-subset arguments remain available for extraction.

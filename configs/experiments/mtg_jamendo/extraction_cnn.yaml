@@ -1,0 +1,15 @@
+# Same CNN extraction policy as the genre datasets, with multi-label targets.
+dataset: mtg_jamendo
+paths:
+  manifest: ../../../data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl
+  output_dir: ../../../data/features/mtg_jamendo/msd_musicnn
+  report: ../../../outputs/mtg_jamendo/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 4096
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Retain the original mood/theme tags and any repaired paths in the manifest.
+# Full-duration mono 16 kHz; 187-frame patches; pad and retain the final patch.
+# Mean-pool all 200-d window embeddings once per track/source. No chord/key stage.

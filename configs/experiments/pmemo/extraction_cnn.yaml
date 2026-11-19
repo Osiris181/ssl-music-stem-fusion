@@ -1,0 +1,14 @@
+# Shared frozen CNN protocol; preserve the existing PMEmo chorus/split mapping.
+dataset: pmemo
+paths:
+  manifest: ../../../data/manifests/pmemo/pmemo_features.jsonl
+  output_dir: ../../../data/features/pmemo/msd_musicnn
+  report: ../../../outputs/pmemo/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 4096
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Native 0-1 valence/arousal annotations stay continuous in cache metadata.
+# Both targets and all training seeds reuse the same six-source 200-d cache.

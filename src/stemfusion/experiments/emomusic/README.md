@@ -14,6 +14,8 @@ separate binary valence/arousal classifiers through the same shared fitter;
 | `separation.py` | Shared HT-Demucs backend/settings, tqdm progress and readable final summary; reuse complete existing six-stem outputs. |
 | `extract_mert.py` | Save all 12 frozen MERT transformer layers for every retained 30-second segment. |
 | `extract_chords_keys.py` | Extract whole-track BTC chords, generated MIDI, music21 key and normalized chords independently per source. |
+| `extraction_cnn.py` | Shared Phase 3 frozen MSD_musicnn extraction; one 200-dimensional vector per track/source, preserving supplied continuous annotations. |
+| `train_mid_cnn.py` | Shared PMEmo/DEAM CNN trainer for two separate binary targets, seven conditions and five seeds; native >= 5 labels without changing supplied columns. |
 | `train_mid.py` | Seven-condition mid fusion, separate binary targets, five seeds and the shared Music2Emo model/fitting/metric implementation. |
 | `train_late.py` | Independent matched mixture/stem branches, protected mid references, twelve reporting conditions including five standalone stems. |
 
@@ -218,6 +220,111 @@ Separation prints the same readable final summary as the other datasets:
 reused/new/failed/unprocessed tracks, retries and report location. The detailed
 JSON report is retained on disk. Preparation/separation do not apply the
 training label rule or resolve the annotation-provenance caveat above.
+
+## Phase 3 CNN extraction
+
+`extraction_cnn.py` uses the same shared extractor, frozen official MSD_musicnn
+backend and guarded decoder as PMEmo/DEAM. It reads the existing
+`data/manifests/emomusic/emomusic_features.jsonl`, retaining its 495/124/125
+splits, numeric IDs and audio destinations. Original mixtures remain under
+`/mnt/HDD/emoMusic/clips_45sec/`; stems remain under the intentional shared
+`/mnt/HDD/osiris181/DEAM_separated/htdemucs_6s/` root. No new separation,
+manifest generation, resplitting or audio copying is performed.
+
+Activate the [isolated musicnn environment](../../../../../environments/musicnn/README.md)
+and run from this directory:
+
+```bash
+python extraction_cnn.py --dry-run
+python extraction_cnn.py
+```
+
+The preset is `configs/experiments/emomusic/extraction_cnn.yaml`. Preprocessing
+is identical to PMEmo/DEAM: mono 16 kHz, official log-mel transformation,
+consecutive nonoverlapping 187-frame windows, right-zero-padding of the final
+log-mel window, and equal-window averaging into a float32 `(200,)` vector.
+Full available audio is used without an additional crop. Sources are mixture,
+guitar, drums, piano, bass and vocals, excluding `other`; stem end differences
+must remain within 0.25 seconds of the decoded mixture. Runtime defaults are
+16 windows per batch and a 4096 MB TensorFlow GPU cap. `--gpu-memory-mb N`
+overrides the cap; keep its original value when resuming existing caches.
+
+Both valence and arousal reuse this cache. Supplied 1-9 scores and column names
+are saved unchanged: no normalization, binarization or column swapping. The
+annotation-provenance caveat above remains unresolved and is not corrected
+by audio feature extraction.
+
+Outputs are separate from DEAM, MERT and harmonic features:
+
+```text
+data/features/emomusic/msd_musicnn/{split}/{source}/{track_id}.npz
+outputs/emomusic/cnn/extraction_report.json
+```
+
+Compatible completed caches are verified and reused on rerun. The
+[shared decoding guard](../../../../../docs/cnn_audio_decoding.md) reports
+unrecoverable corruption and alignment failures instead of silently changing
+the cohort. Incompatible inputs/settings require explicit `--overwrite`.
+Commands display tqdm and readable final counts; detailed JSON retains
+per-view failures and recovery information. `--dry-run` reads only metadata,
+without decoding audio, loading the model or writing outputs. This entry
+does not run training or alter existing feature files.
+
+### CNN mid-fusion training
+
+After extraction finishes, use the main PyTorch environment, not the isolated
+TensorFlow/musicnn environment, and run from this directory:
+
+```bash
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py
+```
+
+The code flow is identical to PMEmo/DEAM:
+`train_mid_cnn.py` -> `experiments/_cnn_emotion.py` ->
+`data/emotion_cnn_features.py` -> the unchanged `training/music2emo.py` fitter
+with `training/emotion.py`'s `BinaryEmotionTask` evaluation adapter. The preset
+`configs/experiments/emomusic/mid_fusion_cnn.yaml` inherits the active
+`mid_fusion.yaml`, retaining supplied columns and the native-score rule:
+**high >= 5, low < 5**, independently for each target. No normalization,
+column swapping or resplitting is performed; the annotation-provenance caveat
+above remains unresolved.
+
+The default fits 70 independent classifiers: valence/arousal x seven
+conditions x seeds 32, 64, 128, 256 and 512. Conditions are mixture-only,
+repeated mixture x 4/5/6, and mixture + G/D/P, + B, + V. Each condition uses
+the same complete cohort. Repeated controls concatenate exact copies of
+the cached mixture vector, matching the corresponding fusion model's input
+width and trainable parameter count.
+
+All use the same plain `200 * inputs -> 512 -> 256 -> 1` ReLU head, without
+dropout, chord/key inputs or a harmonic Transformer. The retained recipe is
+Adam 1e-4, batch size 8, maximum 200 epochs, training-only frequency-weighted
+BCE, and validation-loss early stopping with patience 10 and minimum delta
+1e-4. The best checkpoint minimizes validation weighted BCE, keeping the
+earliest epoch on ties. Each target's probability threshold is selected on
+validation macro F1 over 0-1 in 0.01 steps, choosing the lowest tied threshold,
+then frozen for test evaluation. Accuracy and macro F1/ROC-AUC/average
+precision use the same binary implementation as PMEmo/DEAM.
+
+Readable and detailed reports are printed/saved separately per target:
+
+```text
+outputs/emomusic/cnn/summary_mid_fusion_valence.{txt,json}
+outputs/emomusic/cnn/summary_mid_fusion_arousal.{txt,json}
+outputs/emomusic/cnn/runs/{target}/{condition}/seed_<seed>/best.pt
+```
+
+Summaries include mean +/- sample SD and paired fusion-minus-control
+differences. Compatible finished runs are verified and reused by default;
+changed inputs/settings remain errors unless `--overwrite` is explicit.
+Use `--target valence`, `--seed 32` or `--run mixture_only` for subsets, which
+receive distinct summary filenames. Dry runs and validation-only checks
+write no training outputs. Missing or incompatible caches are errors; finish
+extraction before training. Existing MERT/harmony features, checkpoints and
+results remain untouched. This Phase 3 entry does not add late fusion or
+standalone-stem training.
 
 ## Mid-fusion training
 

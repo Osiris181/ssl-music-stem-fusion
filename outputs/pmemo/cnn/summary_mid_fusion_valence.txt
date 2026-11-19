@@ -1,0 +1,24 @@
+PMEmo: binary valence | frozen MSD_musicnn mid-fusion
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Ground truth: original_0_1 score >= 0.5 is high; lower scores are low.
+Features: fixed track-window means, 200 dimensions per source; plain 512/256/1 ReLU head.
+No chord/key features, harmonic Transformer, or head dropout.
+Checkpoint: minimum validation weighted BCE; threshold: validation macro-F1 grid, ties to lowest.
+Accuracy is track-level; macro metrics average low and high classes. PR-AUC means average precision.
+
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 79.3043 +/- 1.1338 | 0.7428 +/- 0.0164 | 0.8414 +/- 0.0066 | 0.8060 +/- 0.0121
+repeated_mixture_4 | 79.3043 +/- 1.1338 | 0.7497 +/- 0.0161 | 0.8354 +/- 0.0058 | 0.8007 +/- 0.0110
+repeated_mixture_5 | 79.4783 +/- 1.1666 | 0.7532 +/- 0.0125 | 0.8327 +/- 0.0053 | 0.7940 +/- 0.0096
+repeated_mixture_6 | 80.0000 +/- 0.8696 | 0.7585 +/- 0.0082 | 0.8336 +/- 0.0062 | 0.7975 +/- 0.0108
+mixture_guitar_drums_piano | 78.7826 +/- 1.3188 | 0.7569 +/- 0.0056 | 0.8541 +/- 0.0025 | 0.8229 +/- 0.0018
+mixture_guitar_drums_piano_bass | 79.8261 +/- 1.1338 | 0.7646 +/- 0.0107 | 0.8589 +/- 0.0028 | 0.8343 +/- 0.0029
+mixture_all_five_stems | 78.6087 +/- 0.4763 | 0.7474 +/- 0.0069 | 0.8579 +/- 0.0030 | 0.8330 +/- 0.0040
+
+Paired differences: fusion minus its repeated-mixture control.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - repeated_mixture_4 | -0.5217 +/- 2.0942 | 0.0072 +/- 0.0213 | 0.0187 +/- 0.0044 | 0.0222 +/- 0.0105
+mixture_guitar_drums_piano_bass - repeated_mixture_5 | 0.3478 +/- 2.0942 | 0.0114 +/- 0.0224 | 0.0262 +/- 0.0052 | 0.0402 +/- 0.0108
+mixture_all_five_stems - repeated_mixture_6 | -1.3913 +/- 0.4763 | -0.0111 +/- 0.0057 | 0.0244 +/- 0.0060 | 0.0354 +/- 0.0074

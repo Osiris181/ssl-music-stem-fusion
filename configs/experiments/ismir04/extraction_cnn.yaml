@@ -1,0 +1,14 @@
+# Same frozen CNN and extraction policy as GTZAN. Retain the complete track.
+dataset: ismir04
+paths:
+  manifest: ../../../data/manifests/ismir04/ismir04_htdemucs.jsonl
+  output_dir: ../../../data/features/ismir04/msd_musicnn
+  report: ../../../outputs/ismir04/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 4096
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Official 16 kHz mono log-mel, 187-frame windows with no overlap;
+# right-pad the last partial patch and mean-pool all 200-d window embeddings.

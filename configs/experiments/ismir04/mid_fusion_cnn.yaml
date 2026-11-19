@@ -1,0 +1,11 @@
+# Inherit the existing six-class ISMIR04 protocol and seven mid-fusion conditions.
+protocol: mid_fusion.yaml
+dataset: ismir04
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+paths:
+  manifest: ../../../data/manifests/ismir04/ismir04_htdemucs.jsonl
+  feature_dir: ../../../data/features/ismir04/msd_musicnn
+  output_dir: ../../../outputs/ismir04/cnn/runs
+  summary_dir: ../../../outputs/ismir04/cnn

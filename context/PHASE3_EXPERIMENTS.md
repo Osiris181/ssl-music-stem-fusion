@@ -37,6 +37,14 @@ Reuse the original mixtures and the outputs of the existing pretrained HT-Demucs
 
 **Retain Phase 2 splits and labels.** In particular, preserve existing source-aligned GTZAN IDs (the Phase 2 source cache includes 499/250/250, not the original 500/250/250 nominal training count); the audited ISMIR04 inclusion/exclusion and split manifests (729/726/724 as documented in Phase 2); existing FMA-Medium and MTG-Jamendo split/target mappings; and the established PMEmo/EmoMusic/DEAM binary targets. Verify actual live files rather than regenerating splits from prose. No track may move between train, validation, and test due to a different extractor.
 
+**FMA CNN loading:** automatically skip tracks missing any of the six required
+cached embeddings, using the same retained tracks for all seven CNN conditions
+and five seeds. No policy flag, hardcoded track IDs, changed split assignments,
+or zero-vector imputation is used. Record actual counts and missing sources in
+the data audit. Existing MusicFM inputs/results stay unchanged; if the retained
+CNN training cohort differs, the cross-extractor comparison is not an exactly
+identical-training-cohort contrast. Present caches still undergo strict validation.
+
 **Existing binary-label decisions:** PMEmo high when native score `>= 0.5`; EmoMusic and DEAM high when native score `>= 5`. Keep separate valence/arousal targets. For EmoMusic, preserve the existing metadata columns but retain the **unresolved valence/arousal column-provenance caveat** documented in Phase 2; do not silently swap labels.
 
 ## C. Frozen CNN encoder

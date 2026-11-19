@@ -17,8 +17,10 @@ FMA audio paths or hardcodes dataset cache filenames.
 | `_music2emo_identity.py` | Strict reviewed compatibility for optional binary hooks; preserves completed Jamendo identities while rejecting actual fitting changes. |
 | `music2emo_late_fusion.py` | Verify selected branch predictions, sum logits then sigmoid, choose validation-only ensemble thresholds, and save multilabel ensemble results without additional fitting. |
 
-FMA settings live in `configs/training/fma_medium_genre.yaml`. Both fusion
-profiles inherit it. The default outer seeds are 32, 64, 128, 256, 512.
+Shared genre settings live in `configs/training/genre.yaml`. FMA's
+`configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml` inherit
+it directly and supply their dataset paths and fusion-specific settings.
+The default outer seeds are 32, 64, 128, 256, 512.
 Every condition uses the same tracks, Adam at 1e-4, batch size 128, 20 epochs,
 ReLU/dropout 0.2, and validation accuracy + macro ROC-AUC + macro average
 precision checkpoint selection. Ties retain the earliest epoch.

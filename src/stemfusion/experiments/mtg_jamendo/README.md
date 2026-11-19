@@ -22,6 +22,8 @@ not required inputs. See the [shared chord/key guide](#chordkey-extraction).
 | `separation.py` | Run the shared separator on the prepared manifest and reuse complete output folders. |
 | `validate_separation.py` | Fully decode native outputs, check duration/finiteness, and prepare a validated audio manifest with optional float32 WAV copies. |
 | `extract_mert.py` | Save all-layer frozen MERT embeddings per 30-second segment. |
+| `extraction_cnn.py` | Phase 3 frozen MSD_musicnn extraction, mean-pooled per track/source with the same CNN backend as the genre datasets. |
+| `train_mid_cnn.py` | Seven plain CNN mid-fusion conditions using the existing Jamendo weighted loss, stopping and evaluation protocol. |
 | `extract_chords_keys.py` | Generate whole-track BTC chords, MIDI-derived key, and normalized chords paired with MERT. |
 | `train_reproduction.py` | Run the isolated five-seed original-mixture Music2Emo baseline, with released early stopping and a 200-epoch cap, before stem experiments. |
 | `reproduction.py` | Baseline fitting, checkpoint selection, evaluation, and reporting implementation. |
@@ -209,6 +211,135 @@ The older MusicFM-named manifest can remain as a historical artifact; changing
 the manifest filename does not require rerunning separation or extraction
 when its contents are unchanged. Existing reports retain their original
 configuration paths and hashes.
+
+## Phase 3 CNN extraction
+
+`extraction_cnn.py` loads `configs/experiments/mtg_jamendo/extraction_cnn.yaml`
+and uses the same shared CNN extraction implementation as the genre datasets.
+It reuses `data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl`, including
+canonical track IDs, fixed partitions, all 56 mood/theme tag names, and the
+existing validated audio repair paths. The full manifest is read before a
+bounded selection, so `--limit-per-split` changes only the extraction workload.
+
+Activate the [isolated musicnn environment](../../../../../environments/musicnn/README.md),
+then run from this dataset directory:
+
+```bash
+python extraction_cnn.py --dry-run
+python extraction_cnn.py
+```
+
+Compatibility setup for legacy Keras and local CUDA libraries is automatic.
+The original mixture and five stems (guitar, drums, piano, bass, vocals) use the
+same frozen standard MSD_musicnn checkpoint, mono 16 kHz audio, official log-mel
+processing and consecutive 187-frame windows. Retain and right-pad the final
+partial window; average all 200-dimensional window embeddings equally into one
+track vector. Full duration is retained and batches contain at most 16 windows.
+Sources are aligned to the resampled mixture length in memory within the shared
+0.25-second tolerance; larger discrepancies fail. Silent inputs are retained.
+CPU preprocessing holds the full waveform and spectrogram in memory.
+The YAML GPU memory cap is 4096 MB; `--gpu-memory-mb N` overrides it.
+
+The shared [decoding guard and cache recovery](../../../../../docs/cnn_audio_decoding.md)
+apply here as in the genre datasets. Healthy caches are retained; invalid
+decodes receive a checked FFmpeg fallback. Unrecoverable audio remains an
+explicit failure without changing the mood/theme cohort.
+
+This produces a plain CNN representation without chord/key features. It saves
+one vector per track/source, rather than MERT's separate 30-second segment
+caches. CNN versus MERT plus harmony is therefore a comparison of complete
+representation pipelines, as described in the Phase 3 design.
+
+Caches save to `data/features/mtg_jamendo/msd_musicnn/{split}/{source}/{track_id}.npz`.
+Each includes `embedding` (finite float32, shape 200) and JSON `metadata` with
+the original `tags` and `relative_path`, source/audio provenance, hashes and
+window counts. Tags remain names in their original order; no class-index order
+or single genre label is invented during extraction. The existing training tag
+mapping can be applied when preparing CNN classifiers.
+
+The final readable counts point to `outputs/mtg_jamendo/cnn/extraction_report.json`.
+The report also records the 56-tag setting. Rerunning reuses compatible caches;
+explicit `--overwrite` is required for changed settings or input metadata.
+Failures are reported and return a nonzero exit status without silently changing
+the target cohort. No new separation or harmonic extraction pass is required.
+
+For a small check with separate output:
+
+```bash
+python extraction_cnn.py --limit-per-split 1 \
+  --output-dir /tmp/mtg_jamendo_cnn_check/features \
+  --report /tmp/mtg_jamendo_cnn_check/report.json --fail-fast
+```
+
+The existing MERT training scripts continue to read their own caches. Potential
+MSD pretraining overlap with downstream recordings remains unresolved.
+
+### Plain CNN mid-fusion training
+
+After CNN extraction completes, activate your main PyTorch training environment
+and run from this directory:
+
+```bash
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py
+```
+
+`configs/experiments/mtg_jamendo/mid_fusion_cnn.yaml` inherits the existing
+Jamendo `mid_fusion.yaml` protocol. It supplies CNN cache paths, 200 dimensions
+per source, and a plain classifier with hidden widths **512 -> 256** and 56
+output logits. Two ReLU activations match the MERT classifier head. There is
+no head dropout: the original MERT model's dropout is inside its chord
+Transformer, which is absent here. No chord/key files, embeddings, or Transformer
+parameters are used by this classifier.
+
+The schedule is the same seven conditions as the genre CNN experiments:
+mixture only; identical mixture copies x4/x5/x6; and M+G+D+P, then +B, then +V.
+Inputs are 200/800/1000/1200 dimensions. Corresponding repeated-mixture and
+stem-fusion models match exactly in nominal parameter count. Five seeds
+32/64/128/256/512 produce 35 fits; the CNN mixture reference is trained here.
+
+The existing `training/music2emo.py` fitter handles Adam 1e-4, batch size 8,
+up to 200 epochs, and the author's frequency-weighted BCE. The unchanged
+`tag_list.npy[127:]` defines the 56 output columns; the existing
+`music2emotion/probas_train.npy` supplies weights and must match the current
+training-label frequencies. Each tag must have positive and negative examples
+in all splits. There is no new split or label reordering.
+
+The best checkpoint is the lowest validation weighted BCE, keeping the earliest
+tie. Early stopping uses patience 10 and min_delta 1e-4. The fitter retains the
+top five validation-loss checkpoints, `last.pt` for interrupted-run resume, and
+the selected `best.pt`. One global threshold maximizes validation macro F1 on
+0.00..1.00 in 0.01 steps, with the lowest threshold winning ties. That threshold
+is applied unchanged to test predictions. Accuracy is label-wise; additional
+metrics are macro F1, macro ROC-AUC and macro average precision/PR-AUC.
+
+CNN input is the fixed cached whole-track window mean in both training and
+evaluation. MERT's random consecutive 30-second segment selection cannot be
+repeated from a single track vector; this representation difference is recorded
+explicitly in the CNN protocol. No random cropping or repeated re-extraction
+is introduced. Every seed reuses the same CNN cache.
+
+The loader verifies all IDs, original tag names, source paths and aligned window
+counts, finite float32 vectors, matching extraction settings and cache hashes.
+A tqdm bar reports cache loading. Training never reads source audio or harmony
+files. This CNN loader always verifies payload hashes. Do not use the MERT
+script's optional checksum flag with this entry point.
+
+Per-condition checkpoints, predictions, thresholds and metrics save under
+`outputs/mtg_jamendo/cnn/runs/{condition}/seed_{seed}/`. The final table prints
+and saves to `outputs/mtg_jamendo/cnn/summary_mid_fusion.txt` and `.json`, including
+sample SD and paired differences against the repeated-mixture controls. Subset
+runs use distinct summary names. Completed compatible fits are reused by
+default; interrupted fits resume from `last.pt`. `--overwrite` explicitly
+retrains. `--run NAME`, repeated `--seed N`, and diagnostic optimization
+overrides follow the existing entry-point pattern. An explicit `--output-dir`
+also redirects summaries unless `--summary-dir` is supplied.
+
+Reusable implementation: `experiments/_cnn_mood.py` schedules conditions,
+`data/jamendo_cnn_features.py` loads caches, and `models/cnn_mood.py` supplies
+the plain head. Actual fitting, loss, early stopping and threshold selection
+remain in the existing `training/music2emo.py` implementation.
 
 ## MERT segment extraction
 

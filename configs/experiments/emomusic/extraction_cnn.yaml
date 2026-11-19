@@ -1,0 +1,14 @@
+# Shared frozen CNN protocol; preserve the existing EmoMusic audio/split mapping.
+dataset: emomusic
+paths:
+  manifest: ../../../data/manifests/emomusic/emomusic_features.jsonl
+  output_dir: ../../../data/features/emomusic/msd_musicnn
+  report: ../../../outputs/emomusic/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 4096
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Supplied 1-9 valence/arousal columns stay continuous and unchanged.
+# Both targets and all training seeds reuse the same six-source 200-d cache.

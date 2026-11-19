@@ -7,6 +7,8 @@
 | `separation.yaml` | Shared HT-Demucs inference profile, separation job manifest and exact output/report locations. |
 | `mert.yaml` | Shared pinned MERT profile, 30-second retained-tail segments and aligned source views. |
 | `chords_keys.yaml` | Shared BTC/music21 descriptors with default-on CQT-tail retries. |
+| `extraction_cnn.yaml` | Shared Phase 3 frozen MSD_musicnn extraction over the existing PMEmo manifest, with continuous annotations retained and separate CNN cache/report paths. |
+| `mid_fusion_cnn.yaml` | Inherit the active binary-emotion training protocol, replacing MERT/harmony with 200-d CNN inputs and a plain 512/256/1 head; separate CNN outputs for both targets. |
 | `mid_fusion.yaml` | Separate binary valence/arousal, seven matched conditions and five seeds through the shared emotion/Music2Emo profiles. |
 | `late_fusion.yaml` | Same binary task/training profile, independent mixture/stem branches, twelve reports including stem-only, and a configured mid-fusion reference root. |
 

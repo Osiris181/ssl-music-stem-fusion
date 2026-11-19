@@ -1,12 +1,26 @@
 # Seven mid-fusion conditions, each run over the shared five outer seeds.
 dataset: fma_medium
-task: genre_classification
+task:
+  name: genre_classification
+  number_of_classes: 16
 number_of_classes: 16
 separator: htdemucs_6s
 feature_profile: ../../features/musicfm_msd_layer7.yaml
-training_profile: ../../training/fma_medium_mid_fusion.yaml
+training_profile: ../../training/genre.yaml
 command: train fma-medium mid-fusion
 implementation_status: phase2_repeated_mixture_controls
+
+# Dataset paths resolve relative to this YAML, independently of the working directory.
+paths:
+  manifest: ../../../data/manifests/fma_medium/fma_medium_htdemucs.jsonl
+  feature_dir: ../../../data/features/fma_medium/musicfm_msd_layer7
+  output_dir: ../../../outputs/fma_medium/phase2
+  summary_dir: ../../../outputs/fma_medium
+
+features:
+  fusion: concatenate
+model:
+  name: deep_mlp
 
 runs:
   mixture_only: {kind: reference, sources: [mixture]}

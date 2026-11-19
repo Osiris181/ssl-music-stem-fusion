@@ -14,6 +14,7 @@ Current implementation:
 | `fma.py` | Parse FMA-Medium metadata and align mixture and HT-Demucs paths by six-digit track ID. |
 | `fma_features.py` | Verify extraction reports, cache contents, exact split IDs, labels, and dimensions; load the common training track set. |
 | `features.py` | Dataset-independent aligned feature containers passed to training. |
+| `emotion_cnn_features.py` | Verify aligned track-level CNN vectors and native annotations, share arrays across valence/arousal, and create binary target labels with training-only prevalence without opening audio or harmony caches. |
 | `gtzan.py` | Read provided stratified splits, check common audio availability, assign ten-class labels, and generate audio manifests. |
 | `gtzan_features.py` | Load NumPy or PyTorch GTZAN caches with exact ID alignment and extraction/import provenance validation. |
 | `ismir04.py` | Preserve CSV partitions and six-class labels, exclude confirmed duplicates, and assign collision-safe IDs. |

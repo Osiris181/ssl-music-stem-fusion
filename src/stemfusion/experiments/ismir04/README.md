@@ -11,7 +11,9 @@ and cache filenames. All training hyperparameters come from
 | `prepare_manifest.py` | Preserve provided CSV partitions and labels, audit duplicates, and bind retained tracks to audio paths. |
 | `separation.py` | Generate missing stem sets with the shared HT-Demucs backend. |
 | `extraction.py` | Extract shared MusicFM-MSD layer-7 embeddings with explicit long-track chunking. |
+| `extraction_cnn.py` | Extract the Phase 3 frozen MSD_musicnn embeddings with the same backend and window policy as GTZAN. |
 | `train_mid.py` | Train the mixture baseline, three capacity controls, and three stem-fusion conditions. |
+| `train_mid_cnn.py` | Train the seven CNN mid-fusion conditions using the existing genre trainer. |
 | `train_late.py` | Train independent branches, evaluate matched ensembles, and report standalone stems. |
 
 `prepare_manifest.py` reads the provided CSVs, checks for exact audio
@@ -171,6 +173,105 @@ complete cache-content audit. Failed splits produce partial caches and failure
 reports instead of publishing complete split caches. tqdm displays source/split
 progress; per-source/aggregate JSON reports record settings, paths, counts,
 and errors.
+
+## Phase 3 CNN extraction and training
+
+All CNN datasets share [guarded decoding and cache recovery](../../../../../docs/cnn_audio_decoding.md).
+Invalid primary decodes receive a checked FFmpeg fallback. Incomplete tracks
+have their reference revalidated, and wrong-length caches are repaired with
+backups. Valid caches and the 0.25-second alignment tolerance remain unchanged.
+
+The CNN experiment reuses `data/manifests/ismir04/ismir04_htdemucs.jsonl`,
+including its unique IDs, existing source paths, six-class mapping and fixed
+729/726/724 partitions. Reuse the prepared manifest and separated audio.
+
+The public scripts call the same `_cnn_extraction.py` and `_cnn_genre.py`
+orchestration as GTZAN. The frozen encoder and window pooling live in
+`features/musicnn.py`. The ISMIR04 cache adapter preserves the CSV genre map
+and feeds the existing genre models, trainer, metrics and reporting.
+
+Install/activate the isolated TensorFlow extraction environment using the
+[environment instructions](../../../../../environments/musicnn/README.md).
+From the repository root, activation is `source musicnn/bin/activate`.
+Then, from this ISMIR04 experiment directory:
+
+```bash
+python extraction_cnn.py --dry-run
+python extraction_cnn.py
+```
+
+`configs/experiments/ismir04/extraction_cnn.yaml` defines the local manifest,
+cache/report paths and execution settings. YAML paths resolve relative to the
+declaring YAML, while CLI paths resolve relative to the current directory.
+Compatibility setup for legacy Keras and environment-local CUDA libraries runs
+automatically. No separate launcher is needed.
+
+The extractor uses the same official standard MSD_musicnn checkpoint as GTZAN:
+mono 16 kHz, official log-mel preprocessing, consecutive 187-frame windows with
+no overlap, and 200-dimensional penultimate embeddings. It retains and pads
+the final partial log-mel window, then averages all window embeddings equally.
+This differs from the released extractor's tail-dropping behavior and is the
+same adaptation in both CNN datasets. No duration truncation is applied.
+
+Sources are trimmed/padded in memory to the mixture's resampled length within
+the shared 0.25-second tolerance; larger discrepancies fail extraction. This
+aligns window boundaries and does not estimate waveform latency. Silent vectors
+are retained. Long recordings use a full-track spectrogram and batches of at
+most 16 windows for CNN inference. The window sums are divided by the total
+window count, so the smaller final batch gets the correct weight. Unlike the
+MusicFM configuration, no 30-second encoder chunk policy is needed here.
+CPU preprocessing still needs memory for the full waveform and spectrogram.
+The YAML GPU memory cap is 4096 MB; `--gpu-memory-mb N` overrides it.
+
+Features save as `data/features/ismir04/msd_musicnn/{split}/{source}/{track_id}.npz`.
+Each file contains a float32 `(200,)` embedding and JSON provenance covering
+the dataset/split/label, checkpoint and source hashes, audio hash, frame counts
+and padding. The final readable counts point to
+`outputs/ismir04/cnn/extraction_report.json`. A failed view produces an error
+and a nonzero exit status; training requires the complete manifest cohort.
+Reruns reuse matching caches. Use `--overwrite` explicitly to replace them.
+
+For a bounded check without writing full-experiment caches:
+
+```bash
+python extraction_cnn.py --limit-per-split 1 \
+  --output-dir /tmp/ismir04_cnn_check/features \
+  --report /tmp/ismir04_cnn_check/extraction_report.json --fail-fast
+```
+
+After full extraction finishes, activate your main PyTorch training environment
+and run from this directory:
+
+```bash
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py
+```
+
+`configs/experiments/ismir04/mid_fusion_cnn.yaml` inherits the active ISMIR04
+`mid_fusion.yaml` protocol and shared `configs/training/genre.yaml` settings:
+1024/512 hidden layers, ReLU, dropout 0.2, unweighted cross-entropy, Adam 1e-4,
+batch 128, 20 epochs and no early stopping. The best checkpoint maximizes the
+validation sum of accuracy, macro ROC-AUC and macro AP; ties retain the earlier
+epoch. Test evaluation follows checkpoint selection.
+
+The five seeds remain 32, 64, 128, 256 and 512. The seven conditions are mixture
+only; repeated mixture x4/x5/x6; and M+G+D+P, then +B, then +V. Input widths are
+200/800/1000/1200 and the output has six classes. Corresponding repeated-mixture
+and stem-fusion MLPs have identical nominal parameter counts. No CNN late-fusion
+or additional harmonic features are part of this matrix.
+
+Training reads caches and the manifest; it checks exact IDs, labels, finite
+vectors, extraction provenance and aligned source windows. CNN checkpoints and
+per-run results save under `outputs/ismir04/cnn/runs/`. The final terminal table
+also saves as `outputs/ismir04/cnn/summary_mid_fusion.txt` and `.json`, with
+mean/sample SD and paired fusion-minus-control differences. Selected runs or
+seed subsets use distinct summary names. Reruns reuse verified complete fits;
+`--overwrite` retrains them. CLI training overrides match the GTZAN CNN script.
+
+MSD pretraining overlap with the evaluation collections remains unresolved;
+the CNN comparison does not by itself isolate pretraining objective from other
+representation and architecture differences.
 
 ## Training configuration and commands
 

@@ -58,11 +58,10 @@ Comparisons are made within each dataset, representation, and target.
 
 ## Implementation
 
-Runnable extraction and training scripts are provided for
-[FMA-Medium](src/stemfusion/experiments/fma_medium/README.md) and
-[GTZAN](src/stemfusion/experiments/gtzan/README.md). Dataset scripts
-load YAML settings and call shared modules for data loading, feature
-extraction, model training, evaluation, and reporting.
+Runnable extraction and training scripts are provided in the
+[dataset experiment directories](src/stemfusion/experiments/README.md).
+Dataset scripts load YAML settings and call shared modules for data loading,
+feature extraction, model training, evaluation, and reporting.
 
 | Component | Implementation |
 | --- | --- |
@@ -112,7 +111,7 @@ stem-fusion-music-classification/
 │   ├── separators/                  # HT-Demucs settings
 │   ├── features/                    # Genre MusicFM and frozen MERT settings
 │   ├── training/                    # Shared classifier settings and paths
-│   └── experiments/                 # Genre datasets and MTG-Jamendo task configurations
+│   └── experiments/                 # Per-dataset experiment configurations
 ├── context/                         # Research motivation and experimental design notes
 ├── data/                            # Local manifests and cached features
 ├── docs/                            # Detailed configuration and usage guides
@@ -195,16 +194,30 @@ already works, no reinstall is needed.
 
 ### Running experiments
 
-Feature extraction also requires a local MusicFM checkout and the MSD
-checkpoint/statistics files. Configure the paths in:
+The three genre datasets—FMA-Medium, GTZAN, and ISMIR04—use the shared
+[MusicFM settings](configs/features/musicfm_msd_layer7.yaml) and
+[genre training profile](configs/training/genre.yaml). MusicFM extraction
+requires a local MusicFM checkout and the MSD checkpoint/statistics files.
+For dataset-specific manifests, audio paths, extraction, and training presets,
+start with the corresponding folder under `configs/experiments/`; its YAML
+files reference shared profiles under `configs/` where applicable.
 
-- [MusicFM settings](configs/features/musicfm_msd_layer7.yaml).
-- [FMA manifest CSV and audio paths](configs/experiments/fma_medium/manifest.yaml).
-- [FMA extraction settings](configs/experiments/fma_medium/extraction.yaml).
-- [Common genre training settings](configs/training/genre.yaml).
-- Dataset paths: [FMA-Medium](configs/training/fma_medium_genre.yaml), [GTZAN](configs/training/gtzan_genre.yaml), and [ISMIR04](configs/training/ismir04_genre.yaml).
+Each dataset has its own experiment presets. The mid- and late-fusion columns
+refer to the MusicFM genre or MERT + chord/key experiments; the CNN column is
+the frozen MSD_musicnn mid-fusion comparison. CNN late fusion is not part of
+the current experiment design.
 
-Prepare the aligned manifest and features using the
+| Dataset and setup guide | Mid fusion | Late fusion | CNN mid fusion |
+| --- | --- | --- | --- |
+| [FMA-Medium](src/stemfusion/experiments/fma_medium/README.md) | [Config](configs/experiments/fma_medium/mid_fusion.yaml) | [Config](configs/experiments/fma_medium/late_fusion.yaml) | [Config](configs/experiments/fma_medium/mid_fusion_cnn.yaml) |
+| [GTZAN](src/stemfusion/experiments/gtzan/README.md) | [Config](configs/experiments/gtzan/mid_fusion.yaml) | [Config](configs/experiments/gtzan/late_fusion.yaml) | [Config](configs/experiments/gtzan/mid_fusion_cnn.yaml) |
+| [ISMIR04](src/stemfusion/experiments/ismir04/README.md) | [Config](configs/experiments/ismir04/mid_fusion.yaml) | [Config](configs/experiments/ismir04/late_fusion.yaml) | [Config](configs/experiments/ismir04/mid_fusion_cnn.yaml) |
+| [MTG-Jamendo](src/stemfusion/experiments/mtg_jamendo/README.md) | [Config](configs/experiments/mtg_jamendo/mid_fusion.yaml) | [Config](configs/experiments/mtg_jamendo/late_fusion.yaml) | [Config](configs/experiments/mtg_jamendo/mid_fusion_cnn.yaml) |
+| [PMEmo](src/stemfusion/experiments/pmemo/README.md) | [Config](configs/experiments/pmemo/mid_fusion.yaml) | [Config](configs/experiments/pmemo/late_fusion.yaml) | [Config](configs/experiments/pmemo/mid_fusion_cnn.yaml) |
+| [DEAM](src/stemfusion/experiments/deam/README.md) | [Config](configs/experiments/deam/mid_fusion.yaml) | [Config](configs/experiments/deam/late_fusion.yaml) | [Config](configs/experiments/deam/mid_fusion_cnn.yaml) |
+| [EmoMusic](src/stemfusion/experiments/emomusic/README.md) | [Config](configs/experiments/emomusic/mid_fusion.yaml) | [Config](configs/experiments/emomusic/late_fusion.yaml) | [Config](configs/experiments/emomusic/mid_fusion_cnn.yaml) |
+
+For example, prepare FMA-Medium's aligned manifest and features using the
 [extraction guide](docs/fma_medium_extraction.md). Then run:
 
 ```bash

@@ -52,6 +52,16 @@ def dataset_adapter(config: GenreExperimentConfig):
         from stemfusion.data.gtzan import inspect_manifest
         from stemfusion.experiments._datasets import GenreDataset
         return GenreDataset("GTZAN", 10, inspect_manifest, cache_paths, load_gtzan_cnn_features)
+    if config.feature_backend == "msd_musicnn" and config.dataset == "ismir04":
+        from stemfusion.data.ismir04_cnn_features import cache_paths, load_ismir04_cnn_features
+        from stemfusion.data.ismir04 import inspect_manifest
+        from stemfusion.experiments._datasets import GenreDataset
+        return GenreDataset("ISMIR04", 6, inspect_manifest, cache_paths, load_ismir04_cnn_features)
+    if config.feature_backend == "msd_musicnn" and config.dataset == "fma_medium":
+        from stemfusion.data.fma_cnn_features import cache_paths, load_fma_cnn_features
+        from stemfusion.data.fma_features import inspect_manifest
+        from stemfusion.experiments._datasets import GenreDataset
+        return GenreDataset("FMA-Medium", 16, inspect_manifest, cache_paths, load_fma_cnn_features)
     raise ValueError("Unsupported genre feature backend/dataset combination.")
 
 

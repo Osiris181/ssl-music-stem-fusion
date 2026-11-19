@@ -129,7 +129,7 @@ class YAMLConfigurationTests(unittest.TestCase):
 
     def test_training_yaml_defaults_and_cli_runtime_override(self) -> None:
         path = self.write_yaml({
-            "training_profile": str(default_config_path("training/fma_medium_mid_fusion.yaml")),
+            "training_profile": str(default_config_path("experiments/fma_medium/mid_fusion.yaml")),
             "optimization": {"batch_size": 4, "epochs": 3, "learning_rate": 0.002},
             "model": {"hidden_dimensions": [16, 8], "dropout": 0.1},
             "reproducibility": {"seeds": [123]},

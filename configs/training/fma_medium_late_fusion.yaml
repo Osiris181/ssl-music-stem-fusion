@@ -1,5 +1,0 @@
-training_profile: fma_medium_genre.yaml
-features:
-  fusion: independent_logits_then_equal_sum
-model:
-  name: per_source_deep_mlp

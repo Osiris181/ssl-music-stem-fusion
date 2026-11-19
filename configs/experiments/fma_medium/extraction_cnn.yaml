@@ -1,0 +1,14 @@
+# The same official CNN, window policy and runtime used for GTZAN and ISMIR04.
+dataset: fma_medium
+paths:
+  manifest: ../../../data/manifests/fma_medium/fma_medium_htdemucs.jsonl
+  output_dir: ../../../data/features/fma_medium/msd_musicnn
+  report: ../../../outputs/fma_medium/cnn/extraction_report.json
+runtime:
+  device: /GPU:0
+  batch_size: 16
+  gpu_memory_mb: 4096
+audio:
+  maximum_source_duration_difference_seconds: 0.25
+# Full-duration mono 16 kHz; consecutive 187-frame patches; pad the last patch.
+# One 200-d window-mean vector per manifest track/source; no harmonic features.

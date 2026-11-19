@@ -1,5 +1,0 @@
-training_profile: fma_medium_genre.yaml
-features:
-  fusion: concatenate
-model:
-  name: deep_mlp

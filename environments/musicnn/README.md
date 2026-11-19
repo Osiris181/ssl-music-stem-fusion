@@ -40,12 +40,37 @@ python extraction_cnn.py --dry-run
 python extraction_cnn.py
 ```
 
+The same extraction commands are available from each dataset directory:
+`src/stemfusion/experiments/{gtzan,ismir04,fma_medium,mtg_jamendo,pmemo}/`.
+All five use this environment and the same frozen CNN extraction backend.
+
+Audio loading uses the shared [duration guard and FFmpeg fallback](../../docs/cnn_audio_decoding.md).
+System `ffmpeg` and `ffprobe` are required when the primary decoder cannot be
+validated; install the operating system's `ffmpeg` package separately from uv.
+Healthy decoded inputs and compatible caches remain unchanged. Unrecoverable
+corruption or true duration mismatches remain explicit extraction failures.
+
 The entry point automatically configures legacy Keras and this environment's
 CUDA library paths before importing TensorFlow. No launcher script is required.
 The preset was tested on an RTX 5090 with TensorFlow 2.21.0, tf-keras 2.21.0,
 CUDA runtime 12.9.79 and cuDNN 9.28.1.4. PTX JIT/deprecation warnings can occur;
 actual GPU inference was verified, not native SM120 binary support. A compatible
 host NVIDIA driver is still required; pip packages do not install that driver.
+
+The dataset YAML presets allow TensorFlow up to 4096 MB of GPU memory.
+This is an upper limit, not a target utilization or a batch-size change.
+Override it with `python extraction_cnn.py --gpu-memory-mb N`. A process reads
+the setting at startup; editing YAML cannot resize a running TensorFlow session.
+
+Earlier caches recorded a 768 MB cap. To resume those with their original
+settings, run `python extraction_cnn.py --gpu-memory-mb 768`. To re-extract into
+the same destination with the new cap, use `python extraction_cnn.py --overwrite`,
+which replaces existing features. Alternatively, choose a new `--output-dir`
+and `--report` to preserve the old cache. Do not mix settings within one cohort:
+the extractor checks recorded runtime settings when reusing files. More memory
+can permit different cuDNN algorithms, so identical floating-point results or a
+speedup are not guaranteed. Completed classifier results do not need rerunning
+just because a default extraction memory cap changed.
 
 For classifier training, deactivate this environment and activate your main
 PyTorch environment, then run `python train_mid_cnn.py`. Do not install PyTorch

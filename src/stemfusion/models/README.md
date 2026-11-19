@@ -11,6 +11,8 @@ source-separation models belong to their own pipeline stages.
 | --- | --- |
 | `mlp.py` | Three-linear-layer MLP used by the paper's mid-fusion genre experiments. |
 | `late_fusion.py` | Separately parameterized source MLPs with equal logit aggregation. |
+| `cnn_mood.py` | Plain 200-per-source CNN vectors into a 512/256/56 ReLU head for Jamendo, without harmony or head dropout. |
+| `cnn_emotion.py` | The corresponding 512/256/1 plain CNN binary-emotion head, with actual parameter counting for matched repeated-mixture controls. |
 
 For FMA genre classification, every source MLP uses hidden dimensions 1024
 and 512 with dropout 0.2. Mid fusion receives 1024 times the number of selected

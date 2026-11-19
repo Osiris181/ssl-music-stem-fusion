@@ -7,6 +7,8 @@
 | `separation.yaml` | Same shared HT-Demucs profile as DEAM/PMEmo, preserving the intentional DEAM output root and a separate EmoMusic report. |
 | `mert.yaml` | Shared pinned MERT profile, retained 30-second tails and mixture-duration alignment. |
 | `chords_keys.yaml` | Shared independent BTC/music21 features and bounded CQT retry. |
+| `extraction_cnn.yaml` | Shared PMEmo/DEAM frozen MSD_musicnn runtime/alignment settings, existing manifest and separate 200-dimensional CNN cache/report paths; supplied scores/columns remain unchanged. |
+| `mid_fusion_cnn.yaml` | Inherits the active EmoMusic binary protocol and supplied target columns; shared plain 512/256/1 CNN head, native >= 5 labels, seven conditions and five seeds, with independent CNN outputs. |
 | `mid_fusion.yaml` | Same seven-condition/five-seed binary model/fitting recipe as DEAM/PMEmo; native scores high >= 5, low < 5, retaining the supplied target columns. |
 | `late_fusion.yaml` | Same binary recipe with independent position-paired mixture/stem branches, logit-sum ensembles, protected configured mid references and twelve reports including standalone stems. |
 

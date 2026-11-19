@@ -6,7 +6,7 @@ paths:
 runtime:
   device: /GPU:0
   batch_size: 16
-  gpu_memory_mb: 768
+  gpu_memory_mb: 4096
 audio:
   maximum_source_duration_difference_seconds: 0.25
 # Fixed backend: official MSD_musicnn, mono 16 kHz, 187-frame windows,

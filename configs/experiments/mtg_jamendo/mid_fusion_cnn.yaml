@@ -1,0 +1,20 @@
+# Inherit active Jamendo conditions, optimizer, loss, stopping and evaluation.
+protocol: mid_fusion.yaml
+dataset: mtg_jamendo
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+  pooling: track_window_mean
+  harmony: false
+model:
+  hidden_dimensions: [512, 256]
+  activation: relu
+  dropout: 0.0
+  output_labels: 56
+paths:
+  manifest: ../../../data/manifests/mtg_jamendo/mtg_jamendo_features.jsonl
+  feature_dir: ../../../data/features/mtg_jamendo/msd_musicnn
+  tag_list: ../../../data/manifests/mtg_jamendo/tag_list.npy
+  prevalence: ../../../data/manifests/mtg_jamendo/music2emotion/probas_train.npy
+  output_dir: ../../../outputs/mtg_jamendo/cnn/runs
+  summary_dir: ../../../outputs/mtg_jamendo/cnn

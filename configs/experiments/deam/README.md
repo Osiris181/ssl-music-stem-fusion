@@ -7,6 +7,8 @@
 | `separation.yaml` | Shared HT-Demucs profile, separation manifest and exact output/report locations. |
 | `mert.yaml` | Shared pinned MERT profile, retained 30-second tails and mixture-duration stem alignment. |
 | `chords_keys.yaml` | Shared BTC/music21 descriptors, independent per source, with bounded CQT retries. |
+| `extraction_cnn.yaml` | Shared frozen MSD_musicnn runtime/alignment settings, existing DEAM feature manifest, and independent 200-dimensional CNN cache/report paths; native scores remain unchanged. |
+| `mid_fusion_cnn.yaml` | Inherits DEAM's active binary protocol, including native high >= 5 labels; plain 200-per-source CNN inputs with a 512/256/1 head and separate CNN outputs. |
 | `mid_fusion.yaml` | Same PMEmo model/fitting recipe, seven conditions and five seeds for each target; native 1-9 scores use high >= 5, low < 5 without normalization. |
 | `late_fusion.yaml` | Same recipe with independent paired-seed branches, twelve reports including stem-only, logit-sum ensembles and an explicit protected mid-reference root. |
 

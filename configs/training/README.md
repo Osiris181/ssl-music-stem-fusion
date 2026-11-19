@@ -6,9 +6,6 @@
 | `music2emo.yaml` | Shared MERT/chord/key feature construction, chord Transformer/MLP architecture, optimizer, loss/stopping/checkpoint recipe, runtime, and five seeds. |
 | `mood_theme_tagging.yaml` | Inherits `music2emo.yaml`; supplies the 56-label head and macro AUROC/average-precision evaluation for Jamendo. |
 | `emotion_recognition.yaml` | Same one-logit recipe and two-class metrics; PMEmo defaults to native 0-1 midpoint 0.5, while DEAM explicitly overrides native 1-9 midpoint 5 without score normalization. |
-| `fma_medium_genre.yaml` | Inherits `genre.yaml`; sets 16 classes and FMA paths. |
-| `fma_medium_mid_fusion.yaml` | Inherits the shared settings and selects concatenation. |
-| `fma_medium_late_fusion.yaml` | Inherits the shared settings and selects independent branches with equal logit summation. |
 | `gtzan_genre.yaml` | Inherits `genre.yaml`; sets ten classes and GTZAN paths. |
 | `gtzan_mid_fusion.yaml`, `gtzan_late_fusion.yaml` | Select the same fusion conventions for GTZAN. |
 | `ismir04_genre.yaml` | Inherits `genre.yaml`; sets six CSV genre classes and ISMIR04 paths. |
@@ -23,8 +20,12 @@ require implementation changes before other values are supported.
 All three datasets use `early_stopping: none`: train all 20 epochs and retain the best
 validation checkpoint. No patience or minimum-improvement threshold is active.
 
-The dataset experiment YAMLs in `../experiments/{fma_medium,gtzan,ismir04}/` inherit these
-profiles and define the conditions. They are loaded automatically by
+FMA-Medium's `../experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`
+inherit `genre.yaml` directly and contain their 16-class target, paths, fusion
+method, model name, and conditions. Its `mid_fusion_cnn.yaml` inherits the
+mid-fusion experiment and overrides the representation and CNN paths.
+GTZAN and ISMIR04 retain their intermediate dataset/fusion profiles for now.
+The experiment YAMLs are loaded automatically by
 `train_mid.py` and `train_late.py`. Paths resolve relative to their declaring
 YAML file. Explicit CLI options override YAML and are recorded.
 

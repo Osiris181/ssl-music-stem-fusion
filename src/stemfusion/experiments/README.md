@@ -50,6 +50,45 @@ audits exact duplicates and explicitly chunks long tracks during extraction.
 All three datasets provide `separation.py`, `prepare_manifest.py`, `extraction.py`, `train_mid.py`,
 and `train_late.py`, each supporting direct execution.
 
+FMA-Medium, GTZAN and ISMIR04 also provide `extraction_cnn.py` and `train_mid_cnn.py` for
+Phase 3. They share the official frozen MSD_musicnn extraction backend and
+genre fitting protocol, using each dataset's existing manifest and class map.
+Run extraction in the isolated musicnn environment, then training in the main
+PyTorch environment. Dataset READMEs document cache and result paths.
+All CNN datasets use the same [guarded audio loading and cache recovery](../../../docs/cnn_audio_decoding.md).
+It preserves healthy cached vectors, retries invalid decodes with FFmpeg, and
+reports genuinely damaged/mismatched audio without changing the cohort.
+MTG-Jamendo provides `extraction_cnn.py` through the same backend and
+`train_mid_cnn.py` for seven conditions with a plain 512/256 hidden-layer head.
+Jamendo retains its 56 mood/theme tags; the CNN classifier uses the existing
+Music2Emo fitter, frequency weights, stopping and evaluation without harmonic
+features or a chord Transformer.
+
+[PMEmo](pmemo/README.md) also provides `extraction_cnn.py` through the same
+shared extractor and guarded decoder. Its existing numeric IDs, fixed splits
+and continuous valence/arousal annotations are preserved; both tasks reuse one
+six-view CNN cache. `train_mid_cnn.py` calls `_cnn_emotion.py` to fit both
+binary targets across seven conditions and five seeds with the same shared
+emotion fitter and metric adapter. The plain 512/256/1 CNN head has no harmonic
+features. This does not change its MERT/harmony training entries or outputs.
+
+[DEAM](deam/README.md) provides `extraction_cnn.py` through that same shared
+extractor and decoder, preserving its supplied splits and native 1-9 scores.
+The separate six-view cache serves both targets without modifying MERT/harmony
+features; extraction does not normalize or binarize annotations.
+`train_mid_cnn.py` uses the same `_cnn_emotion.py` controller, plain 512/256/1
+head and shared fitter as PMEmo, retaining DEAM's native high >= 5 rule and
+separate CNN checkpoints and readable/detailed summaries.
+
+[EmoMusic](emomusic/README.md) provides `extraction_cnn.py` using that same
+shared emotion-extraction workflow. It preserves the supplied split/annotation
+mapping and intentional DEAM stem root, with independent EmoMusic CNN outputs;
+the existing annotation-column provenance caveat remains unresolved.
+`train_mid_cnn.py` calls the shared `_cnn_emotion.py` controller and unchanged
+PMEmo/DEAM fitter, using native >= 5 labels without swapping supplied columns.
+Its seven conditions, five seeds and separate target reports/checkpoints use
+the same plain CNN head and optimization/evaluation settings.
+
 [MTG-Jamendo](mtg_jamendo/README.md) provides `prepare_manifest.py` and
 `separation.py` for shared audio preparation. Manifest preparation defaults to
 the complete feature mapping; `--purpose separation` selects separation jobs.
@@ -85,6 +124,11 @@ Shared orchestration is:
 | `_datasets.py` | Select dataset-specific manifest and cache adapters. |
 | `_separation.py` | Common direct separation CLI and dataset YAML selection; uses `separation/htdemucs.py`. |
 | `_extraction.py` | Common extraction CLI and handoff to `features/_musicfm.py`. |
+| `_cnn_runtime.py` | Automatic legacy Keras and local CUDA setup before official musicnn extraction. |
+| `_cnn_extraction.py` | Shared CNN extraction CLI for genre, Jamendo multi-label and PMEmo/DEAM/EmoMusic continuous-score manifests, source alignment, caching, and reports. |
+| `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared genre scheduler/trainer. |
+| `_cnn_mood.py` | Schedule plain CNN Jamendo tagging experiments with the existing Music2Emo fitter and evaluation protocol. |
+| `_cnn_emotion.py` | Schedule separate binary emotion targets for CNN inputs using the retained shared fitter, training-only prevalence and validation-only thresholds. |
 | `_genre.py` | Common training CLI, seed/condition scheduling, reuse, and summaries. |
 | `_mood_theme_tagging.py` | MERT/harmony mood/theme experiment CLI, mid/late scheduling, protected reuse, and reporting; currently used by MTG-Jamendo. |
 | `_emotion_recognition.py` | MERT/harmony binary-emotion mid-fusion CLI, two-target scheduling and reporting; currently used by PMEmo with the same fitting loop. |
@@ -96,7 +140,8 @@ Shared orchestration is:
 | `_mid_controls.py` | Construct exact repeated-mixture inputs and fit parameter-count/input-width matched controls through the unchanged trainer. |
 | `_stem_results.py` | Common standalone-branch validation and reporting. |
 
-All genre launchers call `_genre.py` directly; Jamendo launchers call
+MusicFM genre launchers call `_genre.py` directly; CNN training launchers call
+it through `_cnn_genre.py`. Jamendo launchers call
 `_mood_theme_tagging.py` directly. No dataset-level `training.py` wrapper is
 needed. FMA's `stem_results.py` retains compatibility imports for saved-branch
 reporting. These shared modules are implementation details; run the

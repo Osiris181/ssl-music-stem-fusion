@@ -14,6 +14,8 @@ features in `Music2Emotion/dataset/pmemo/`.
 | `separation.py` | Run the shared HT-Demucs backend using the separation manifest; reuse complete existing six-stem outputs unless explicitly overwritten. |
 | `extract_mert.py` | Extract all 12 frozen MERT transformer layers for every retained 30-second segment. |
 | `extract_chords_keys.py` | Extract whole-track BTC chords, generate intermediate MIDI, estimate music21 key and normalize chords independently per source. |
+| `extraction_cnn.py` | Thin entry point for shared Phase 3 frozen MSD_musicnn extraction, with one 200-dimensional vector per track/source. |
+| `train_mid_cnn.py` | Thin entry point for two separate CNN binary targets, seven mid-fusion conditions and five seeds through the unchanged emotion fitter. |
 | `train_mid.py` | Thin launcher for both binary targets, seven conditions and five seeds through the shared emotion controller and Music2Emo fitter. |
 | `train_late.py` | Independent binary branches, matched mixture ensembles, nested stem fusion and stem-only results through the same fitter and binary metrics. |
 | `_extraction.py` | Route dataset defaults and command-line arguments to the feature implementations. |
@@ -27,6 +29,8 @@ Defaults are in `configs/experiments/pmemo/`:
 | `separation.yaml` | Shared HT-Demucs settings, separation manifest and output/report paths. |
 | `mert.yaml` | Frozen MERT extraction and output locations. |
 | `chords_keys.yaml` | Shared BTC/music21 extraction and output locations. |
+| `extraction_cnn.yaml` | Shared frozen CNN runtime/alignment settings, existing PMEmo manifest, and independent CNN cache/report paths. |
+| `mid_fusion_cnn.yaml` | Inherits the active PMEmo protocol; selects plain 200-dimensional CNN inputs, a 512/256/1 head and independent CNN output paths. |
 | `mid_fusion.yaml` | Training paths and seven conditions; inherits `configs/training/emotion_recognition.yaml` and `music2emo.yaml`. |
 | `late_fusion.yaml` | Late-fusion paths, twelve report conditions and the configured mid-fusion mixture reference; inherits the same training profiles. |
 
@@ -225,6 +229,121 @@ per-view outcomes and failures. Dry runs only plan: they do not decode audio,
 initialize models, write features or replace saved extraction reports. A
 partial smoke-test report is replaced by the later full-run report, while
 valid per-track features are reused.
+
+## Phase 3 CNN extraction
+
+`extraction_cnn.py` follows the same flow as GTZAN, ISMIR04, FMA-Medium and
+MTG-Jamendo: thin dataset entry point, shared `experiments/_cnn_extraction.py`,
+the existing `data/pmemo.py` manifest reader, shared guarded audio loading, and
+the unchanged `features/musicnn.py` encoder. It automatically loads
+`configs/experiments/pmemo/extraction_cnn.yaml`.
+
+The existing `data/manifests/pmemo/pmemo_features.jsonl` supplies numeric IDs,
+original chorus paths, separated stem paths, fixed 536/116/115 splits, and
+continuous valence/arousal annotations on their native 0-1 scale. No new
+manifest, resplitting, thresholding or source separation is performed.
+
+Activate the [isolated musicnn environment](../../../../../environments/musicnn/README.md)
+and run from this experiment directory:
+
+```bash
+python extraction_cnn.py --dry-run
+python extraction_cnn.py
+```
+
+The shared settings are frozen standard MSD_musicnn, mono 16 kHz audio,
+official log-mel preprocessing, consecutive nonoverlapping 187-frame windows,
+retained/right-padded final windows, and an equal-window mean of 200-dimensional
+embeddings. All six inputs use full available chorus duration: original mixture,
+guitar, drums, piano, bass and vocals; `other` is excluded. Stem alignment uses
+the mixture with the same 0.25-second tolerance. CNN batches contain at most 16
+windows, with the same YAML 4096 MB GPU cap; `--gpu-memory-mb N` overrides it.
+The [decoding guard and FFmpeg fallback](../../../../../docs/cnn_audio_decoding.md)
+and checked cache reuse are shared with the other CNN datasets.
+
+Caches are `data/features/pmemo/msd_musicnn/{split}/{source}/{track_id}.npz`.
+Each contains a finite float32 `embedding` of shape `(200,)` and JSON `metadata`
+with original continuous `annotations`, `relative_path`, source/audio/model
+identity, decoded lengths and window counts. Both valence/arousal tasks and
+all downstream seeds reuse these same vectors; no chord/key features are added.
+Existing MERT/harmony caches and results remain unchanged.
+
+The complete manifest plans 4,602 views. tqdm shows source-view progress; final
+readable counts point to `outputs/pmemo/cnn/extraction_report.json`. Failures
+are reported with nonzero status. Compatible caches are reused automatically;
+changed settings/source identity require explicit `--overwrite`. Audio files
+are never overwritten. For a bounded check with separate output:
+
+```bash
+python extraction_cnn.py --limit-per-split 1 \
+  --output-dir /tmp/pmemo_cnn_check/features \
+  --report /tmp/pmemo_cnn_check/report.json --fail-fast
+```
+
+Existing `train_mid.py` and `train_late.py` continue to train MERT plus harmony.
+CNN training has its own entry point and output root below.
+
+### CNN mid-fusion training
+
+After extraction finishes, activate the main PyTorch environment and run from
+this PMEmo experiment directory:
+
+```bash
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py
+```
+
+The code flow is `train_mid_cnn.py` -> `experiments/_cnn_emotion.py` ->
+`data/emotion_cnn_features.py` -> the unchanged `training/music2emo.py`, with
+`training/emotion.py`'s same `BinaryEmotionTask` metric/threshold adapter.
+`configs/experiments/pmemo/mid_fusion_cnn.yaml` inherits `mid_fusion.yaml`,
+retaining its two targets, native score >= 0.5 high/low labels, seven conditions,
+five seeds, optimizer, weighted BCE, early stopping and checkpoint selection.
+Raw annotation scores are not normalized or overwritten.
+
+CNN-specific differences are explicit: fixed whole-track window-mean vectors
+instead of randomly sampled MERT segment ranges; no chord/key inputs or
+Transformer; `200 * inputs -> 512 -> 256 -> 1` with ReLU and no head dropout.
+Controls concatenate exactly 4/5/6 copies of the same existing mixture vector.
+They match their corresponding fusion model's input width and trainable
+parameter count. Models use one sigmoid output per independently fitted target,
+not a two-target joint head or a two-logit softmax.
+
+| Setting | Retained value |
+| --- | --- |
+| Seeds | 32, 64, 128, 256, 512 |
+| Optimizer | Adam, lr 1e-4, betas 0.9/0.999, eps 1e-8, weight decay 0 |
+| Batch / epoch cap | 8 tracks / 200 epochs |
+| Loss | Author frequency-weighted BCE, using each target's training-only positive prevalence |
+| Early stopping | Validation weighted BCE, patience 10, minimum delta 1e-4 |
+| Checkpoint | Minimum validation weighted BCE, earliest exact tie; retain five best plus last |
+| Prediction threshold | Maximize validation macro F1 over 0.00-1.00 in 0.01 steps; lowest tie; freeze for test |
+| Metrics | Track-level accuracy; low/high macro F1, one-vs-rest ROC-AUC and average precision |
+
+All six cache views must match the existing manifest and each other in IDs,
+source metadata, annotations, extraction settings, finite shape and window
+coverage. Every selected target needs low/high examples in each split. Only
+local feature files are read; no audio or harmonic artifacts are opened.
+The same loaded arrays are reused by both targets and every training seed.
+
+The full run fits 70 classifiers. For a bounded run, supported arguments include:
+
+```bash
+python train_mid_cnn.py --target valence --seed 32 --run mixture_only
+```
+
+Checkpoint directories are
+`outputs/pmemo/cnn/runs/{target}/{condition}/seed_{seed}/`. Readable terminal
+results and separate `summary_mid_fusion_valence.{txt,json}` and
+`summary_mid_fusion_arousal.{txt,json}` are written under `outputs/pmemo/cnn/`.
+Summaries include five-seed mean/sample SD and three paired fusion-minus-control
+contrasts. Subsets receive target/condition/seed-specific filenames. Compatible
+completed fits are reused with checksums by default; `--overwrite` requests
+replacement. Changing `--output-dir` also redirects summaries unless
+`--summary-dir` is supplied. Validation/dry runs write no training outputs.
+Existing MERT checkpoints, features and result files are not reused or modified.
+CNN late fusion and stem-only training are not added in Phase 3.
 
 ## Mid-fusion training
 

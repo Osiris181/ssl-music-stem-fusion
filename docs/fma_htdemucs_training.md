@@ -14,9 +14,13 @@ Shared modules are `training/trainer.py`, `mid_fusion.py`, `late_fusion.py`,
 `metrics.py`, and `reporting.py`. FMA feature loading is in
 `data/fma_features.py`.
 
-Both methods inherit `configs/training/fma_medium_genre.yaml`.
-Set manifest, feature directory, and common output root there.
-The mid/late experiment YAMLs define their condition matrices.
+Both methods inherit `configs/training/genre.yaml` directly.
+Set the manifest, feature directory, and common output/summary roots in
+`configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`.
+Keep these paths equal between the two files to retain branch sharing.
+These experiment YAMLs also define the 16-class target, fusion/model selection,
+and condition matrices. The CNN experiment continues to inherit the mid-fusion
+experiment with its own representation and paths.
 No Python settings need changing for another filesystem location.
 
 ## Running

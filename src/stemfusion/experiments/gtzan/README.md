@@ -21,7 +21,9 @@ This is a separate extractor, not a replacement for MusicFM. It reuses the
 existing GTZAN manifest (499/250/250), labels, split assignments and six source
 paths. Configuration is `configs/experiments/gtzan/extraction_cnn.yaml`;
 YAML paths resolve relative to that file and CLI paths to the working directory.
-The reusable backend is `features/musicnn.py`. No new stem separation is needed.
+The reusable backend is `features/musicnn.py`; orchestration is shared with
+ISMIR04 in `experiments/_cnn_extraction.py` and `experiments/_cnn_genre.py`.
+No new stem separation is needed.
 
 Use the isolated official TensorFlow environment, not the PyTorch training
 environment. Recreate the verified Python 3.12 runtime from the repository root:
@@ -54,7 +56,8 @@ With the musicnn environment activated, you can also run `python extraction_cnn.
 directly from this GTZAN directory. The entry point automatically supplies
 environment-local CUDA library paths and legacy Keras, restarting the Python
 process once before imports if necessary. No separate launcher is required;
-the existing launchers remain compatible. GPU memory defaults to 768 MB; CPU inference is explicitly
+the existing launchers remain compatible. The YAML GPU memory cap is 4096 MB;
+`--gpu-memory-mb N` overrides it. CPU inference is explicitly
 available with `--device /CPU:0`. GPU errors never silently switch to CPU.
 `--limit-per-split 1 --output-dir /tmp/gtzan-cnn-test --report /tmp/gtzan-cnn-test/report.json`
 tests one track per split without writing into the production cache.
@@ -77,6 +80,10 @@ computed over the full track; inference is batched and pooled by window count,
 not by batch means. Long-recording streaming remains future work.
 
 Caches: `data/features/gtzan/msd_musicnn/{split}/{source}/{track_id}.npz`.
+
+All CNN datasets share [guarded decoding and cache recovery](../../../../../docs/cnn_audio_decoding.md).
+Healthy caches remain reusable; invalid decodes receive a checked FFmpeg
+fallback. Genuine source corruption/mismatches remain explicit failures.
 Each contains `embedding` (finite float32, shape 200) and JSON `metadata`,
 readable with `numpy.load(..., allow_pickle=False)`. Provenance records the
 manifest, implementation/checkpoint hashes, software versions, input file hash,

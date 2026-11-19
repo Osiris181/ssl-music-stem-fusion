@@ -1,0 +1,18 @@
+# Retain DEAM binary targets, native-score labels and shared PMEmo optimization.
+protocol: mid_fusion.yaml
+dataset: deam
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+  pooling: track_window_mean
+  harmony: false
+model:
+  hidden_dimensions: [512, 256]
+  activation: relu
+  dropout: 0.0
+  output_labels: 1
+paths:
+  manifest: ../../../data/manifests/deam/deam_features.jsonl
+  feature_dir: ../../../data/features/deam/msd_musicnn
+  output_dir: ../../../outputs/deam/cnn/runs
+  summary_dir: ../../../outputs/deam/cnn

@@ -9,6 +9,8 @@ class mapping are preserved; `other` is excluded.
 | `prepare_manifest.py` | Runnable manifest builder from official metadata and aligned audio paths. |
 | `separation.py` | Runnable HT-Demucs separation using the shared backend and dataset paths. |
 | `extraction.py` | Runnable MusicFM extraction interface. |
+| `extraction_cnn.py` | Phase 3 frozen MSD_musicnn extraction with the same backend and window policy as GTZAN and ISMIR04. |
+| `train_mid_cnn.py` | Train the same seven CNN mid-fusion conditions using the shared genre trainer and five seeds. |
 | `train_mid.py` | Runnable mid-fusion matrix, including repeated-mixture input controls. |
 | `train_late.py` | Runnable independently trained late-fusion matrix, including matched mixture ensembles. |
 | `stem_results.py` | Compatibility interface to shared saved-branch analysis in `experiments/_stem_results.py`. |
@@ -25,9 +27,8 @@ Each public file supports direct execution without PYTHONPATH.
 - MusicFM settings and checkout location: `configs/features/musicfm_msd_layer7.yaml`.
 - HT-Demucs paths: `configs/experiments/fma_medium/separation.yaml`; inference settings inherit `configs/separators/htdemucs_6s.yaml`.
 - Extraction manifest/output/source list: `configs/experiments/fma_medium/extraction.yaml`.
-- Shared classifier settings and manifest/feature/output paths: `configs/training/fma_medium_genre.yaml`.
-- Common genre hyperparameters inherited by FMA-Medium and GTZAN: `configs/training/genre.yaml`.
-- Conditions: `configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`.
+- Common genre hyperparameters inherited by FMA-Medium, GTZAN, and ISMIR04: `configs/training/genre.yaml`.
+- Dataset paths, class count, fusion/model selection, and conditions: `configs/experiments/fma_medium/mid_fusion.yaml` and `late_fusion.yaml`; both inherit the shared genre profile directly.
 
 CLI paths override YAML paths. Relative YAML paths resolve against the YAML
 file; relative CLI paths resolve against the current working directory.
@@ -87,6 +88,115 @@ directory. Dry runs check audio-file availability without writing a manifest;
 they can take time on HDD storage. Existing manifests are protected unless
 `--overwrite` is explicit. Reuse the existing manifest for completed extraction
 and training; this configuration addition does not require rebuilding it.
+
+## Phase 3 CNN extraction
+
+`extraction_cnn.py` uses the shared `experiments/_cnn_extraction.py` orchestration
+and `features/musicnn.py` encoder. It loads
+`configs/experiments/fma_medium/extraction_cnn.yaml` and reuses the existing
+`data/manifests/fma_medium/fma_medium_htdemucs.jsonl`, preserving six-digit IDs,
+the 16-class mapping, original partitions, and mixture/stem audio paths.
+No new manifest or separation pass is needed for the existing setup.
+
+Activate the [isolated musicnn environment](../../../../../environments/musicnn/README.md),
+then run from this experiment directory:
+
+```bash
+python extraction_cnn.py --dry-run
+python extraction_cnn.py
+```
+
+The script configures legacy Keras and local CUDA paths automatically. It uses
+the official frozen standard MSD_musicnn checkpoint, mono 16 kHz audio and
+official log-mel preprocessing. Consecutive 187-frame windows have no overlap;
+the last partial window is retained and right-padded with silence. Average all
+200-dimensional window embeddings into one float32 vector per track/source.
+This is the same explicit tail adaptation used in the other CNN datasets.
+
+The shared [audio-decoding guard](../../../../../docs/cnn_audio_decoding.md)
+retries invalid decodes with FFmpeg and revalidates references for incomplete
+tracks. Wrong-length cached views are repaired with backups; healthy caches
+remain unchanged. True source corruption/mismatches still fail explicitly.
+
+The sources are mixture, guitar, drums, piano, bass and vocals. Resampled stems
+are aligned in memory to the mixture length within a 0.25-second tolerance;
+larger differences fail extraction. The full recording is retained, valid
+silence is retained, and no additional normalization or harmonic features are
+added. CNN inference uses batches of 16 windows and a YAML GPU memory cap of
+4096 MB, overridable with `--gpu-memory-mb N`. Full-track waveform and
+spectrogram preprocessing uses CPU memory.
+
+Caches save to `data/features/fma_medium/msd_musicnn/{split}/{source}/{track_id}.npz`.
+Each file contains `embedding` (float32, shape 200) and JSON `metadata`, including
+the integer genre label, source/audio identity, checkpoint and implementation
+hashes, sample/frame counts, and window/padding policy. `numpy.load` can read
+these files with `allow_pickle=False`.
+
+The tqdm bar counts selected source views. Final readable counts point to
+`outputs/fma_medium/cnn/extraction_report.json`. Reruns reuse matching caches;
+changed settings or input metadata cause a compatibility error and require
+explicit `--overwrite` to replace caches. Failed views are reported with a
+nonzero exit status; they do not redefine the intended cohort.
+
+For a bounded check with separate test output:
+
+```bash
+python extraction_cnn.py --limit-per-split 1 \
+  --output-dir /tmp/fma_medium_cnn_check/features \
+  --report /tmp/fma_medium_cnn_check/report.json --fail-fast
+```
+
+CNN caches are separate from the MusicFM caches consumed by `train_mid.py` and
+`train_late.py`. The MSD pretraining overlap audit remains unresolved.
+
+The FMA CNN training loader automatically retains only tracks with all six
+source embeddings. A track missing any source is skipped from every CNN
+condition, including mixture-only and repeated-mixture controls. No CLI policy
+option or track-ID list is needed. The data audit records skipped tracks,
+missing sources, and actual split counts; the original manifest and caches are
+not modified. Existing embeddings still require valid labels, provenance,
+finite vectors and aligned source windows. Unknown cache IDs, empty retained
+splits and loss of a genre class remain errors. A dry-run plan reports manifest
+counts; validation and training report the retained feature counts.
+
+### CNN mid-fusion training
+
+After extraction is complete, activate the main PyTorch training environment
+and run from this FMA-Medium directory:
+
+```bash
+python train_mid_cnn.py --validate-only
+python train_mid_cnn.py --dry-run
+python train_mid_cnn.py
+```
+
+The entry point calls `_cnn_genre.py` and the same `_genre.py` scheduler, MLPs,
+trainer, evaluation and reporting used by GTZAN and ISMIR04. Configuration is
+`configs/experiments/fma_medium/mid_fusion_cnn.yaml`, which inherits the existing
+FMA-Medium `mid_fusion.yaml` and shared `configs/training/genre.yaml` settings.
+The FMA adapter preserves six-digit IDs and the existing 16-class genre mapping.
+It requires exact manifest IDs for every source/split, finite float32 vectors,
+matching extraction provenance and source-aligned windows. Silent vectors remain
+valid, and no normalization is added. Training reads cached features only.
+
+The seven conditions are mixture only; repeated mixture x4/x5/x6; and M+G+D+P,
+then +B, then +V. Their input widths are 200/800/1000/1200, followed by hidden
+layers 1024/512 and 16 output logits. Corresponding repeated-mixture and fusion
+models have identical nominal parameter counts. ReLU, dropout 0.2, unweighted
+cross-entropy, Adam 1e-4, batch 128 and 20 epochs match the original genre
+experiments. There is no early stopping. The best checkpoint maximizes the
+validation sum of accuracy, macro ROC-AUC and macro AP, retaining the earliest
+epoch on ties. Test evaluation follows model selection.
+
+The five seeds remain 32, 64, 128, 256 and 512: 35 classifier fits in the full
+matrix. Results print after completion and save as
+`outputs/fma_medium/cnn/summary_mid_fusion.txt` and `.json`, including means,
+sample SDs and paired fusion-minus-control differences. Checkpoints and per-run
+metrics save under `outputs/fma_medium/cnn/runs/`. Reruns reuse verified completed
+fits; `--overwrite` explicitly retrains them. `--run NAME` and repeated `--seed N`
+support subsets with distinct summary filenames. An explicit `--output-dir`
+redirects summaries too unless `--summary-dir` is supplied. No CNN late-fusion
+or standalone stem-only fits are included in this matrix.
 
 ## Training commands
 

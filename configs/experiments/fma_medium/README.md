@@ -17,9 +17,13 @@ reference-only. Repeated CLI `--htdemucs-root` values replace the YAML root
 list. Existing manifests require explicit
 `--overwrite` before replacement; dry runs check paths without writing.
 
-Both training matrices inherit common settings from
-`configs/training/fma_medium_genre.yaml`, including outer seeds
-32, 64, 128, 256, 512 and manifest/feature/output paths.
+Both training matrices inherit architecture, optimization, evaluation, and
+outer seeds 32, 64, 128, 256, 512 directly from `configs/training/genre.yaml`.
+Each experiment YAML contains its 16-class target, manifest/feature/output
+paths, fusion method, model name, and conditions. Keep the common branch/output
+paths equal between `mid_fusion.yaml` and `late_fusion.yaml`.
+`mid_fusion_cnn.yaml` continues to inherit `mid_fusion.yaml`, overriding the
+feature representation and CNN paths while preserving the genre protocol.
 
 Without `--run`, training executes every condition. Use `--run NAME` to
 select one condition, `--seed 32` for one outer seed, or repeated `--seed`
