@@ -50,7 +50,7 @@ audits exact duplicates and explicitly chunks long tracks during extraction.
 All three datasets provide `separation.py`, `prepare_manifest.py`, `extraction.py`, `train_mid.py`,
 and `train_late.py`, each supporting direct execution.
 
-FMA-Medium, GTZAN and ISMIR04 also provide `extraction_cnn.py` and `train_mid_cnn.py` for
+FMA-Medium, GTZAN and ISMIR04 also provide `extraction_cnn.py`, `train_mid_cnn.py`, and `train_late_cnn.py` for
 Phase 3. They share the official frozen MSD_musicnn extraction backend and
 genre fitting protocol, using each dataset's existing manifest and class map.
 Run extraction in the isolated musicnn environment, then training in the main
@@ -126,7 +126,7 @@ Shared orchestration is:
 | `_extraction.py` | Common extraction CLI and handoff to `features/_musicfm.py`. |
 | `_cnn_runtime.py` | Automatic legacy Keras and local CUDA setup before official musicnn extraction. |
 | `_cnn_extraction.py` | Shared CNN extraction CLI for genre, Jamendo multi-label and PMEmo/DEAM/EmoMusic continuous-score manifests, source alignment, caching, and reports. |
-| `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared mid/late genre scheduler/trainer; FMA provides `train_late_cnn.py` with read-only CNN-M reuse. |
+| `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared mid/late genre scheduler/trainer; FMA, GTZAN, and ISMIR04 provide `train_late_cnn.py` with read-only CNN-M reuse. |
 | `_genre_reference.py` | Load and verify a completed CNN genre mixture reference without fitting or changing it. |
 | `_cnn_mood.py` | Schedule plain CNN Jamendo tagging experiments with the existing Music2Emo fitter and evaluation protocol. |
 | `_cnn_emotion.py` | Schedule separate binary emotion targets for CNN inputs using the retained shared fitter, training-only prevalence and validation-only thresholds. |

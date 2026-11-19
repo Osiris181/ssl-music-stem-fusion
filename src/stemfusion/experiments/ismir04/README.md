@@ -15,6 +15,7 @@ and cache filenames. All training hyperparameters come from
 | `train_mid.py` | Train the mixture baseline, three capacity controls, and three stem-fusion conditions. |
 | `train_mid_cnn.py` | Train the seven CNN mid-fusion conditions using the existing genre trainer. |
 | `train_late.py` | Train independent branches, evaluate matched ensembles, and report standalone stems. |
+| `train_late_cnn.py` | Reuse CNN-M, train independent CNN branches, and report matched ensembles and standalone stems using the same workflow as FMA and GTZAN. |
 
 `prepare_manifest.py` reads the provided CSVs, checks for exact audio
 duplicates, and generates an aligned six-class manifest. It never creates a
@@ -258,8 +259,9 @@ epoch. Test evaluation follows checkpoint selection.
 The five seeds remain 32, 64, 128, 256 and 512. The seven conditions are mixture
 only; repeated mixture x4/x5/x6; and M+G+D+P, then +B, then +V. Input widths are
 200/800/1000/1200 and the output has six classes. Corresponding repeated-mixture
-and stem-fusion MLPs have identical nominal parameter counts. No CNN late-fusion
-or additional harmonic features are part of this matrix.
+and stem-fusion MLPs have identical nominal parameter counts. The mid-fusion
+command covers these seven conditions; CNN late fusion uses the separate
+command below. Neither CNN experiment adds harmonic features.
 
 Training reads caches and the manifest; it checks exact IDs, labels, finite
 vectors, extraction provenance and aligned source windows. CNN checkpoints and
@@ -272,6 +274,52 @@ seed subsets use distinct summary names. Reruns reuse verified complete fits;
 MSD pretraining overlap with the evaluation collections remains unresolved;
 the CNN comparison does not by itself isolate pretraining objective from other
 representation and architecture differences.
+
+### CNN late-fusion training
+
+Use the main PyTorch training environment and run from this ISMIR04 directory:
+
+```bash
+python train_late_cnn.py --dry-run
+python train_late_cnn.py --validate-only
+python train_late_cnn.py
+```
+
+The entry point uses the same `_cnn_genre.py` controller, `_genre.py` scheduler,
+and shared genre branch fitter and ensemble evaluator as FMA and GTZAN.
+`configs/experiments/ismir04/late_fusion_cnn.yaml` inherits ISMIR04's
+MusicFM `late_fusion.yaml` and shared genre profile. Each branch is
+**200 -> 1024 -> 512 -> 6**, with biased linear layers, ReLU, dropout 0.2,
+unweighted cross-entropy, Adam 1e-4, batch 128, and 20 epochs. Select each
+checkpoint independently using the same validation sum of accuracy, macro
+ROC-AUC, and macro AP, retaining the earliest exact tie as in the other genre experiments.
+There is no early stopping. Preserve the existing six-class mapping and
+729/726/724 partitions.
+
+For outer seeds 32, 64, 128, 256, and 512, reuse CNN-M as M1 from
+`outputs/ismir04/cnn/runs/branches/seed_N/mixture_1/`. Independently train
+M2–M6 on the same mixture embedding and G/D/P/B/V on their respective
+embeddings using the same position-paired SHA256 seeds as FMA and GTZAN.
+The full matrix has **50 new branch fits**. Reuse each branch for nested
+four-, five-, and six-member mixture and source ensembles, adding raw
+logits equally before softmax/argmax. Full runs include all five standalone
+stem results from the selected branch checkpoints without extra fitting.
+
+New checkpoints and ensemble predictions save beneath
+`outputs/ismir04/cnn/late_fusion/runs/`. The terminal and
+`outputs/ismir04/cnn/summary_late_fusion.{txt,json}` include the M1 reference,
+six ensembles, five standalone stems, and paired differences with sample SD.
+Companion `summary_stem_only.{txt,json}` files save in the same summary
+directory. Existing mid-fusion checkpoints and summaries remain unchanged.
+
+`--validate-only` checks the cache and all requested M1 references without
+training or writing outputs. `--run NAME` and repeated `--seed N` select
+subsets with distinct summary suffixes. Reruns reuse verified completed
+fits; `--overwrite` affects late outputs only. `--reference-output-dir`
+selects a completed CNN mid-run root and `--output-dir` selects the new
+late-run root; the roots must be separate and non-nested. An explicit output
+root redirects summaries unless `--summary-dir` is supplied. A missing or
+incompatible M1 reference stops the affected run.
 
 ## Training configuration and commands
 

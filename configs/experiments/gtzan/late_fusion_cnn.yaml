@@ -1,0 +1,12 @@
+# Inherit the MusicFM late-fusion architecture, optimizer, seeds and conditions.
+protocol: late_fusion.yaml
+dataset: gtzan
+features:
+  name: msd_musicnn
+  dimension_per_source: 200
+paths:
+  manifest: ../../../data/manifests/gtzan/gtzan_htdemucs.jsonl
+  feature_dir: ../../../data/features/gtzan/msd_musicnn
+  reference_output_dir: ../../../outputs/gtzan/cnn/runs
+  output_dir: ../../../outputs/gtzan/cnn/late_fusion/runs
+  summary_dir: ../../../outputs/gtzan/cnn

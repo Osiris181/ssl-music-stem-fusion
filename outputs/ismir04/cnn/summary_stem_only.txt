@@ -1,0 +1,30 @@
+Stem only test results
+Dataset: ISMIR04 | Task: 6-class genre classification
+Features: frozen official MSD_musicnn penultimate, track-window mean; HT-Demucs htdemucs_6s stems.
+Outer seeds: 32, 64, 128, 256, 512
+Embedding width per source: 200
+Tracks: train 729, validation 726, test 724.
+Training: Adam, learning rate 0.0001, batch size 128, 20 epochs.
+Standard MLP hidden widths: 1024/512; ReLU; dropout 0.2.
+Checkpoint selection: maximum validation accuracy + macro ROC-AUC + macro AP; earliest epoch on ties.
+Mean +/- sample SD (ddof=1); metrics on the 0-1 scale.
+
+Condition    | Accuracy          | Macro F1          | Macro ROC-AUC     | Macro AP (PR-AUC)
+-------------+-------------------+-------------------+-------------------+------------------
+Mixture only | 0.8348 +/- 0.0016 | 0.7895 +/- 0.0022 | 0.9709 +/- 0.0007 | 0.8669 +/- 0.0028
+Guitar only  | 0.7019 +/- 0.0043 | 0.6116 +/- 0.0048 | 0.9159 +/- 0.0007 | 0.7004 +/- 0.0036
+Drums only   | 0.7174 +/- 0.0032 | 0.5122 +/- 0.0082 | 0.8704 +/- 0.0009 | 0.6101 +/- 0.0050
+Piano only   | 0.4892 +/- 0.0025 | 0.1949 +/- 0.0033 | 0.6763 +/- 0.0066 | 0.3190 +/- 0.0046
+Bass only    | 0.6566 +/- 0.0055 | 0.4284 +/- 0.0117 | 0.8463 +/- 0.0012 | 0.5575 +/- 0.0025
+Vocals only  | 0.6188 +/- 0.0052 | 0.4123 +/- 0.0107 | 0.8547 +/- 0.0024 | 0.5514 +/- 0.0043
+
+Reading the results:
+M = original mixture; G = guitar; D = drums; P = piano; B = bass; V = vocals.
+The native 'other' stem is excluded.
+Each stem-only row evaluates one existing, independently trained late-fusion branch on its own.
+The mixture-only row is the shared single-MLP reference.
+Standalone scores are supporting analysis, not evidence of incremental benefit beyond the mixture.
+PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.
+Sample SD describes training-run variability. No significance tests were performed.
+
+Detailed JSON: summary_stem_only.json

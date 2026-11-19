@@ -14,6 +14,7 @@ and cache filenames.
 | `train_mid.py` | Run the standard mixture baseline, three capacity controls, and three stem-fusion conditions. |
 | `train_mid_cnn.py` | Run the same seven mid-fusion conditions using frozen CNN caches and the shared genre trainer. |
 | `train_late.py` | Run three mixture ensembles, three stem ensembles, and supporting standalone-stem reports. |
+| `train_late_cnn.py` | Use the same CNN late-fusion workflow as FMA: reuse CNN-M, train independent branches, and report matched ensembles and standalone stems. |
 
 ## Phase 3 CNN extraction
 
@@ -124,7 +125,8 @@ after checkpoint selection. No normalization or chord/key features are added.
 The 35 fits comprise mixture only, identical mixture copies x4/x5/x6, and
 M+G+D+P / M+G+D+P+B / M+G+D+P+B+V. Input widths are 200, 800, 1000,
 and 1200. Repeated-mixture and corresponding fusion MLPs match exactly in
-nominal parameter count. No CNN late-fusion or standalone-stem runs are added.
+nominal parameter count. The mid-fusion command covers these seven conditions;
+CNN late fusion and standalone stems use the separate command below.
 
 The cache adapter requires all manifest IDs in all six sources, finite float32
 vectors, matching checkpoint/extraction provenance and aligned window counts.
@@ -141,6 +143,52 @@ Use `--run NAME`, repeated `--seed N`, or the same supported training overrides
 for diagnostics; default full experiments use the inherited protocol unchanged.
 An explicit `--output-dir` redirects summaries too unless `--summary-dir` is set.
 
+### CNN late-fusion training
+
+In the main PyTorch training environment, run from this GTZAN directory:
+
+```bash
+python train_late_cnn.py --dry-run
+python train_late_cnn.py --validate-only
+python train_late_cnn.py
+```
+
+This uses exactly the FMA CNN late-fusion implementation: the dataset entry
+point calls `_cnn_genre.py`, the shared `_genre.py` scheduler, and the existing
+genre branch fitter and ensemble evaluator. The configuration at
+`configs/experiments/gtzan/late_fusion_cnn.yaml` inherits GTZAN's MusicFM
+`late_fusion.yaml` and the shared genre training profile. Each branch uses
+**200 -> 1024 -> 512 -> 10**, biased linear layers, ReLU, dropout 0.2,
+unweighted cross-entropy, Adam 1e-4, batch 128, and 20 epochs. Select each
+checkpoint independently by the highest validation sum of accuracy, macro
+ROC-AUC, and macro AP, retaining the earliest exact tie. There is no early stopping.
+
+For outer seeds 32, 64, 128, 256, and 512, reuse the completed CNN mixture-only
+model as M1 from `outputs/gtzan/cnn/runs/branches/seed_N/mixture_1/`. Train
+M2–M6 separately on the same mixture embedding and G/D/P/B/V on their own
+embeddings, using the same position-paired SHA256 branch seeds as FMA. The
+full matrix requires **50 new branch fits**. Reuse these branches across
+four-, five-, and six-member mixture and source ensembles, summing raw logits
+equally before softmax/argmax. Full runs include all five standalone stem
+results from the selected branch checkpoints without additional fitting.
+Use the existing 499/250/250 source-aligned split and fixed ten-class mapping.
+
+New checkpoints and ensemble predictions save beneath
+`outputs/gtzan/cnn/late_fusion/runs/`. Results print in the terminal and save
+to `outputs/gtzan/cnn/summary_late_fusion.{txt,json}`, including the M1
+reference, six ensembles, five standalone stems, and paired differences with
+sample SD. Companion `summary_stem_only.{txt,json}` files are also saved there.
+The completed mid-fusion checkpoints and summaries remain unchanged.
+
+`--validate-only` checks cached inputs and every requested M1 reference
+without fitting or writing outputs. Use `--run NAME` or repeated `--seed N`
+for subsets, which receive distinct summary filename suffixes. Reruns reuse
+verified complete fits; `--overwrite` affects late outputs only. Override
+`--reference-output-dir` to use another completed CNN mid-run root, and use
+`--output-dir` for the new late-run root; these roots must be separate and
+non-nested. An explicit output root redirects summaries unless `--summary-dir`
+is supplied. Missing or incompatible M1 references stop the affected run.
+
 ## Configuration and data
 
 | YAML | Purpose |
@@ -152,6 +200,7 @@ An explicit `--output-dir` redirects summaries too unless `--summary-dir` is set
 | `configs/training/genre.yaml` | Common genre architecture, optimization, metrics, checkpoint selection, and five seeds for all genre datasets. |
 | `configs/training/gtzan_genre.yaml` | Ten classes and GTZAN manifest/cache/run/summary paths. |
 | `configs/experiments/gtzan/mid_fusion.yaml`, `late_fusion.yaml` | The same condition matrices as FMA-Medium. |
+| `configs/experiments/gtzan/mid_fusion_cnn.yaml`, `late_fusion_cnn.yaml` | CNN cache paths, separate output roots, and inheritance of the corresponding MusicFM protocol. |
 
 Each script automatically loads its YAML. Paths in YAML resolve relative to
 the file declaring them; CLI paths resolve relative to the current directory.

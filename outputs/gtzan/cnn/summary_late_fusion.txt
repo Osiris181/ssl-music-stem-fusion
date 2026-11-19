@@ -1,0 +1,52 @@
+Late fusion test results
+Dataset: GTZAN | Task: 10-class genre classification
+Features: frozen official MSD_musicnn penultimate, track-window mean; HT-Demucs htdemucs_6s stems.
+Outer seeds: 32, 64, 128, 256, 512
+Embedding width per source: 200
+Tracks: train 499, validation 250, test 250.
+Training: Adam, learning rate 0.0001, batch size 128, 20 epochs.
+Standard MLP hidden widths: 1024/512; ReLU; dropout 0.2.
+Checkpoint selection: maximum validation accuracy + macro ROC-AUC + macro AP; earliest epoch on ties.
+Mean +/- sample SD (ddof=1); metrics on the 0-1 scale.
+
+Condition            | Accuracy          | Macro F1          | Macro ROC-AUC     | Macro AP (PR-AUC)
+---------------------+-------------------+-------------------+-------------------+------------------
+Mixture only         | 0.8240 +/- 0.0063 | 0.8194 +/- 0.0067 | 0.9846 +/- 0.0007 | 0.9103 +/- 0.0037
+Mixture ensemble (4) | 0.8224 +/- 0.0036 | 0.8176 +/- 0.0036 | 0.9847 +/- 0.0003 | 0.9132 +/- 0.0012
+Mixture ensemble (5) | 0.8200 +/- 0.0040 | 0.8147 +/- 0.0041 | 0.9847 +/- 0.0002 | 0.9127 +/- 0.0012
+Mixture ensemble (6) | 0.8184 +/- 0.0022 | 0.8131 +/- 0.0025 | 0.9846 +/- 0.0003 | 0.9125 +/- 0.0012
+M+G+D+P              | 0.8168 +/- 0.0052 | 0.8092 +/- 0.0066 | 0.9805 +/- 0.0005 | 0.9053 +/- 0.0014
+M+G+D+P+B            | 0.8368 +/- 0.0052 | 0.8322 +/- 0.0059 | 0.9807 +/- 0.0005 | 0.9115 +/- 0.0013
+M+G+D+P+B+V          | 0.8496 +/- 0.0046 | 0.8467 +/- 0.0047 | 0.9857 +/- 0.0001 | 0.9283 +/- 0.0009
+
+Supporting analysis: individual stem classifiers
+Condition   | Accuracy          | Macro F1          | Macro ROC-AUC     | Macro AP (PR-AUC)
+------------+-------------------+-------------------+-------------------+------------------
+Guitar only | 0.5008 +/- 0.0077 | 0.4829 +/- 0.0069 | 0.8550 +/- 0.0021 | 0.5290 +/- 0.0028
+Drums only  | 0.5648 +/- 0.0077 | 0.5175 +/- 0.0095 | 0.8813 +/- 0.0019 | 0.5710 +/- 0.0046
+Piano only  | 0.2056 +/- 0.0100 | 0.1510 +/- 0.0113 | 0.6532 +/- 0.0067 | 0.2524 +/- 0.0114
+Bass only   | 0.5184 +/- 0.0073 | 0.4713 +/- 0.0108 | 0.8459 +/- 0.0019 | 0.5137 +/- 0.0063
+Vocals only | 0.5704 +/- 0.0122 | 0.5527 +/- 0.0154 | 0.8993 +/- 0.0006 | 0.6240 +/- 0.0043
+
+Paired differences (fusion minus matched control):
+Comparison                          | Accuracy           | Macro F1           | Macro ROC-AUC      | Macro AP (PR-AUC) 
+------------------------------------+--------------------+--------------------+--------------------+-------------------
+M+G+D+P vs Mixture ensemble (4)     | -0.0056 +/- 0.0022 | -0.0084 +/- 0.0040 | -0.0041 +/- 0.0006 | -0.0079 +/- 0.0016
+M+G+D+P+B vs Mixture ensemble (5)   | +0.0168 +/- 0.0033 | +0.0175 +/- 0.0041 | -0.0040 +/- 0.0005 | -0.0012 +/- 0.0015
+M+G+D+P+B+V vs Mixture ensemble (6) | +0.0312 +/- 0.0052 | +0.0336 +/- 0.0057 | +0.0011 +/- 0.0004 | +0.0158 +/- 0.0012
+
+Reading the results:
+M = original mixture; G = guitar; D = drums; P = piano; B = bass; V = vocals.
+The native 'other' stem is excluded.
+Each stem-only row evaluates one existing, independently trained late-fusion branch on its own.
+The mixture-only row is the shared single-MLP reference.
+Standalone scores are supporting analysis, not evidence of incremental benefit beyond the mixture.
+M+G+D+P+B+V uses all five selected stems.
+Matched mixture (k): one mixture-only MLP with approximately the parameter count of k-source mid-fusion.
+Mixture ensemble (k): k independently trained mixture-only classifiers.
+Late fusion sums selected branch logits equally, then applies softmax.
+Paired differences use the same outer seed; positive values favor stem fusion.
+PR-AUC here means macro average precision; F1 and ROC-AUC are also macro averaged.
+Sample SD describes training-run variability. No significance tests were performed.
+
+Detailed JSON: summary_late_fusion.json
