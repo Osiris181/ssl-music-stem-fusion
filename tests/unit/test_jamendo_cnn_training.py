@@ -1,5 +1,6 @@
 """Plain CNN Jamendo inputs and integration with the existing multilabel fitter."""
 import contextlib
+from dataclasses import replace
 import io
 import json
 from pathlib import Path
@@ -10,13 +11,15 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from stemfusion.configuration import JAMENDO_MID_CONDITIONS
+from stemfusion.configuration import JAMENDO_MID_CONDITIONS, JAMENDO_LATE_CONDITIONS
 from stemfusion.data.jamendo_cnn_features import JamendoCNNDataset, load_jamendo_cnn_features
 from stemfusion.experiments._cnn_mood import JamendoCNNConfig, main, run_experiment, format_summary
+from stemfusion.experiments import _cnn_mood_late as late
 from stemfusion.features.musicnn import SOURCES, VERSION, CHECKPOINT_HASHES, SOURCE_COMMIT, save_cache
 from stemfusion.models.cnn_mood import CNNMoodClassifier
 from stemfusion.training import music2emo
-from stemfusion.training.reporting import file_checksum
+from stemfusion.training.reporting import file_checksum, fingerprint
+from stemfusion.training.late_fusion import branch_seed
 
 
 class JamendoCNNTrainingTests(unittest.TestCase):
@@ -144,6 +147,155 @@ class JamendoCNNTrainingTests(unittest.TestCase):
                 repeated = run_experiment(self.config)
             self.assertEqual(result["conditions"], repeated["conditions"])
             self.assertEqual(checkpoints, {path: path.stat().st_mtime_ns for path in checkpoints})
+        finally:
+            torch.set_num_threads(threads)
+
+    def late_config(self, **updates):
+        return late.JamendoCNNLateConfig(
+            **{**vars(self.config), "conditions": JAMENDO_LATE_CONDITIONS,
+               "output_dir": self.root / "late", "summary_dir": self.root / "late_reports", **updates},
+            reference_output_dir=self.config.output_dir)
+
+    def fit_reference(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            return run_experiment(replace(self.config, selected_run="mixture_only"))
+
+    def test_late_cli_inherits_mid_training_settings_and_position_paired_schedule(self):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            status = late.main(self.arguments("--reference-output-dir", str(self.config.output_dir), "--dry-run"))
+        self.assertEqual(status, 0)
+        plan = json.loads(output.getvalue())
+        self.assertEqual(plan["seeds"], [32, 64, 128, 256, 512])
+        self.assertEqual(plan["hidden_dimensions"], [512, 256])
+        self.assertEqual((plan["epochs"], plan["batch_size"], plan["learning_rate"]), (200, 8, 1e-4))
+        self.assertEqual((plan["early_stopping_patience"], plan["early_stopping_min_delta"]), (10, 1e-4))
+        self.assertFalse(plan["harmony_features"])
+        self.assertEqual(plan["dropout"], 0.)
+        self.assertEqual(plan["branch_trainable_parameters"], 248632)
+        self.assertEqual(plan["branches_per_outer_seed"], 11)
+        self.assertEqual(plan["new_branch_fits_per_seed"], 10)
+        self.assertEqual(plan["maximum_new_branch_fits"], 50)
+        self.assertEqual(plan["report_conditions_per_seed"], 12)
+        self.assertEqual(plan["aggregation"], "sum_logits_then_sigmoid")
+        schedule = {item["branch_id"]: item for item in plan["branch_schedule"]["32"]}
+        for index, source in enumerate(SOURCES[1:], start=1):
+            self.assertEqual(schedule[source]["actual_training_seed"], branch_seed(32, index))
+            self.assertEqual(schedule[source]["actual_training_seed"], schedule[f"mixture_{index + 1}"]["actual_training_seed"])
+        self.assertFalse((self.root / "cli").exists())
+
+    def test_late_missing_reference_and_overlapping_roots_fail_without_fitting(self):
+        config = self.late_config()
+        with patch.object(late.music2emo, "fit_model", side_effect=AssertionError("Must not fit")), \
+             contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(ValueError, "Completed CNN mixture-only reference required"):
+                late.run_experiment(config)
+            with self.assertRaisesRegex(ValueError, "non-nested roots"):
+                late.run_experiment(replace(config, output_dir=config.reference_output_dir / "late"))
+        self.assertFalse(config.output_dir.exists())
+
+    def test_late_subsets_request_only_their_required_new_branches(self):
+        for name, fits in (("mixture_only", 0), ("guitar_only", 1),
+                           ("mixture_ensemble_4", 3), ("mixture_guitar_drums_piano", 3)):
+            with patch.object(late.mid, "load_jamendo_cnn_features", side_effect=AssertionError("Dry run must not load features")):
+                plan = late.run_experiment(self.late_config(selected_run=name, dry_run=True))
+            self.assertEqual(plan["new_branch_fits_per_seed"], fits)
+            self.assertEqual(plan["report_conditions_per_seed"], 1)
+        self.assertFalse((self.root / "late").exists())
+
+    def test_late_full_run_reuses_m1_and_shared_fitter_thresholds_and_resume(self):
+        threads = torch.get_num_threads()
+        torch.set_num_threads(1)
+        try:
+            self.fit_reference()
+            config = self.late_config()
+            reference_files = {path: (file_checksum(path), path.stat().st_mtime_ns)
+                               for path in self.config.output_dir.rglob("*") if path.is_file()}
+            with patch.object(late.music2emo, "fit_model", wraps=music2emo.fit_model) as fitting, \
+                 contextlib.redirect_stderr(io.StringIO()):
+                result = late.run_experiment(config)
+            self.assertEqual(fitting.call_count, 10)
+            self.assertEqual(len(result["conditions"]), 12)
+            self.assertEqual(len(result["paired_differences"]), 3)
+            self.assertEqual(len(result["standalone_conditions"]), 5)
+            self.assertEqual(len(list(config.output_dir.rglob("best.pt"))), 10)
+            self.assertFalse((config.output_dir / "branches/mixture_1").exists())
+            branches = result["branches"][32]
+            self.assertEqual(branches["mixture_1"]["output_directory"], str(self.config.output_dir / "mixture_only/seed_32"))
+            for name, branch in branches.items():
+                protocol = branch["protocol"]
+                self.assertEqual(protocol["hidden_dimensions"], [512, 256])
+                self.assertEqual(protocol["head_dropout"], 0.)
+                self.assertFalse(protocol["harmony_features"])
+                self.assertEqual(protocol["sampling"], "fixed_track_window_mean")
+                self.assertEqual(protocol["selection"], "min_validation_weighted_bce")
+                self.assertEqual(branch["trainable_parameters"], 248632)
+                self.assertEqual(branch["actual_training_seed"], branch_seed(32, branch["index"]))
+                if name != "mixture_1":
+                    self.assertEqual(protocol["early_stopping"]["patience"], 10)
+                with np.load(Path(branch["output_directory"]) / "predictions_validation.npz", allow_pickle=False) as saved:
+                    self.assertEqual(branch["threshold"], music2emo.select_threshold(saved))
+            for name, runs in result["runs"].items():
+                run = runs[32]
+                if JAMENDO_LATE_CONDITIONS[name]["kind"] in {"reference", "stem_only"}:
+                    self.assertEqual(run["additional_training_jobs"], 0)
+                    continue
+                directory = Path(run["output_directory"])
+                with np.load(directory / "predictions_validation.npz", allow_pickle=False) as saved:
+                    self.assertEqual(run["threshold"], music2emo.select_threshold(saved))
+                summed = np.zeros((2, 56), dtype=np.float32)
+                for member in run["members"]:
+                    with np.load(Path(member["output_directory"]) / "predictions_test.npz", allow_pickle=False) as saved:
+                        summed += saved["logits"]
+                with np.load(directory / "predictions_test.npz", allow_pickle=False) as saved:
+                    np.testing.assert_array_equal(saved["logits"], summed)
+                    np.testing.assert_allclose(saved["probabilities"], torch.from_numpy(summed).sigmoid().numpy())
+                    np.testing.assert_array_equal(saved["predictions"], saved["probabilities"] >= run["threshold"])
+            report = self.root / "late_reports/summary_late_fusion_seeds_32.txt"
+            self.assertTrue(report.is_file())
+            self.assertIn("guitar_only", report.read_text())
+            self.assertIn("sum raw logits", report.read_text())
+            times = {path: path.stat().st_mtime_ns for path in config.output_dir.rglob("best.pt")}
+            with patch("torch.optim.Adam", side_effect=AssertionError("Resume must not fit")), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                repeated = late.run_experiment(config)
+            self.assertEqual(result["conditions"], repeated["conditions"])
+            self.assertEqual(times, {path: path.stat().st_mtime_ns for path in times})
+            with contextlib.redirect_stderr(io.StringIO()):
+                late.run_experiment(replace(config, overwrite=True, resume=False))
+            self.assertEqual(reference_files, {path: (file_checksum(path), path.stat().st_mtime_ns)
+                                               for path in reference_files})
+            with self.assertRaisesRegex(ValueError, "incompatible batch_size"), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                late.run_experiment(replace(config, output_dir=self.root / "different", batch_size=3))
+            self.assertFalse((self.root / "different").exists())
+        finally:
+            torch.set_num_threads(threads)
+
+    def test_late_reference_validation_preserves_mid_identity_and_rejects_changed_checkpoints(self):
+        threads = torch.get_num_threads()
+        torch.set_num_threads(1)
+        try:
+            reference = self.fit_reference()["runs"]["mixture_only"][32]
+            with contextlib.redirect_stderr(io.StringIO()):
+                result = late.run_experiment(self.late_config(validate_only=True))
+            self.assertEqual(result["reference_seeds_verified"], [32])
+            self.assertFalse((self.root / "late").exists())
+            with patch.object(late.music2emo, "fit_model", side_effect=AssertionError("Must preflight all references")), \
+                 self.assertRaisesRegex(ValueError, "Completed CNN mixture-only reference required"), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                late.run_experiment(self.late_config(seeds=(32, 64)))
+            self.assertFalse((self.root / "late").exists())
+            from stemfusion.experiments._cnn_mood import implementation_identity
+            self.assertEqual(reference["implementation_sha256"], implementation_identity())
+            signature = fingerprint({"seed": 32, "protocol": reference["protocol"],
+                                     "data": reference["data_fingerprint"], "implementation": implementation_identity()})
+            self.assertEqual(signature, reference["signature"])
+            Path(reference["checkpoint"]).write_bytes(b"damaged synthetic checkpoint")
+            with self.assertRaisesRegex(ValueError, "artifact is missing or changed"), \
+                 contextlib.redirect_stderr(io.StringIO()):
+                late.run_experiment(self.late_config(validate_only=True))
+            self.assertFalse((self.root / "late").exists())
         finally:
             torch.set_num_threads(threads)
 

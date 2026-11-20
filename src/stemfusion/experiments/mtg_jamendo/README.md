@@ -24,6 +24,7 @@ not required inputs. See the [shared chord/key guide](#chordkey-extraction).
 | `extract_mert.py` | Save all-layer frozen MERT embeddings per 30-second segment. |
 | `extraction_cnn.py` | Phase 3 frozen MSD_musicnn extraction, mean-pooled per track/source with the same CNN backend as the genre datasets. |
 | `train_mid_cnn.py` | Seven plain CNN mid-fusion conditions using the existing Jamendo weighted loss, stopping and evaluation protocol. |
+| `train_late_cnn.py` | Reuse CNN-M, train independent plain CNN branches, and report matched mixture ensembles, source ensembles, and standalone stems. |
 | `extract_chords_keys.py` | Generate whole-track BTC chords, MIDI-derived key, and normalized chords paired with MERT. |
 | `train_reproduction.py` | Run the isolated five-seed original-mixture Music2Emo baseline, with released early stopping and a 200-epoch cap, before stem experiments. |
 | `reproduction.py` | Baseline fitting, checkpoint selection, evaluation, and reporting implementation. |
@@ -340,6 +341,59 @@ Reusable implementation: `experiments/_cnn_mood.py` schedules conditions,
 `data/jamendo_cnn_features.py` loads caches, and `models/cnn_mood.py` supplies
 the plain head. Actual fitting, loss, early stopping and threshold selection
 remain in the existing `training/music2emo.py` implementation.
+
+### Plain CNN late-fusion training
+
+Use the main PyTorch training environment and run from this directory:
+
+```bash
+python train_late_cnn.py --dry-run
+python train_late_cnn.py --validate-only
+python train_late_cnn.py
+```
+
+The thin entry point calls `experiments/_cnn_mood_late.py`. It follows the CNN
+mid-fusion flow: load YAML, load the same aligned track-level CNN cache, call
+`training/music2emo.py` with `CNNMoodClassifier` and `JamendoCNNDataset`, and
+save readable/detailed summaries. Ensemble evaluation reuses
+`training/music2emo_late_fusion.py`. The existing mid controller and its saved
+run identities are unchanged.
+
+`configs/experiments/mtg_jamendo/late_fusion_cnn.yaml` inherits the active
+Jamendo `late_fusion.yaml` protocol. Every branch is **200 -> 512 -> 256 -> 56**
+with biased linear layers and ReLU, no head dropout, and no chord/key features.
+The existing training-label frequency-weighted BCE, Adam 1e-4, batch 8,
+200-epoch cap, validation-loss patience 10/min_delta 1e-4, and lowest-validation-
+weighted-BCE checkpoint selection match CNN mid fusion. Keep the existing
+56-tag order and 9,949/3,802/4,231 train/validation/test partitions.
+
+For outer seeds 32, 64, 128, 256, and 512, load M1 from the completed
+`outputs/mtg_jamendo/cnn/runs/mixture_only/seed_N/` reference without fitting
+or modifying it. Train M2–M6 on the same mixture features and G/D/P/B/V on
+their own features using the same position-paired SHA256 seeds as Phase 2.
+The full matrix adds **50 branch fits**. Reuse each fitted branch across
+four-, five-, and six-member matched mixture and source ensembles. Add raw
+logits equally, then apply sigmoid. Select a separate global validation-macro-
+F1 threshold for each ensemble on 0.00..1.00 in 0.01 steps, lowest tie; apply
+it unchanged to test. Each standalone stem uses its own selected checkpoint
+and validation threshold, with no extra fit. Accuracy remains label-wise.
+
+New branch checkpoints and predictions save under
+`outputs/mtg_jamendo/cnn/late_fusion/runs/branches/{branch_id}/seed_{actual_seed}/`;
+ensemble predictions save under that run root's
+`ensembles/{condition}/seed_{outer_seed}/`. The terminal and
+`outputs/mtg_jamendo/cnn/summary_late_fusion.{txt,json}` report the mixture
+reference, three mixture ensembles, three source ensembles, five standalone
+stems, and paired differences with five-seed sample SD.
+
+`--validate-only` checks cached inputs and all requested M1 references without
+training or writing results. Missing, changed, or incompatible references stop
+the run. `--run NAME` and repeated `--seed N` select subsets with distinct
+summary suffixes. Reruns reuse completed branches or resume interrupted ones
+from `last.pt`; `--overwrite` affects late outputs only. Override
+`--reference-output-dir` to select another completed CNN mid-run root and
+`--output-dir` for new late runs; these roots must be separate and non-nested.
+An explicit output root redirects summaries unless `--summary-dir` is supplied.
 
 ## MERT segment extraction
 

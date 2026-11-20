@@ -1,0 +1,28 @@
+MTG-Jamendo: frozen MSD_musicnn late fusion; plain 512/256 ReLU branch heads
+Seeds: 32, 64, 128, 256, 512; mean +/- sample SD (ddof=1).
+Features: fixed track-window mean, 200 dimensions per source; no chord/key features.
+Checkpoints: minimum validation weighted BCE; ensembles sum raw logits, then sigmoid.
+Accuracy is label-wise. Each model uses its own global validation-macro-F1 threshold.
+Standalone stems reuse selected branch checkpoints; PR-AUC means macro average precision.
+
+Condition | Accuracy (%) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_only | 90.1104 +/- 1.1940 | 0.1501 +/- 0.0046 | 0.7484 +/- 0.0020 | 0.1220 +/- 0.0035
+mixture_ensemble_4 | 89.3156 +/- 0.9940 | 0.1545 +/- 0.0025 | 0.7507 +/- 0.0011 | 0.1248 +/- 0.0015
+mixture_ensemble_5 | 89.3434 +/- 1.1067 | 0.1544 +/- 0.0023 | 0.7507 +/- 0.0011 | 0.1229 +/- 0.0013
+mixture_ensemble_6 | 88.0177 +/- 0.2077 | 0.1533 +/- 0.0009 | 0.7510 +/- 0.0010 | 0.1214 +/- 0.0009
+mixture_guitar_drums_piano | 88.7984 +/- 2.1142 | 0.1570 +/- 0.0047 | 0.7533 +/- 0.0011 | 0.1307 +/- 0.0020
+mixture_guitar_drums_piano_bass | 89.9981 +/- 0.8384 | 0.1573 +/- 0.0025 | 0.7540 +/- 0.0012 | 0.1293 +/- 0.0021
+mixture_all_five_stems | 89.5691 +/- 0.8857 | 0.1578 +/- 0.0027 | 0.7575 +/- 0.0014 | 0.1322 +/- 0.0023
+guitar_only | 82.6652 +/- 1.9824 | 0.1076 +/- 0.0041 | 0.6703 +/- 0.0051 | 0.0801 +/- 0.0031
+drums_only | 83.6208 +/- 1.6040 | 0.1235 +/- 0.0010 | 0.7029 +/- 0.0030 | 0.0956 +/- 0.0024
+piano_only | 82.1305 +/- 3.0592 | 0.0903 +/- 0.0015 | 0.6369 +/- 0.0019 | 0.0657 +/- 0.0007
+bass_only | 80.4809 +/- 3.4665 | 0.0994 +/- 0.0010 | 0.6692 +/- 0.0009 | 0.0717 +/- 0.0006
+vocals_only | 69.6378 +/- 2.7729 | 0.0883 +/- 0.0036 | 0.6320 +/- 0.0076 | 0.0640 +/- 0.0041
+
+Paired differences: stem fusion minus its matched mixture ensemble.
+Comparison | Accuracy (percentage points) | Macro F1 | Macro ROC-AUC | Macro PR-AUC
+--- | --- | --- | --- | ---
+mixture_guitar_drums_piano - mixture_ensemble_4 | -0.5172 +/- 1.9570 | 0.0025 +/- 0.0041 | 0.0026 +/- 0.0011 | 0.0059 +/- 0.0012
+mixture_guitar_drums_piano_bass - mixture_ensemble_5 | 0.6547 +/- 1.4664 | 0.0028 +/- 0.0022 | 0.0032 +/- 0.0010 | 0.0064 +/- 0.0017
+mixture_all_five_stems - mixture_ensemble_6 | 1.5514 +/- 0.9543 | 0.0045 +/- 0.0022 | 0.0065 +/- 0.0012 | 0.0108 +/- 0.0015

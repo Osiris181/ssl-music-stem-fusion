@@ -63,6 +63,9 @@ MTG-Jamendo provides `extraction_cnn.py` through the same backend and
 Jamendo retains its 56 mood/theme tags; the CNN classifier uses the existing
 Music2Emo fitter, frequency weights, stopping and evaluation without harmonic
 features or a chord Transformer.
+`train_late_cnn.py` uses `_cnn_mood_late.py` with that same CNN loader,
+model and fitter, reuses the completed CNN mixture reference, and evaluates
+independent matched-mixture/source ensembles plus five standalone stems.
 
 [PMEmo](pmemo/README.md) also provides `extraction_cnn.py` through the same
 shared extractor and guarded decoder. Its existing numeric IDs, fixed splits
@@ -129,6 +132,7 @@ Shared orchestration is:
 | `_cnn_genre.py` | Inherit genre training YAML for CNN caches and call the shared mid/late genre scheduler/trainer; FMA, GTZAN, and ISMIR04 provide `train_late_cnn.py` with read-only CNN-M reuse. |
 | `_genre_reference.py` | Load and verify a completed CNN genre mixture reference without fitting or changing it. |
 | `_cnn_mood.py` | Schedule plain CNN Jamendo tagging experiments with the existing Music2Emo fitter and evaluation protocol. |
+| `_cnn_mood_late.py` | Schedule independent plain CNN Jamendo branches with the same loader/model/fitter, read the completed CNN-M reference, and use shared multilabel late-fusion evaluation. |
 | `_cnn_emotion.py` | Schedule separate binary emotion targets for CNN inputs using the retained shared fitter, training-only prevalence and validation-only thresholds. |
 | `_genre.py` | Common training CLI, seed/condition scheduling, reuse, and summaries. |
 | `_mood_theme_tagging.py` | MERT/harmony mood/theme experiment CLI, mid/late scheduling, protected reuse, and reporting; currently used by MTG-Jamendo. |
